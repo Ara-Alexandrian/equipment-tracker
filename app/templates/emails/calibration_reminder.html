@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Calibration Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+        }
+        .equipment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .equipment-table th, .equipment-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .equipment-table th {
+            background-color: #f0f0f0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        .days-label {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: white;
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Equipment Calibration Reminder</h2>
+        </div>
+        <div class="content">
+            <p>Hello from Mary Bird Perkins Cancer Center,</p>
+            
+            <p>This is a reminder that the following equipment items are due for calibration soon:</p>
+            
+            <table class="equipment-table">
+                <thead>
+                    <tr>
+                        <th>Equipment ID</th>
+                        <th>Type</th>
+                        <th>Model</th>
+                        <th>Calibration Due</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in equipment %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.equipment_type }}</td>
+                        <td>{{ item.manufacturer }} {{ item.model }}</td>
+                        <td>{{ item.calibration_due_date }}</td>
+                        <td>
+                            <span class="days-label">
+                                {% if item.days_until_due == 1 %}
+                                Due tomorrow
+                                {% else %}
+                                Due in {{ item.days_until_due }} days
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <p>Please ensure that arrangements are made for calibration to avoid equipment being out of compliance.</p>
+            
+            <a href="{{ app_url }}/dashboard/calibration" class="button">View Calibration Dashboard</a>
+            
+            <p>Thank you,<br>
+            Equipment Tracker System<br>
+            Mary Bird Perkins Cancer Center<br>
+            Department of Medical Physics</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from the Equipment Tracker System.</p>
+            <p>If you have any questions, please contact aalexandrian@marybird.com</p>
+            <p>{{ timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        </div>
+    </div>
+</body>
+</html>

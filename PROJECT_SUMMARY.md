@@ -1,10 +1,10 @@
-# Equipment Tracker Project Summary
+# Medical Physics Equipment Tracker Project Summary
 
 This document provides a summary of the equipment tracker application and instructions for running and testing the system.
 
 ## Overview
 
-The Equipment Tracker is a web-based application designed for clinical physicists and day-to-day users to manage health physics equipment inventory, track calibration schedules, and monitor equipment location. The system includes:
+The Equipment Tracker is a web-based application designed for clinical physicists and day-to-day users to manage medical physics equipment inventory, track calibration schedules, and monitor equipment location. The system includes:
 
 1. **Equipment Management Dashboard**
    - View and search all equipment
@@ -42,21 +42,42 @@ The Equipment Tracker is a web-based application designed for clinical physicist
 1. Run the application:
    ```bash
    cd /config/github/equipment-tracker
+   
+   # Using the start script (recommended):
+   ./start.sh
+   
+   # Or manually:
+   # For local access only:
    python run.py
+   
+   # For external network access:
+   python run.py --host 0.0.0.0 --port 5000
    ```
 
-2. Open your browser and navigate to http://localhost:5000
+2. Open your browser and navigate to:
+   - Local access: http://localhost:5000
+   - External access: http://YOUR_IP_ADDRESS:5000 (e.g., http://192.168.1.11:5000)
 
 ### Option 2: Using Docker
 
 1. Build and run the Docker container:
    ```bash
    cd /config/github/equipment-tracker
+   
+   # Build the image
    docker build -t equipment-tracker .
-   docker run -p 5000:5000 equipment-tracker
+   
+   # Run the container
+   docker run -p 5000:5000 -e APPLICATION_URL=http://YOUR_IP_ADDRESS:5000 equipment-tracker
+   
+   # Or use docker-compose (recommended)
+   export APPLICATION_URL=http://YOUR_IP_ADDRESS:5000  # Replace with your IP
+   docker-compose up -d
    ```
 
-2. Open your browser and navigate to http://localhost:5000
+2. Open your browser and navigate to:
+   - Local access: http://localhost:5000
+   - External access: http://YOUR_IP_ADDRESS:5000 (e.g., http://192.168.1.11:5000)
 
 ## Testing the Application
 
@@ -83,21 +104,36 @@ The Equipment Tracker is a web-based application designed for clinical physicist
    - Select different report types
    - Try different formats (PDF, CSV)
 
-## Future Enhancements
+## Recent Enhancements
 
-1. **Notifications System**:
+1. **Dark Mode Support**:
+   - Toggle between light and dark themes
+   - Persistent theme selection using localStorage
+   - Improved UI with appropriate color schemes for both modes
+
+2. **Notifications System**:
    - Email alerts for upcoming calibrations
    - Overdue equipment notifications
+   - User-configurable notification preferences
+   - Notification history tracking
 
-2. **Advanced Data Import**:
+3. **Administrative Interface**:
+   - Equipment management with CRUD operations
+   - User management with role assignment
+   - Advanced report generation options
+   - Calibration tracking and alerts
+
+## Future Enhancements
+
+1. **Advanced Data Import**:
    - Direct database connection options
    - API-based data import
 
-3. **Mobile Application**:
+2. **Mobile Application**:
    - Companion mobile app for scanning equipment
    - QR code integration
 
-4. **Advanced Analytics**:
+3. **Advanced Analytics**:
    - Predictive maintenance suggestions
    - Cost analysis for calibration and maintenance
 

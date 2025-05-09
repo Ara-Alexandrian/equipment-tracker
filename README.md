@@ -1,11 +1,11 @@
-# Health Physics Equipment Tracker
+# Medical Physics Equipment Tracker
 
-A comprehensive web-based application for tracking health physics equipment, their calibration status, location, and checkout history.
+A comprehensive web-based application for tracking medical physics equipment, their calibration status, location, and checkout history.
 
 ## Features
 
 - **Equipment Dashboard:** Overview of all equipment with status indicators
-- **Calibration Tracking:** Monitor calibration due dates and get alerts for upcoming calibrations
+- **Calibration Tracking:** Monitor calibration due dates and receive email notifications for upcoming and overdue calibrations
 - **Equipment Checkout System:** Track equipment locations and checkout history
 - **Visual Interface:** Interactive network visualization of equipment relationships
 - **User Management:** Role-based access control (Admin, Physicist, Regular User)
@@ -49,18 +49,46 @@ A comprehensive web-based application for tracking health physics equipment, the
 
 4. Run the application:
    ```bash
+   # Using the start script (recommended):
+   ./start.sh
+   
+   # Or manually:
+   # For local access only:
    python run.py
+   
+   # For external network access:
+   python run.py --host 0.0.0.0 --port 5000
    ```
 
-5. Access the application at [http://localhost:5000](http://localhost:5000)
+5. Access the application:
+   - Local access: [http://localhost:5000](http://localhost:5000)
+   - External access: http://YOUR_IP_ADDRESS:5000 (e.g., http://192.168.1.11:5000)
 
 ## Configuration
 
 The application uses JSON files for data storage, located in the `app/data` directory:
 - `equipment.json`: Equipment metadata
 - `equipment_status.json`: Current status and location of equipment
-- `users.json`: User accounts and roles
+- `users.json`: User accounts, roles, and notification preferences
 - `checkout_history.json`: History of equipment checkout activities
+- `notification_logs.json`: History of sent calibration notifications
+
+### Email Notifications
+
+The application includes an email notification system for calibration alerts. You can configure the email settings using environment variables:
+
+```bash
+export MAIL_SERVER=smtp.marybird.com
+export MAIL_PORT=587
+export MAIL_USERNAME=your-username
+export MAIL_PASSWORD=your-password
+export MAIL_USE_TLS=True
+export MAIL_DEFAULT_SENDER=equipment-tracker@marybird.com
+```
+
+For Docker deployment, these variables can be set in the docker-compose.yml file.
+
+The included cron job automatically checks for upcoming and overdue calibrations daily at 8:00 AM and sends notifications to users with appropriate roles and preferences.
 
 ## User Accounts
 
@@ -68,6 +96,13 @@ Default user accounts for testing:
 - Admin: username `admin`, password `admin123`
 - Physicist: username `physicist`, password `physicist123`
 - Regular User: username `user`, password `user123`
+
+### Theme Support
+
+The application supports both light and dark themes:
+- Automatic detection of system preferences
+- Manual toggle in the navigation bar
+- Persistent theme selection using localStorage
 
 ## Development
 

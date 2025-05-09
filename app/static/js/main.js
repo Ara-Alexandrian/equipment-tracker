@@ -121,30 +121,52 @@ async function fetchFromApi(endpoint, params = {}) {
  * Set up theme switcher functionality
  */
 function setupThemeSwitcher() {
-    const themeToggle = document.getElementById('theme-toggle');
-    if (!themeToggle) return;
+    const themeBtn = document.getElementById('theme-btn');
+    if (!themeBtn) {
+        console.warn('Theme button element not found');
+        return;
+    }
     
     // Check for saved theme preference or default to light theme
     const currentTheme = localStorage.getItem('theme') || 'light';
     
-    // Set initial theme
+    // Set initial button icon based on current theme
     if (currentTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeToggle.checked = true;
+        themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+        // Update chart themes
+        updateChartsForTheme('dark');
+    } else {
+        themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
     }
     
-    // Toggle theme when switch is clicked
-    themeToggle.addEventListener('change', function() {
-        if (this.checked) {
-            document.body.classList.add('dark-mode');
-            localStorage.setItem('theme', 'dark');
-        } else {
+    // Toggle theme when button is clicked
+    themeBtn.addEventListener('click', function() {
+        const isDarkMode = document.documentElement.classList.contains('dark-mode');
+        
+        if (isDarkMode) {
+            // Switch to light mode
+            document.documentElement.classList.remove('dark-mode');
             document.body.classList.remove('dark-mode');
             localStorage.setItem('theme', 'light');
+            themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
+            updateChartsForTheme('light');
+        } else {
+            // Switch to dark mode
+            document.documentElement.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+            themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+            updateChartsForTheme('dark');
         }
         
-        // If there are charts on the page, update them
-        updateChartsForTheme(this.checked ? 'dark' : 'light');
+        // Add a highlight effect to show the button was clicked
+        themeBtn.classList.add('btn-primary');
+        setTimeout(() => {
+            themeBtn.classList.remove('btn-primary');
+        }, 300);
+        
+        // Force page refresh to ensure all styles are applied correctly
+        window.location.reload();
     });
 }
 

@@ -15,6 +15,7 @@
     .chart-container {
         height: 300px;
         margin-bottom: 20px;
+        padding-bottom: 20px; /* Add extra padding at the bottom for x-axis labels */
     }
     
     .legend {
@@ -40,15 +41,56 @@
     }
     
     .tooltip {
-        position: absolute;
-        background-color: rgba(255, 255, 255, 0.9);
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 10px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        position: fixed; /* Changed from absolute to fixed for better positioning */
+        background-color: rgba(255, 255, 255, 0.98);
+        border: 1px solid #aaa;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         pointer-events: none;
-        z-index: 1000;
+        z-index: 9999; /* Increased z-index to ensure it's on top of everything */
         display: none;
+        max-width: 280px;
+        font-size: 0.9rem;
+        transition: opacity 0.2s;
+        opacity: 0;
+    }
+    
+    .tooltip.visible {
+        opacity: 1;
+    }
+    
+    .tooltip-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }
+    
+    .tooltip-content {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 5px 8px;
+    }
+    
+    .tooltip-label {
+        font-weight: 500;
+        color: #666;
+    }
+    
+    .tooltip-value {
+        font-weight: normal;
+    }
+    
+    .tooltip-status {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: white;
+        margin-top: 3px;
     }
     
     .node {
@@ -217,35 +259,169 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr('stroke-width', 1.5)
                 .attr('class', 'node')
                 .on('mouseover', function(event, d) {
-                    // Show tooltip
+                    // Initialize tooltip (actual positioning will be handled by mousemove)
                     tooltip.style.display = 'block';
-                    tooltip.style.left = (event.pageX + 10) + 'px';
-                    tooltip.style.top = (event.pageY - 20) + 'px';
+                    tooltip.style.visibility = 'hidden'; // Hide until properly positioned
                     
                     // Set tooltip content based on node type
                     if (d.type === 'equipment') {
+                        // Get status color
+                        let statusColor = '#28a745'; // Default green
+                        if (d.status === 'Checked Out') statusColor = '#007bff';
+                        else if (d.status === 'In Calibration') statusColor = '#17a2b8';
+                        else if (d.status === 'Under Repair') statusColor = '#ffc107';
+                        else if (d.status === 'Out of Service') statusColor = '#dc3545';
+                        
+                        // Get calibration status (if available)
+                        const calibrationInfo = d.calibration_due_date ? 
+                            `<div class="tooltip-label">Calibration Due:</div>
+                             <div class="tooltip-value">${d.calibration_due_date}</div>` : '';
+                        
                         tooltip.innerHTML = `
-                            <div><strong>${d.name}</strong></div>
-                            <div>Serial: ${d.serial}</div>
-                            <div>Status: ${d.status}</div>
-                            <div>Location: ${d.location}</div>
+                            <div class="tooltip-title">${d.name}</div>
+                            <div class="tooltip-content">
+                                <div class="tooltip-label">Equipment Type:</div>
+                                <div class="tooltip-value">${d.equipment_type || 'Unknown'}</div>
+                                
+                                <div class="tooltip-label">Manufacturer:</div>
+                                <div class="tooltip-value">${d.manufacturer || d.name.split(' ')[0]}</div>
+                                
+                                <div class="tooltip-label">Serial:</div>
+                                <div class="tooltip-value">${d.serial}</div>
+                                
+                                <div class="tooltip-label">Status:</div>
+                                <div class="tooltip-value">
+                                    <span class="tooltip-status" style="background-color: ${statusColor}">
+                                        ${d.status}
+                                    </span>
+                                </div>
+                                
+                                <div class="tooltip-label">Location:</div>
+                                <div class="tooltip-value">${d.location}</div>
+                                
+                                ${calibrationInfo}
+                            </div>
+                            <div style="margin-top: 8px; font-size: 0.8rem; font-style: italic; color: #666;">
+                                Click for details
+                            </div>
                         `;
                     } else if (d.type === 'manufacturer') {
                         tooltip.innerHTML = `
-                            <div><strong>${d.name}</strong></div>
-                            <div>Manufacturer</div>
-                            <div>Equipment Count: ${d.count}</div>
+                            <div class="tooltip-title">${d.name}</div>
+                            <div class="tooltip-content">
+                                <div class="tooltip-label">Type:</div>
+                                <div class="tooltip-value">Manufacturer</div>
+                                
+                                <div class="tooltip-label">Equipment Count:</div>
+                                <div class="tooltip-value">${d.count}</div>
+                                
+                                <div class="tooltip-label">Models:</div>
+                                <div class="tooltip-value">Click to view connected equipment</div>
+                            </div>
                         `;
                     } else {
                         tooltip.innerHTML = `
-                            <div><strong>${d.name}</strong></div>
-                            <div>Category</div>
-                            <div>Equipment Count: ${d.count}</div>
+                            <div class="tooltip-title">${d.name}</div>
+                            <div class="tooltip-content">
+                                <div class="tooltip-label">Type:</div>
+                                <div class="tooltip-value">Equipment Category</div>
+                                
+                                <div class="tooltip-label">Equipment Count:</div>
+                                <div class="tooltip-value">${d.count}</div>
+                                
+                                <div class="tooltip-label">Description:</div>
+                                <div class="tooltip-value">
+                                    ${d.name === 'Chamber' ? 'Ionization chambers for radiation measurement' : 
+                                      d.name === 'Electrometer' ? 'Devices for measuring electrical charge' : 
+                                      d.name === 'Survey Meter' ? 'Handheld meters for radiation monitoring' : 
+                                      'Equipment category'}
+                                </div>
+                            </div>
                         `;
                     }
+                    
+                    // Animate tooltip appearance
+                    setTimeout(() => {
+                        tooltip.classList.add('visible');
+                    }, 10);
+                })
+                .on('mousemove', function(event) {
+                    // Ensure tooltip is visible so we can measure it correctly
+                    if (tooltip.style.display === 'none') {
+                        tooltip.style.visibility = 'hidden';
+                        tooltip.style.display = 'block';
+                    }
+                    
+                    // Get tooltip dimensions
+                    const tooltipWidth = tooltip.offsetWidth;
+                    const tooltipHeight = tooltip.offsetHeight;
+                    
+                    // Get network container position and bounds
+                    const networkContainer = document.getElementById('networkContainer');
+                    const networkRect = networkContainer.getBoundingClientRect();
+                    
+                    // Get viewport dimensions
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    
+                    // Calculate available space in each direction
+                    const spaceAbove = event.clientY - 10; // Space above cursor
+                    const spaceBelow = viewportHeight - event.clientY - 10; // Space below cursor
+                    const spaceLeft = event.clientX - 10; // Space to the left of cursor
+                    const spaceRight = viewportWidth - event.clientX - 10; // Space to the right of cursor
+                    
+                    // First, try to position tooltip near network container
+                    // even if it means not being right next to the cursor
+                    
+                    // Determine optimal position (ensures tooltip is always fully visible)
+                    let left, top;
+                    
+                    // Create a safety margin to keep tooltips away from edges
+                    const margin = 10;
+                    
+                    // Vertical positioning based on available space
+                    if (spaceBelow >= tooltipHeight + margin) {
+                        // Prefer below - most natural position
+                        top = event.clientY + margin;
+                    } else if (spaceAbove >= tooltipHeight + margin) {
+                        // If not enough space below, try above
+                        top = event.clientY - tooltipHeight - margin;
+                    } else {
+                        // If neither works well, center vertically in the available space
+                        top = Math.max(margin, 
+                              Math.min(viewportHeight - tooltipHeight - margin, 
+                                      (viewportHeight - tooltipHeight) / 2));
+                    }
+                    
+                    // Horizontal positioning based on available space
+                    if (spaceRight >= tooltipWidth + margin) {
+                        // Prefer right of cursor
+                        left = event.clientX + margin;
+                    } else if (spaceLeft >= tooltipWidth + margin) {
+                        // If not enough space to right, try left
+                        left = event.clientX - tooltipWidth - margin;
+                    } else {
+                        // If neither works well, center horizontally
+                        left = Math.max(margin, 
+                               Math.min(viewportWidth - tooltipWidth - margin, 
+                                       (viewportWidth - tooltipWidth) / 2));
+                    }
+                    
+                    // Final positioning check to guarantee tooltip is fully in viewport
+                    left = Math.max(margin, Math.min(viewportWidth - tooltipWidth - margin, left));
+                    top = Math.max(margin, Math.min(viewportHeight - tooltipHeight - margin, top));
+                    
+                    // Apply the calculated position
+                    tooltip.style.left = `${left}px`;
+                    tooltip.style.top = `${top}px`;
+                    tooltip.style.visibility = 'visible';
                 })
                 .on('mouseout', function() {
-                    tooltip.style.display = 'none';
+                    tooltip.classList.remove('visible');
+                    tooltip.style.visibility = 'hidden';
+                    setTimeout(() => {
+                        tooltip.style.display = 'none';
+                    }, 200);
                 })
                 .on('click', function(event, d) {
                     if (d.type === 'equipment' && d.equipment_id) {
@@ -481,20 +657,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const yScale = d3.scaleLinear()
                 .domain([0, d3.max(data, d => d.count) * 1.1])
-                .range([height - 40, 20]);
+                .range([height - 60, 20]); // Increased bottom margin from 40 to 60
             
             // Create axes
             const xAxis = d3.axisBottom(xScale);
             const yAxis = d3.axisLeft(yScale);
             
             svg.append('g')
-                .attr('transform', `translate(0, ${height - 40})`)
+                .attr('transform', `translate(0, ${height - 60})`) // Updated to match yScale
                 .call(xAxis)
                 .selectAll('text')
                 .attr('transform', 'rotate(-45)')
                 .attr('text-anchor', 'end')
                 .attr('dx', '-.8em')
                 .attr('dy', '.15em');
+                
+            // Add more padding at the bottom for x-axis labels
+            svg.append('g')
+                .attr('class', 'x-axis-padding')
+                .attr('transform', `translate(0, ${height - 10})`);
             
             svg.append('g')
                 .attr('transform', 'translate(50, 0)')
@@ -509,7 +690,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr('x', d => xScale(d.status))
                 .attr('y', d => yScale(d.count))
                 .attr('width', xScale.bandwidth())
-                .attr('height', d => height - 40 - yScale(d.count))
+                .attr('height', d => height - 60 - yScale(d.count)) // Updated to match yScale
                 .attr('fill', d => d.color);
             
             // Add bar labels

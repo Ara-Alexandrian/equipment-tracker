@@ -1,0 +1,33 @@
+URGENT: Equipment Calibration Overdue
+====================================
+
+Hello from Mary Bird Perkins Cancer Center,
+
+URGENT ACTION REQUIRED: The following equipment items have overdue calibrations and should not be used until calibrated.
+
+{% for item in equipment %}
+- {{ item.id }} ({{ item.manufacturer }} {{ item.model }})
+  Type: {{ item.equipment_type }}
+  Calibration Due: {{ item.calibration_due_date }}
+  {% if item.days_overdue == 1 %}
+  Status: 1 day overdue
+  {% else %}
+  Status: {{ item.days_overdue }} days overdue
+  {% endif %}
+
+{% endfor %}
+
+Immediate action is required: Please schedule calibration for these items as soon as possible. Equipment with overdue calibration should not be used for clinical purposes.
+
+To view the full calibration dashboard, please visit:
+{{ app_url }}/dashboard/calibration
+
+Thank you,
+Equipment Tracker System
+Mary Bird Perkins Cancer Center
+Department of Medical Physics
+
+---
+This is an automated message from the Equipment Tracker System.
+If you have any questions, please contact aalexandrian@marybird.com
+{{ timestamp.strftime('%Y-%m-%d %H:%M:%S') }}

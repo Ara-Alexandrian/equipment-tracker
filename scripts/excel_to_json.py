@@ -12,6 +12,7 @@ from datetime import datetime
 
 # Add parent directory to path so we can import app modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from app.models.json_utils import DateTimeEncoder
 
 def clean_dataframe(df):
     """Clean up the dataframe by removing empty rows and handling headers."""
@@ -241,14 +242,14 @@ def main():
     # Save equipment data to JSON file
     equipment_file = os.path.join(args.output_dir, 'equipment.json')
     with open(equipment_file, 'w') as f:
-        json.dump(all_equipment, f, indent=2)
+        json.dump(all_equipment, f, cls=DateTimeEncoder, indent=2)
     
     print(f"Saved {len(all_equipment)} equipment items to {equipment_file}")
     
     # Save equipment status to JSON file
     status_file = os.path.join(args.output_dir, 'equipment_status.json')
     with open(status_file, 'w') as f:
-        json.dump(equipment_status, f, indent=2)
+        json.dump(equipment_status, f, cls=DateTimeEncoder, indent=2)
     
     print(f"Saved equipment status to {status_file}")
 

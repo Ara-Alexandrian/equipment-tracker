@@ -3,18 +3,36 @@
     "name": "Administrator",
     "email": "admin@example.com",
     "role": "admin",
-    "password": "admin123"
+    "password": "admin123",
+    "notification_preferences": {
+      "receive_due_soon": true,
+      "receive_overdue": true,
+      "days_before_due": 30,
+      "email_format": "html"
+    }
   },
   "physicist": {
     "name": "Clinical Physicist",
     "email": "physicist@example.com",
     "role": "physicist",
-    "password": "physicist123"
+    "password": "physicist123",
+    "notification_preferences": {
+      "receive_due_soon": true,
+      "receive_overdue": true,
+      "days_before_due": 14,
+      "email_format": "html"
+    }
   },
   "user": {
     "name": "Regular User",
     "email": "user@example.com",
     "role": "user",
-    "password": "user123"
+    "password": "user123",
+    "notification_preferences": {
+      "receive_due_soon": false,
+      "receive_overdue": false,
+      "days_before_due": 7,
+      "email_format": "text"
+    }
   }
 }

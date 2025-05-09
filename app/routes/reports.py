@@ -35,108 +35,118 @@ def index():
 @physicist_required
 def generate_report():
     """Generate a report based on user specifications."""
-    # Get report parameters
-    report_type = request.form.get('report_type', 'inventory')
-    report_format = request.form.get('report_format', 'pdf')
-    date_range = request.form.get('date_range', 'all')
-    start_date = request.form.get('start_date')
-    end_date = request.form.get('end_date')
-    include_fields = request.form.getlist('include_fields')
-    
-    # Get the current date and time for the report filename
-    current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
-    
-    # Parse date range
-    start = None
-    end = datetime.now()
-    
-    if date_range == 'custom' and start_date and end_date:
-        try:
-            start = datetime.strptime(start_date, '%Y-%m-%d')
-            end = datetime.strptime(end_date, '%Y-%m-%d')
-        except:
-            # Invalid date format, use defaults
-            pass
-    elif date_range == 'week':
-        start = end - timedelta(days=7)
-    elif date_range == 'month':
-        start = end - timedelta(days=30)
-    elif date_range == 'year':
-        start = end - timedelta(days=365)
-    
-    # Generate report content based on report type
-    if report_type == 'inventory':
-        data = generate_inventory_report(include_fields)
-        filename = f"inventory_report_{current_datetime}"
-    elif report_type == 'checkout':
-        data = generate_checkout_report(start, end, include_fields)
-        filename = f"checkout_report_{current_datetime}"
-    elif report_type == 'calibration':
-        data = generate_calibration_report(include_fields)
-        filename = f"calibration_report_{current_datetime}"
-    elif report_type == 'maintenance':
-        data = generate_maintenance_report(start, end, include_fields)
-        filename = f"maintenance_report_{current_datetime}"
-    else:
-        return jsonify({"error": "Invalid report type"}), 400
-    
-    # Generate appropriate file format
-    if report_format == 'pdf':
-        # TODO: Implement actual PDF generation with a library like ReportLab or WeasyPrint
-        # For now, we'll return HTML that could be converted to PDF
-        html = render_template(
-            'reports/pdf_template.html',
-            report_type=report_type,
-            date_range_text=get_date_range_text(date_range, start, end),
-            data=data,
-            current_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        )
+    try:
+        # Get report parameters
+        report_type = request.form.get('report_type', 'inventory')
+        report_format = request.form.get('report_format', 'pdf')
+        date_range = request.form.get('date_range', 'all')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        include_fields = request.form.getlist('include_fields')
+        
+        # Get the current date and time for the report filename
+        current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Parse date range
+        start = None
+        end = datetime.now()
+        
+        if date_range == 'custom' and start_date and end_date:
+            try:
+                start = datetime.strptime(start_date, '%Y-%m-%d')
+                end = datetime.strptime(end_date, '%Y-%m-%d')
+            except:
+                # Invalid date format, use defaults
+                pass
+        elif date_range == 'week':
+            start = end - timedelta(days=7)
+        elif date_range == 'month':
+            start = end - timedelta(days=30)
+        elif date_range == 'year':
+            start = end - timedelta(days=365)
+        
+        # Generate report content based on report type
+        if report_type == 'inventory':
+            data = generate_inventory_report(include_fields)
+            filename = f"inventory_report_{current_datetime}"
+        elif report_type == 'checkout':
+            data = generate_checkout_report(start, end, include_fields)
+            filename = f"checkout_report_{current_datetime}"
+        elif report_type == 'calibration':
+            data = generate_calibration_report(include_fields)
+            filename = f"calibration_report_{current_datetime}"
+        elif report_type == 'maintenance':
+            data = generate_maintenance_report(start, end, include_fields)
+            filename = f"maintenance_report_{current_datetime}"
+        else:
+            return jsonify({"status": "error", "error": "Invalid report type"}), 400
+        
+        # Generate appropriate file format
+        if report_format == 'pdf':
+            # TODO: Implement actual PDF generation with a library like ReportLab or WeasyPrint
+            # For now, we'll return HTML that could be converted to PDF
+            html = render_template(
+                'reports/pdf_template.html',
+                report_type=report_type,
+                date_range_text=get_date_range_text(date_range, start, end),
+                data=data,
+                current_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            )
+            return jsonify({
+                "status": "success",
+                "html": html,
+                "message": "PDF report generation is simulated for demonstration. In a production environment, this would generate and download a PDF file."
+            })
+        
+        elif report_format == 'excel':
+            # For simplicity, we'll actually return CSV data
+            csv_data = generate_csv_data(data)
+            output = io.StringIO()
+            csv_writer = csv.writer(output)
+            
+            # Write headers
+            csv_writer.writerow(csv_data['headers'])
+            
+            # Write data rows
+            for row in csv_data['rows']:
+                csv_writer.writerow(row)
+            
+            return jsonify({
+                "status": "success",
+                "csv": output.getvalue(),
+                "filename": f"{filename}.csv",
+                "message": "Excel report generation is simulated for demonstration. In a production environment, this would generate and download an Excel file."
+            })
+        
+        elif report_format == 'csv':
+            csv_data = generate_csv_data(data)
+            output = io.StringIO()
+            csv_writer = csv.writer(output)
+            
+            # Write headers
+            csv_writer.writerow(csv_data['headers'])
+            
+            # Write data rows
+            for row in csv_data['rows']:
+                csv_writer.writerow(row)
+            
+            return jsonify({
+                "status": "success",
+                "csv": output.getvalue(),
+                "filename": f"{filename}.csv"
+            })
+        
+        else:
+            return jsonify({"status": "error", "error": "Invalid report format"}), 400
+            
+    except Exception as e:
+        # Log the error and return a friendly error message
+        import traceback
+        traceback.print_exc()
         return jsonify({
-            "status": "success",
-            "html": html,
-            "message": "PDF report generation is simulated for demonstration. In a production environment, this would generate and download a PDF file."
-        })
-    
-    elif report_format == 'excel':
-        # For simplicity, we'll actually return CSV data
-        csv_data = generate_csv_data(data)
-        output = io.StringIO()
-        csv_writer = csv.writer(output)
-        
-        # Write headers
-        csv_writer.writerow(csv_data['headers'])
-        
-        # Write data rows
-        for row in csv_data['rows']:
-            csv_writer.writerow(row)
-        
-        return jsonify({
-            "status": "success",
-            "csv": output.getvalue(),
-            "filename": f"{filename}.csv",
-            "message": "Excel report generation is simulated for demonstration. In a production environment, this would generate and download an Excel file."
-        })
-    
-    elif report_format == 'csv':
-        csv_data = generate_csv_data(data)
-        output = io.StringIO()
-        csv_writer = csv.writer(output)
-        
-        # Write headers
-        csv_writer.writerow(csv_data['headers'])
-        
-        # Write data rows
-        for row in csv_data['rows']:
-            csv_writer.writerow(row)
-        
-        return jsonify({
-            "status": "success",
-            "csv": output.getvalue(),
-            "filename": f"{filename}.csv"
-        })
-    
-    else:
-        return jsonify({"error": "Invalid report format"}), 400
+            "status": "error",
+            "error": f"Error generating report: {str(e)}"
+        }), 500
 
 def get_date_range_text(date_range, start_date, end_date):
     """Get a text description of the date range."""

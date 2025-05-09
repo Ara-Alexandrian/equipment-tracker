@@ -1,0 +1,33 @@
+Equipment Calibration Reminder
+============================
+
+Hello from Mary Bird Perkins Cancer Center,
+
+This is a reminder that the following equipment items are due for calibration soon:
+
+{% for item in equipment %}
+- {{ item.id }} ({{ item.manufacturer }} {{ item.model }})
+  Type: {{ item.equipment_type }}
+  Calibration Due: {{ item.calibration_due_date }}
+  {% if item.days_until_due == 1 %}
+  Status: Due tomorrow
+  {% else %}
+  Status: Due in {{ item.days_until_due }} days
+  {% endif %}
+
+{% endfor %}
+
+Please ensure that arrangements are made for calibration to avoid equipment being out of compliance.
+
+To view the full calibration dashboard, please visit:
+{{ app_url }}/dashboard/calibration
+
+Thank you,
+Equipment Tracker System
+Mary Bird Perkins Cancer Center
+Department of Medical Physics
+
+---
+This is an automated message from the Equipment Tracker System.
+If you have any questions, please contact aalexandrian@marybird.com
+{{ timestamp.strftime('%Y-%m-%d %H:%M:%S') }}

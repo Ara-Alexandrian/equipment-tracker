@@ -6,6 +6,7 @@ import os
 import json
 import pandas as pd
 from datetime import datetime
+import traceback
 from app.models.json_utils import save_json
 
 class JsonEquipmentDataManager:
@@ -71,6 +72,7 @@ class JsonEquipmentDataManager:
             
         except Exception as e:
             print(f"Error loading equipment data: {e}")
+            traceback.print_exc()  # Print the full traceback to help debug the issue
             # Initialize empty DataFrames in case of error
             self.all_equipment_df = pd.DataFrame()
             self.chambers_df = pd.DataFrame()
@@ -224,11 +226,14 @@ class JsonEquipmentDataManager:
         # Try each format
         for fmt in date_formats:
             try:
-                return datetime.strptime(date_str, fmt)
+                dt = datetime.strptime(date_str, fmt)
+                # Return ISO format string instead of datetime object to avoid serialization issues
+                return dt.isoformat()
             except ValueError:
                 continue
-        
-        return None
+            
+        # If we can't parse it, just return the string as-is
+        return date_str
     
     def get_calibration_due_soon(self, days=30):
         """Get equipment where calibration is due soon.
@@ -265,20 +270,30 @@ class JsonEquipmentDataManager:
             cal_date = self._parse_calibration_date(date_str)
             if not cal_date:
                 continue
-                
-            # Calculate difference in days
-            delta = cal_date - current_date
             
-            if delta.days < 0:
-                # Overdue
-                item['calibration_status'] = 'overdue'
-                item['days_overdue'] = abs(delta.days)
-                due_soon_items.append(item)
-            elif delta.days <= days:
-                # Due soon
-                item['calibration_status'] = 'due_soon'
-                item['days_until_due'] = delta.days
-                due_soon_items.append(item)
+            try:
+                # Convert ISO format string back to datetime for comparison
+                if isinstance(cal_date, str):
+                    cal_date_dt = datetime.fromisoformat(cal_date)
+                else:
+                    cal_date_dt = cal_date
+                
+                # Calculate difference in days
+                delta = cal_date_dt - current_date
+                
+                if delta.days < 0:
+                    # Overdue
+                    item['calibration_status'] = 'overdue'
+                    item['days_overdue'] = abs(delta.days)
+                    due_soon_items.append(item)
+                elif delta.days <= days:
+                    # Due soon
+                    item['calibration_status'] = 'due_soon'
+                    item['days_until_due'] = delta.days
+                    due_soon_items.append(item)
+            except Exception as e:
+                print(f"Error processing calibration date '{cal_date}': {e}")
+                continue
         
         return due_soon_items
         
@@ -318,25 +333,40 @@ class JsonEquipmentDataManager:
                     filtered_items.append(item)
                 continue
                 
-            # Calculate time until calibration
-            delta = cal_date - current_date
-            
-            # Assign status
-            if delta.days < 0:
-                item['calibration_status'] = 'overdue'
-                item['days_overdue'] = abs(delta.days)
-            elif delta.days <= 30:
-                item['calibration_status'] = 'due_soon'
-                item['days_until_due'] = delta.days
-            else:
-                item['calibration_status'] = 'current'
-                item['days_until_due'] = delta.days
+            # Convert ISO format string back to datetime for comparison
+            try:
+                if isinstance(cal_date, str):
+                    cal_date_dt = datetime.fromisoformat(cal_date)
+                else:
+                    cal_date_dt = cal_date
+                
+                # Calculate time until calibration
+                delta = cal_date_dt - current_date
+                delta_days = delta.days
+                
+                # Assign status
+                if delta_days < 0:
+                    item['calibration_status'] = 'overdue'
+                    item['days_overdue'] = abs(delta_days)
+                elif delta_days <= 30:
+                    item['calibration_status'] = 'due_soon'
+                    item['days_until_due'] = delta_days
+                else:
+                    item['calibration_status'] = 'current'
+                    item['days_until_due'] = delta_days
+            except Exception as e:
+                print(f"Error processing calibration date '{cal_date}': {e}")
+                item['calibration_status'] = 'unknown'
                 
             # Apply date range filter if specified
             date_in_range = True
-            if start_date and cal_date < start_date:
-                date_in_range = False
-            if end_date and cal_date > end_date:
+            try:
+                if start_date and cal_date_dt < start_date:
+                    date_in_range = False
+                if end_date and cal_date_dt > end_date:
+                    date_in_range = False
+            except Exception:
+                # If comparison fails, assume it's out of range
                 date_in_range = False
                 
             # Apply status filter if specified

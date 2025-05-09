@@ -11,17 +11,28 @@
             </div>
             <div class="card-body">
                 <form method="post">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required autofocus>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
+                    {{ form.csrf_token }}
                     <input type="hidden" name="next" value="{{ next_url }}">
+                    
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control", autofocus=true) }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control") }}
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        {{ form.remember(class="form-check-input") }}
+                        {{ form.remember.label(class="form-check-label") }}
+                    </div>
+                    
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Login</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                        </button>
                     </div>
                 </form>
             </div>

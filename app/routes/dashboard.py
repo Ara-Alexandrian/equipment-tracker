@@ -134,15 +134,33 @@ def calibration_overview():
         if not cal_date:
             status_counts['unknown'] += 1
             continue
-            
-        delta = cal_date - datetime.now()
         
-        if delta.days < 0:
-            status_counts['overdue'] += 1
-        elif delta.days <= 30:
-            status_counts['due_soon'] += 1
-        else:
-            status_counts['current'] += 1
+        try:
+            # Convert ISO format string back to datetime for comparison
+            if isinstance(cal_date, str):
+                try:
+                    # Try to parse as ISO format
+                    cal_date_dt = datetime.fromisoformat(cal_date)
+                except ValueError:
+                    # If that fails, it might not be an ISO string, mark as unknown
+                    status_counts['unknown'] += 1
+                    continue
+            else:
+                cal_date_dt = cal_date
+                
+            # Now it's safe to calculate the difference
+            delta = cal_date_dt - datetime.now()
+            
+            if delta.days < 0:
+                status_counts['overdue'] += 1
+            elif delta.days <= 30:
+                status_counts['due_soon'] += 1
+            else:
+                status_counts['current'] += 1
+        except Exception as e:
+            # If anything goes wrong, count as unknown
+            status_counts['unknown'] += 1
+            continue
     
     return render_template(
         'dashboard/calibration.html',

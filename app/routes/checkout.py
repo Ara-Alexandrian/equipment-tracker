@@ -3,7 +3,11 @@ Checkout routes for equipment checkout system
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from app import checkout_manager, equipment_manager
+from app.models.forms import LoginForm, NotificationPreferencesForm
+from app.models.json_utils import DateTimeEncoder
 import functools
+import json
+import os
 
 bp = Blueprint('checkout', __name__, url_prefix='/checkout')
 
@@ -51,22 +55,24 @@ def physicist_required(view):
 def login():
     """User login page."""
     next_url = request.args.get('next', url_for('dashboard.index'))
+    form = LoginForm()
     
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
         
         user = checkout_manager.authenticate_user(username, password)
         
         if user:
             session.clear()
             session['user'] = user
+            session['user']['username'] = username
             flash(f'Welcome, {user["name"]}!', 'success')
             return redirect(next_url)
         
         flash('Invalid username or password', 'danger')
     
-    return render_template('checkout/login.html', next_url=next_url)
+    return render_template('checkout/login.html', form=form, next_url=next_url)
 
 @bp.route('/logout')
 def logout():
@@ -74,6 +80,68 @@ def logout():
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('dashboard.index'))
+
+@bp.route('/profile/notifications', methods=['GET', 'POST'])
+@login_required
+def notification_preferences():
+    """User notification preferences."""
+    # Get current user data
+    username = session['user']['username']
+    users_file_path = os.path.join(checkout_manager.data_dir, 'users.json')
+    
+    # Load all user data
+    try:
+        with open(users_file_path, 'r') as f:
+            users_data = json.load(f)
+    except:
+        flash('Could not load user data', 'danger')
+        return redirect(url_for('checkout.index'))
+    
+    if username not in users_data:
+        flash('User data not found', 'danger')
+        return redirect(url_for('checkout.index'))
+    
+    # Get user data and initialize form
+    user_data = users_data[username]
+    form = NotificationPreferencesForm()
+    
+    # On form submit
+    if form.validate_on_submit():
+        # Update user preferences
+        user_data['notification_preferences'] = {
+            'receive_due_soon': form.receive_due_soon.data,
+            'receive_overdue': form.receive_overdue.data,
+            'days_before_due': form.days_before_due.data,
+            'email_format': form.email_format.data
+        }
+        
+        # Save updated user data
+        try:
+            with open(users_file_path, 'w') as f:
+                json.dump(users_data, f, cls=DateTimeEncoder, indent=2)
+            
+            # Update session data
+            session['user'] = user_data
+            session['user']['username'] = username
+            
+            flash('Notification preferences updated successfully', 'success')
+        except Exception as e:
+            flash(f'Error saving preferences: {str(e)}', 'danger')
+    
+    # On GET request, populate form with current values
+    elif request.method == 'GET':
+        # Get current preferences or set defaults
+        prefs = user_data.get('notification_preferences', {})
+        form.receive_due_soon.data = prefs.get('receive_due_soon', True)
+        form.receive_overdue.data = prefs.get('receive_overdue', True)
+        form.days_before_due.data = prefs.get('days_before_due', 30)
+        form.email_format.data = prefs.get('email_format', 'html')
+    
+    return render_template(
+        'checkout/notification_preferences.html',
+        form=form,
+        user=user_data
+    )
 
 @bp.route('/')
 @login_required
@@ -370,3 +438,26 @@ def api_return_equipment(equipment_id):
             'status': 'error',
             'message': 'Failed to return equipment'
         }), 500
+        
+@bp.route('/notifications/history')
+@physicist_required
+def notification_history():
+    """View notification history."""
+    # Load notification logs
+    logs_file_path = os.path.join(checkout_manager.data_dir, 'notification_logs.json')
+    
+    logs = []
+    if os.path.exists(logs_file_path):
+        try:
+            with open(logs_file_path, 'r') as f:
+                logs = json.load(f)
+                
+            # Sort logs by timestamp (newest first)
+            logs.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        except Exception as e:
+            flash(f'Error loading notification logs: {str(e)}', 'danger')
+    
+    return render_template(
+        'checkout/notification_history.html',
+        logs=logs
+    )

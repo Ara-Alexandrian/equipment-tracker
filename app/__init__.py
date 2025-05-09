@@ -2,10 +2,13 @@
 Equipment Tracker Flask Application
 """
 from flask import Flask, session, json
+from flask_mail import Mail
+from flask_wtf.csrf import CSRFProtect
 from app.models.equipment import EquipmentDataManager
 from app.models.json_equipment import JsonEquipmentDataManager
 from app.models.json_checkout import JsonCheckoutManager
 from app.models.json_utils import DateTimeEncoder
+from app.utils.notifications.email_service import email_service
 import datetime
 import os
 
@@ -19,7 +22,19 @@ app.config.from_mapping(
     DATA_DIR='Resources',
     JSON_DATA_DIR='app/data',
     SESSION_PERMANENT=True,
-    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=7)
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=7),
+    
+    # Email configuration (override with environment variables in production)
+    MAIL_SERVER=os.environ.get('MAIL_SERVER', 'smtp.marybird.com'),
+    MAIL_PORT=int(os.environ.get('MAIL_PORT', 587)),
+    MAIL_USE_TLS=os.environ.get('MAIL_USE_TLS', 'True').lower() in ['true', '1', 't'],
+    MAIL_USE_SSL=os.environ.get('MAIL_USE_SSL', 'False').lower() in ['true', '1', 't'],
+    MAIL_USERNAME=os.environ.get('MAIL_USERNAME', None),
+    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD', None),
+    MAIL_DEFAULT_SENDER=os.environ.get('MAIL_DEFAULT_SENDER', 'equipment-tracker@marybird.com'),
+    
+    # Application URL for links in notifications
+    APPLICATION_URL=os.environ.get('APPLICATION_URL', 'http://localhost:5000')
 )
 
 # Ensure JSON data directory exists
@@ -33,14 +48,24 @@ excel_equipment_manager = EquipmentDataManager(app.config['DATA_DIR'])
 equipment_manager = JsonEquipmentDataManager(app.config['JSON_DATA_DIR'])
 checkout_manager = JsonCheckoutManager(app.config['JSON_DATA_DIR'])
 
+# Initialize Flask-Mail
+mail = Mail(app)
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
+
+# Initialize email notification service
+email_service.init_app(app)
+
 # Import and register routes
-from app.routes import dashboard, api, checkout, visual, reports
+from app.routes import dashboard, api, checkout, visual, reports, admin
 
 app.register_blueprint(dashboard.bp)
 app.register_blueprint(api.bp)
 app.register_blueprint(checkout.bp)
 app.register_blueprint(visual.bp)
 app.register_blueprint(reports.bp)
+app.register_blueprint(admin.bp)
 
 # Add template context processors
 @app.context_processor
@@ -50,6 +75,19 @@ def inject_context():
         'now': datetime.datetime.now(),
         'user': session.get('user', None)
     }
+
+# Add template filters
+@app.template_filter('datetime')
+def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
+    """Format a datetime object or string as a string."""
+    if not value:
+        return ''
+    if isinstance(value, str):
+        try:
+            value = datetime.datetime.fromisoformat(value)
+        except (ValueError, TypeError):
+            return value
+    return value.strftime(format)
 
 # Define main route 
 @app.route('/')

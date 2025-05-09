@@ -103,7 +103,15 @@
                         </div>
                     </a>
                     
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#reportModal">
+                    <a href="{{ url_for('admin.equipment_management') }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-tools fs-4 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Equipment Management</h5>
+                            <p class="mb-0 text-muted">Add, edit, or remove equipment items</p>
+                        </div>
+                    </a>
+
+                    <a href="{{ url_for('admin.reports') }}" class="list-group-item list-group-item-action d-flex align-items-center">
                         <i class="bi bi-file-earmark-pdf fs-4 me-3"></i>
                         <div>
                             <h5 class="mb-1">Generate Reports</h5>
