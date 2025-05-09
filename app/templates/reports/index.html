@@ -67,6 +67,7 @@
             </div>
             <div class="card-body">
                 <form id="reportForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="reportType" class="form-label">Report Type</label>
                         <select class="form-select" id="reportType" name="report_type">
@@ -223,9 +224,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Send request to generate report
         fetch('/reports/generate', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 // Hide loading indicator
@@ -336,12 +345,26 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error:', error);
+            const errorMessage = error.message || 'Unknown error';
             document.getElementById('initialMessage').innerHTML = `
                 <i class="bi bi-exclamation-triangle-fill"></i> 
-                Error generating report: ${error.message || 'Unknown error'}
+                Error generating report: ${errorMessage}
             `;
             document.getElementById('initialMessage').classList.remove('alert-info');
             document.getElementById('initialMessage').classList.add('alert-danger');
+            
+            // Add detailed error help 
+            if (errorMessage.includes('CSRF') || errorMessage.includes('403')) {
+                document.getElementById('initialMessage').innerHTML += `
+                    <hr>
+                    <p>This may be a CSRF token issue. Try refreshing the page and submitting again.</p>
+                `;
+            } else if (errorMessage.includes('Unexpected token')) {
+                document.getElementById('initialMessage').innerHTML += `
+                    <hr>
+                    <p>The server response couldn't be processed correctly. This may be because the server is returning HTML instead of JSON.</p>
+                `;
+            }
         });
     });
 });

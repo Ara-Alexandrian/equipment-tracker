@@ -164,9 +164,6 @@ function setupThemeSwitcher() {
         setTimeout(() => {
             themeBtn.classList.remove('btn-primary');
         }, 300);
-        
-        // Force page refresh to ensure all styles are applied correctly
-        window.location.reload();
     });
 }
 
