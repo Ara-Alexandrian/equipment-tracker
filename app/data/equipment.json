@@ -6,7 +6,7 @@
     "manufacturer": "CNMC",
     "model": "TN30013",
     "serial_number": "123456",
-    "location": "Physics Lab 1",
+    "location": "Essen (BR)",
     "calibration_due_date": "08/2025",
     "notes": "Annual calibration required"
   },
@@ -17,7 +17,7 @@
     "manufacturer": "CNMC",
     "model": "TN30013",
     "serial_number": "456789",
-    "location": "Physics Lab 1",
+    "location": "Picardy (BRG)",
     "calibration_due_date": "10/2025",
     "notes": "Annual calibration required"
   },
@@ -28,7 +28,7 @@
     "manufacturer": "PTW",
     "model": "31010",
     "serial_number": "987654",
-    "location": "Physics Lab 2",
+    "location": "Hammond",
     "calibration_due_date": "06/2025",
     "notes": "Annual calibration required"
   },
@@ -39,7 +39,7 @@
     "manufacturer": "IBA",
     "model": "FC65-G",
     "serial_number": "555123",
-    "location": "Treatment Room 1",
+    "location": "Houma",
     "calibration_due_date": "11/2025",
     "notes": "Annual calibration required"
   },
@@ -50,7 +50,7 @@
     "manufacturer": "PTW",
     "model": "30013",
     "serial_number": "333222",
-    "location": "Physics Lab 3",
+    "location": "Natchez",
     "calibration_due_date": "09/2025",
     "notes": "Annual calibration required"
   },
@@ -61,7 +61,7 @@
     "manufacturer": "Standard Imaging",
     "model": "MAX-4000",
     "serial_number": "112233",
-    "location": "Physics Lab 1",
+    "location": "Covington",
     "calibration_due_date": "07/2025",
     "notes": "Annual calibration required"
   },
@@ -72,7 +72,7 @@
     "manufacturer": "CNMC",
     "model": "K602",
     "serial_number": "445566",
-    "location": "Physics Lab 2",
+    "location": "Womans Hospital",
     "calibration_due_date": "05/2025",
     "notes": "Annual calibration required"
   },
@@ -83,7 +83,7 @@
     "manufacturer": "PTW",
     "model": "Unidos E",
     "serial_number": "778899",
-    "location": "Physics Lab 3",
+    "location": "Gonzales",
     "calibration_due_date": "12/2025",
     "notes": "Annual calibration required"
   },
@@ -94,7 +94,7 @@
     "manufacturer": "Keithley",
     "model": "35040",
     "serial_number": "665544",
-    "location": "Physics Lab 1",
+    "location": "Essen (BR)",
     "calibration_due_date": "01/2026",
     "notes": "Annual calibration required"
   },
@@ -105,7 +105,7 @@
     "manufacturer": "Ludlum",
     "model": "14C",
     "serial_number": "221100",
-    "location": "Radiation Safety Office",
+    "location": "Picardy (BRG)",
     "calibration_due_date": "06/2025",
     "notes": "Annual calibration required"
   },
@@ -116,7 +116,7 @@
     "manufacturer": "Ludlum",
     "model": "3",
     "serial_number": "332211",
-    "location": "Radiation Safety Office",
+    "location": "Hammond",
     "calibration_due_date": "07/2025",
     "notes": "Annual calibration required"
   },
@@ -127,7 +127,7 @@
     "manufacturer": "Fluke",
     "model": "451P",
     "serial_number": "443322",
-    "location": "Treatment Room 1",
+    "location": "Houma",
     "calibration_due_date": "08/2025",
     "notes": "Annual calibration required"
   },
@@ -138,7 +138,7 @@
     "manufacturer": "Fluke",
     "model": "451B",
     "serial_number": "554433",
-    "location": "Treatment Room 2",
+    "location": "Natchez",
     "calibration_due_date": "09/2025",
     "notes": "Annual calibration required"
   },
@@ -149,7 +149,7 @@
     "manufacturer": "Mirion",
     "model": "RDS-31",
     "serial_number": "665544",
-    "location": "Radiation Safety Office",
+    "location": "Covington",
     "calibration_due_date": "10/2025",
     "notes": "Annual calibration required"
   }

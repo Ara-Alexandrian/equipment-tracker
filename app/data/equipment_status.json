@@ -1,7 +1,7 @@
 {
   "Chamber-CNMC-123456": {
     "status": "In Storage",
-    "location": "Physics Lab 1",
+    "location": "Essen (BR)",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": null,
@@ -11,7 +11,7 @@
   },
   "Chamber-CNMC-456789": {
     "status": "Checked Out",
-    "location": "Treatment Room 2",
+    "location": "Natchez",
     "checked_out_by": "physicist",
     "checked_out_time": "2025-05-03T09:15:00",
     "expected_return": "2025-05-10T09:15:00",
@@ -21,7 +21,7 @@
   },
   "Chamber-PTW-987654": {
     "status": "In Calibration",
-    "location": "Calibration Lab",
+    "location": "Womans Hospital",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": "2025-05-15T00:00:00",
@@ -31,7 +31,7 @@
   },
   "Chamber-IBA-555123": {
     "status": "In Storage",
-    "location": "Treatment Room 1",
+    "location": "Houma",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": null,
@@ -41,7 +41,7 @@
   },
   "Chamber-PTW-333222": {
     "status": "Under Repair",
-    "location": "Service Center",
+    "location": "Gonzales",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": "2025-05-20T00:00:00",
@@ -51,7 +51,7 @@
   },
   "Electrometer-Standard-112233": {
     "status": "In Storage",
-    "location": "Physics Lab 1",
+    "location": "Covington",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": null,
@@ -61,7 +61,7 @@
   },
   "Electrometer-CNMC-445566": {
     "status": "Checked Out",
-    "location": "Treatment Room 3",
+    "location": "Picardy (BRG)",
     "checked_out_by": "physicist",
     "checked_out_time": "2025-05-04T10:30:00",
     "expected_return": "2025-05-11T10:30:00",
@@ -71,7 +71,7 @@
   },
   "Electrometer-PTW-778899": {
     "status": "In Storage",
-    "location": "Physics Lab 3",
+    "location": "Gonzales",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": null,
@@ -81,7 +81,7 @@
   },
   "Electrometer-Keithley-665544": {
     "status": "Out of Service",
-    "location": "Physics Lab 1",
+    "location": "Essen (BR)",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": null,
@@ -91,7 +91,7 @@
   },
   "Survey-Meter-Ludlum-221100": {
     "status": "In Storage",
-    "location": "Radiation Safety Office",
+    "location": "Picardy (BRG)",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": null,
@@ -101,7 +101,7 @@
   },
   "Survey-Meter-Ludlum-332211": {
     "status": "Checked Out",
-    "location": "Brachytherapy Suite",
+    "location": "Womans Hospital",
     "checked_out_by": "user",
     "checked_out_time": "2025-05-02T09:45:00",
     "expected_return": "2025-05-03T09:45:00",
@@ -111,7 +111,7 @@
   },
   "Survey-Meter-Fluke-443322": {
     "status": "In Storage",
-    "location": "Treatment Room 1",
+    "location": "Houma",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": null,
@@ -121,7 +121,7 @@
   },
   "Survey-Meter-Fluke-554433": {
     "status": "In Storage",
-    "location": "Treatment Room 2",
+    "location": "Natchez",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": null,
@@ -131,7 +131,7 @@
   },
   "Survey-Meter-Mirion-665544": {
     "status": "In Calibration",
-    "location": "Calibration Lab",
+    "location": "Hammond",
     "checked_out_by": null,
     "checked_out_time": null,
     "expected_return": "2025-05-25T00:00:00",
