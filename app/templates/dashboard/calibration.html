@@ -206,6 +206,26 @@ document.addEventListener('DOMContentLoaded', function() {
                             return label + ': ' + value + ' (' + percentage + '%)';
                         }
                     }
+                },
+                legend: {
+                    position: 'top',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    },
+                    onClick: function(e, legendItem, legend) {
+                        // Toggle the visibility of the clicked item
+                        const index = legendItem.index;
+                        const ci = legend.chart;
+                        const meta = ci.getDatasetMeta(0);
+                        
+                        // Toggle visibility
+                        meta.data[index].hidden = !meta.data[index].hidden;
+                        
+                        // Update the chart
+                        ci.update();
+                    }
                 }
             }
         }
@@ -244,6 +264,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 title: {
                     display: true,
                     text: 'Equipment by Category'
+                },
+                legend: {
+                    position: 'top',
+                    onClick: function(e, legendItem, legend) {
+                        const index = legendItem.index;
+                        const ci = legend.chart;
+                        const meta = ci.getDatasetMeta(0);
+                        const alreadyHidden = meta.hidden;
+                        
+                        // Toggle visibility
+                        meta.hidden = !alreadyHidden;
+                        
+                        // Update the chart
+                        ci.update();
+                    }
                 }
             },
             scales: {
@@ -252,6 +287,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: {
                         display: true,
                         text: 'Number of Items'
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45,
+                        padding: 10,
+                        font: {
+                            size: 11
+                        }
                     }
                 }
             }

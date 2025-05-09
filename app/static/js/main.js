@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up data tables if the library is loaded
     setupDataTables();
     
+    // Set up theme switcher
+    setupThemeSwitcher();
+    
     // Add fade-out to alerts after 3 seconds
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(function(alert) {
@@ -111,5 +114,79 @@ async function fetchFromApi(endpoint, params = {}) {
     } catch (error) {
         console.error('Error fetching from API:', error);
         throw error;
+    }
+}
+
+/**
+ * Set up theme switcher functionality
+ */
+function setupThemeSwitcher() {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (!themeToggle) return;
+    
+    // Check for saved theme preference or default to light theme
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    
+    // Set initial theme
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggle.checked = true;
+    }
+    
+    // Toggle theme when switch is clicked
+    themeToggle.addEventListener('change', function() {
+        if (this.checked) {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+        }
+        
+        // If there are charts on the page, update them
+        updateChartsForTheme(this.checked ? 'dark' : 'light');
+    });
+}
+
+/**
+ * Update chart colors for the current theme
+ * @param {string} theme - The current theme ('light' or 'dark')
+ */
+function updateChartsForTheme(theme) {
+    // Update any Chart.js charts on the page
+    if (typeof Chart !== 'undefined') {
+        Chart.helpers.each(Chart.instances, function(chart) {
+            // Only update if the chart has a config with options
+            if (chart.config && chart.config.options) {
+                
+                // Update grid and text colors
+                if (chart.config.options.scales) {
+                    for (const axis in chart.config.options.scales) {
+                        const scale = chart.config.options.scales[axis];
+                        
+                        if (scale.grid) {
+                            scale.grid.color = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                        }
+                        
+                        if (scale.ticks) {
+                            scale.ticks.color = theme === 'dark' ? '#adb5bd' : '#666';
+                        }
+                    }
+                }
+                
+                // Update title and legend colors
+                if (chart.config.options.plugins && chart.config.options.plugins.title) {
+                    chart.config.options.plugins.title.color = theme === 'dark' ? '#fff' : '#000';
+                }
+                
+                if (chart.config.options.plugins && chart.config.options.plugins.legend) {
+                    chart.config.options.plugins.legend.labels = chart.config.options.plugins.legend.labels || {};
+                    chart.config.options.plugins.legend.labels.color = theme === 'dark' ? '#adb5bd' : '#666';
+                }
+                
+                // Update the chart
+                chart.update();
+            }
+        });
     }
 }
