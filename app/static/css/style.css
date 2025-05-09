@@ -5,127 +5,6 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Dark mode styles */
-:root.dark-mode, 
-html.dark-mode, 
-body.dark-mode {
-    background-color: #121212 !important;
-    color: #e0e0e0 !important;
-}
-
-/* Use direct CSS variables which Bootstrap respects */
-:root.dark-mode {
-    --bs-body-bg: #121212 !important;
-    --bs-body-color: #e0e0e0 !important;
-    --bs-card-bg: #2d2d2d !important;
-    --bs-card-border-color: #3d3d3d !important;
-    --bs-navbar-active-color: #fff !important;
-    --bs-table-color: #e0e0e0 !important;
-    --bs-table-border-color: #3d3d3d !important;
-    --bs-table-striped-bg: rgba(255, 255, 255, 0.05) !important;
-}
-
-body.dark-mode .navbar {
-    background-color: #1f1f1f !important;
-}
-
-/* Dark mode theme switch adjustments */
-body.dark-mode .theme-switch::before,
-body.dark-mode .theme-switch::after {
-    color: #e0e0e0;
-}
-
-body.dark-mode .card:not(.bg-primary):not(.bg-success):not(.bg-info):not(.bg-warning):not(.bg-danger) {
-    background-color: #2d2d2d;
-    border-color: #3d3d3d;
-    color: #e0e0e0;
-}
-
-/* Adjust colored cards in dark mode */
-body.dark-mode .card.bg-primary,
-body.dark-mode .card.bg-success,
-body.dark-mode .card.bg-info, 
-body.dark-mode .card.bg-warning,
-body.dark-mode .card.bg-danger {
-    opacity: 0.9;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .table {
-    color: #e0e0e0;
-}
-
-body.dark-mode .table-hover tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.075);
-}
-
-body.dark-mode .card .table {
-    color: #e0e0e0;
-    border-color: #3d3d3d;
-}
-
-body.dark-mode .table th,
-body.dark-mode .table td {
-    border-color: #3d3d3d;
-}
-
-body.dark-mode .card-header {
-    background-color: #252525;
-    border-color: #3d3d3d;
-}
-
-body.dark-mode .btn-outline-primary {
-    color: #8ab4f8;
-    border-color: #8ab4f8;
-}
-
-body.dark-mode .btn-outline-primary:hover {
-    background-color: #8ab4f8;
-    color: #121212;
-}
-
-body.dark-mode .footer, 
-body.dark-mode footer {
-    background-color: #1f1f1f !important;
-}
-
-body.dark-mode .dropdown-menu {
-    background-color: #2d2d2d;
-    border-color: #3d3d3d;
-}
-
-body.dark-mode .dropdown-item {
-    color: #e0e0e0;
-}
-
-body.dark-mode .dropdown-item:hover {
-    background-color: #3d3d3d;
-    color: #ffffff;
-}
-
-body.dark-mode .form-control {
-    background-color: #2d2d2d;
-    border-color: #3d3d3d;
-    color: #e0e0e0;
-}
-
-body.dark-mode .text-muted {
-    color: #adb5bd !important;
-}
-
-/* Dashboard logo in dark mode */
-body.dark-mode .dashboard-logo {
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
-}
-
-body.dark-mode a:not(.btn) {
-    color: #8ab4f8;
-}
-
-body.dark-mode a:not(.btn):hover {
-    color: #aecbfa;
-}
-
 /* Theme toggle button styles */
 #theme-btn {
     position: relative;
@@ -187,17 +66,11 @@ body.dark-mode a:not(.btn):hover {
     animation: float 6s ease-in-out infinite;
 }
 
-/* MBP Logo container with dark mode support */
+/* MBP Logo container */
 .mbp-logo-container {
     transition: all 0.3s ease;
     border: 1px solid #ddd;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-body.dark-mode .mbp-logo-container {
-    background-color: #ffffff !important; /* Always white background for logo */
-    border-color: #444;
-    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
 }
 
 @keyframes float {
@@ -290,15 +163,6 @@ body {
 
 .filter-item.active {
     background-color: #e9ecef;
-    font-weight: bold;
-}
-
-body.dark-mode .filter-item:hover {
-    background-color: #333;
-}
-
-body.dark-mode .filter-item.active {
-    background-color: #444;
     font-weight: bold;
 }
 

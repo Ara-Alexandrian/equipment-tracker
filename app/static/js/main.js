@@ -133,10 +133,11 @@ function setupThemeSwitcher() {
     // Set initial button icon based on current theme
     if (currentTheme === 'dark') {
         themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
-        // Update chart themes
-        updateChartsForTheme('dark');
+        applyDarkMode(); // Apply dark mode on page load
     } else {
         themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
+        // Ensure light mode is properly applied
+        removeDarkMode();
     }
     
     // Toggle theme when button is clicked
@@ -145,18 +146,14 @@ function setupThemeSwitcher() {
         
         if (isDarkMode) {
             // Switch to light mode
-            document.documentElement.classList.remove('dark-mode');
-            document.body.classList.remove('dark-mode');
+            removeDarkMode();
             localStorage.setItem('theme', 'light');
             themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
-            updateChartsForTheme('light');
         } else {
             // Switch to dark mode
-            document.documentElement.classList.add('dark-mode');
-            document.body.classList.add('dark-mode');
+            applyDarkMode();
             localStorage.setItem('theme', 'dark');
             themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
-            updateChartsForTheme('dark');
         }
         
         // Add a highlight effect to show the button was clicked
@@ -165,6 +162,58 @@ function setupThemeSwitcher() {
             themeBtn.classList.remove('btn-primary');
         }, 300);
     });
+}
+
+/**
+ * Apply dark mode classes and styles to all elements
+ */
+function applyDarkMode() {
+    document.documentElement.classList.add('dark-mode');
+    document.body.classList.add('dark-mode');
+    
+    // Apply dark mode to SVGs and their containers
+    const allSvgs = document.querySelectorAll('svg');
+    allSvgs.forEach(svg => {
+        if (svg.parentElement) {
+            svg.parentElement.classList.add('dark-mode');
+        }
+        svg.classList.add('dark-mode');
+    });
+    
+    // Apply dark mode to table elements
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        table.classList.add('dark-mode');
+    });
+    
+    // Update chart themes
+    updateChartsForTheme('dark');
+}
+
+/**
+ * Remove dark mode classes and restore light mode
+ */
+function removeDarkMode() {
+    document.documentElement.classList.remove('dark-mode');
+    document.body.classList.remove('dark-mode');
+    
+    // Remove dark mode from SVGs and their containers
+    const allSvgs = document.querySelectorAll('svg');
+    allSvgs.forEach(svg => {
+        if (svg.parentElement) {
+            svg.parentElement.classList.remove('dark-mode');
+        }
+        svg.classList.remove('dark-mode');
+    });
+    
+    // Remove dark mode from table elements
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        table.classList.remove('dark-mode');
+    });
+    
+    // Update chart themes
+    updateChartsForTheme('light');
 }
 
 /**

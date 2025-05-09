@@ -9,11 +9,19 @@ html.dark-mode,
 body.dark-mode {
   --bs-body-bg: #121212 !important;
   --bs-body-color: #e0e0e0 !important;
+  --bs-card-bg: #2d2d2d !important;
+  --bs-card-border-color: #3d3d3d !important;
+  --bs-navbar-active-color: #fff !important;
+  --bs-table-color: #e0e0e0 !important;
+  --bs-table-border-color: #3d3d3d !important;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.05) !important;
+  
   background-color: #121212 !important;
   color: #e0e0e0 !important;
 }
 
 /* Navbar adjustments */
+body.dark-mode .navbar,
 body.dark-mode .navbar-dark {
   background-color: #1f1f1f !important;
 }
@@ -66,13 +74,15 @@ body.dark-mode .table-hover tbody tr:hover {
 }
 
 /* Form controls */
-body.dark-mode .form-control {
+body.dark-mode .form-control,
+body.dark-mode .form-select {
   background-color: #2d2d2d !important;
   border-color: #3d3d3d !important;
   color: #e0e0e0 !important;
 }
 
-body.dark-mode .form-control:focus {
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
   box-shadow: 0 0 0 0.25rem rgba(66, 153, 225, 0.25) !important;
 }
 
@@ -156,6 +166,37 @@ body.dark-mode .btn-outline-primary:hover {
   color: #121212 !important;
 }
 
+/* Alert styles */
+body.dark-mode .alert {
+  background-color: #2d2d2d !important;
+  border-color: #3d3d3d !important;
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode .alert-success {
+  background-color: rgba(40, 167, 69, 0.2) !important;
+  border-color: rgba(40, 167, 69, 0.3) !important;
+  color: #28a745 !important;
+}
+
+body.dark-mode .alert-danger {
+  background-color: rgba(220, 53, 69, 0.2) !important;
+  border-color: rgba(220, 53, 69, 0.3) !important;
+  color: #f8d7da !important;
+}
+
+body.dark-mode .alert-warning {
+  background-color: rgba(255, 193, 7, 0.2) !important;
+  border-color: rgba(255, 193, 7, 0.3) !important;
+  color: #fff3cd !important;
+}
+
+body.dark-mode .alert-info {
+  background-color: rgba(23, 162, 184, 0.2) !important;
+  border-color: rgba(23, 162, 184, 0.3) !important;
+  color: #d1ecf1 !important;
+}
+
 /* Filter items */
 body.dark-mode .filter-item:hover {
   background-color: #333 !important;
@@ -196,4 +237,86 @@ body.dark-mode .chart-container svg text {
 body.dark-mode .chart-container svg line,
 body.dark-mode .chart-container svg path.domain {
   stroke: #666 !important;
+}
+
+/* Images and SVG elements in dark mode */
+body.dark-mode svg:not(.preserve-color) path,
+body.dark-mode svg:not(.preserve-color) rect,
+body.dark-mode svg:not(.preserve-color) circle,
+body.dark-mode svg:not(.preserve-color) line,
+body.dark-mode svg:not(.preserve-color) polyline,
+body.dark-mode svg:not(.preserve-color) polygon {
+  stroke: #e0e0e0 !important;
+}
+
+body.dark-mode svg.dark-mode-invert {
+  filter: invert(0.85);
+}
+
+/* Dashboard logo in dark mode */
+body.dark-mode .dashboard-logo {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+}
+
+/* MBP Logo container with dark mode support */
+body.dark-mode .mbp-logo-container {
+  background-color: #2d2d2d !important;
+  border-color: #444 !important;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Modal styles */
+body.dark-mode .modal-content {
+  background-color: #2d2d2d !important;
+  border-color: #3d3d3d !important;
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode .modal-header {
+  border-color: #3d3d3d !important;
+}
+
+body.dark-mode .modal-footer {
+  border-color: #3d3d3d !important;
+}
+
+/* Badge styles */
+body.dark-mode .badge.bg-light {
+  background-color: #343a40 !important;
+  color: #e0e0e0 !important;
+}
+
+/* Bootstrap components */
+body.dark-mode .accordion {
+  --bs-accordion-bg: #2d2d2d !important;
+  --bs-accordion-border-color: #3d3d3d !important;
+  --bs-accordion-color: #e0e0e0 !important;
+  --bs-accordion-btn-color: #e0e0e0 !important;
+}
+
+body.dark-mode .list-group {
+  --bs-list-group-bg: #2d2d2d !important;
+  --bs-list-group-border-color: #3d3d3d !important;
+  --bs-list-group-color: #e0e0e0 !important;
+}
+
+body.dark-mode .list-group-item {
+  background-color: #2d2d2d !important;
+  border-color: #3d3d3d !important;
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode .list-group-item.active {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd !important;
+}
+
+/* Focus-visible outlines */
+body.dark-mode :focus-visible {
+  outline-color: #8ab4f8 !important;
+}
+
+/* Dark mode toggle button enhancement */
+body.dark-mode #theme-btn {
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5) !important;
 }

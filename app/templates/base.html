@@ -17,19 +17,12 @@
             const savedTheme = localStorage.getItem('theme');
             
             if (savedTheme === 'dark') {
-                // Apply dark mode class to html, :root, and body elements
+                // Apply dark mode class to html and body elements
                 document.documentElement.classList.add('dark-mode');
                 document.body.classList.add('dark-mode');
                 
-                // Ensure all SVGs in the page receive dark mode styles
-                document.addEventListener('DOMContentLoaded', function() {
-                    const allSvgs = document.querySelectorAll('svg');
-                    allSvgs.forEach(svg => {
-                        if (svg.parentElement) {
-                            svg.parentElement.classList.add('dark-mode');
-                        }
-                    });
-                });
+                // The full dark mode application will occur when main.js loads
+                // This early application prevents initial flash of light theme
             }
         })();
     </script>
