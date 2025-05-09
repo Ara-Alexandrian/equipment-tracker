@@ -1,14 +1,24 @@
 """
 Report generation routes for equipment tracker
 """
-from flask import Blueprint, render_template, request, send_file, jsonify, session
+from flask import Blueprint, render_template, request, send_file, jsonify, session, Response
 from app import equipment_manager, checkout_manager
 import io
 import csv
 import datetime
 import functools
 import json
+import base64
 from datetime import datetime, timedelta
+
+# Import WeasyPrint for PDF generation if installed
+try:
+    from weasyprint import HTML, CSS
+    WEASYPRINT_AVAILABLE = True
+except ImportError:
+    # WeasyPrint not installed, pdf generation will be simulated
+    WEASYPRINT_AVAILABLE = False
+    print("WeasyPrint not available. PDF generation will be simulated.")
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
 
@@ -30,6 +40,68 @@ def physicist_required(view):
 def index():
     """Report generation page."""
     return render_template('reports/index.html')
+
+@bp.route('/download/<report_type>/<report_format>', methods=['GET'])
+@physicist_required
+def download_report(report_type, report_format):
+    """Direct download endpoint for PDF reports."""
+    try:
+        # Generate report with default parameters
+        date_range = 'all'
+        current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Generate report content based on report type
+        if report_type == 'inventory':
+            data = generate_inventory_report([])
+            filename = f"inventory_report_{current_datetime}"
+        elif report_type == 'checkout':
+            start = datetime.now() - timedelta(days=30)  # Default to last 30 days
+            end = datetime.now()
+            data = generate_checkout_report(start, end, [])
+            filename = f"checkout_report_{current_datetime}"
+        elif report_type == 'calibration':
+            data = generate_calibration_report([])
+            filename = f"calibration_report_{current_datetime}"
+        elif report_type == 'maintenance':
+            start = datetime.now() - timedelta(days=30)  # Default to last 30 days
+            end = datetime.now()
+            data = generate_maintenance_report(start, end, [])
+            filename = f"maintenance_report_{current_datetime}"
+        else:
+            return jsonify({"status": "error", "error": "Invalid report type"}), 400
+        
+        if report_format == 'pdf' and WEASYPRINT_AVAILABLE:
+            # Generate HTML content
+            html_content = render_template(
+                'reports/pdf_template.html',
+                report_type=report_type,
+                date_range_text=get_date_range_text(date_range, start, end) if 'start' in locals() else "All Time",
+                data=data,
+                current_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            )
+            
+            # Create PDF using WeasyPrint
+            pdf_file = io.BytesIO()
+            HTML(string=html_content).write_pdf(pdf_file)
+            pdf_file.seek(0)
+            
+            # Return the PDF as a download
+            return Response(
+                pdf_file,
+                mimetype='application/pdf',
+                headers={
+                    'Content-Disposition': f'attachment; filename={filename}.pdf'
+                }
+            )
+        else:
+            return jsonify({"status": "error", "error": "PDF generation not available or invalid format"}), 400
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "error",
+            "error": f"Error generating report for download: {str(e)}"
+        }), 500
 
 @bp.route('/generate', methods=['POST'])
 @physicist_required
@@ -55,9 +127,20 @@ def generate_report():
             try:
                 start = datetime.strptime(start_date, '%Y-%m-%d')
                 end = datetime.strptime(end_date, '%Y-%m-%d')
-            except:
-                # Invalid date format, use defaults
-                pass
+                
+                # Validate that start date is before end date
+                if start > end:
+                    return jsonify({
+                        "status": "error",
+                        "error": "Start date must be before end date"
+                    }), 400
+            except ValueError as e:
+                # Log the specific date parsing error
+                print(f"Date parsing error: {str(e)}")
+                return jsonify({
+                    "status": "error",
+                    "error": f"Invalid date format. Please use YYYY-MM-DD format for dates."
+                }), 400
         elif date_range == 'week':
             start = end - timedelta(days=7)
         elif date_range == 'month':
@@ -83,20 +166,47 @@ def generate_report():
         
         # Generate appropriate file format
         if report_format == 'pdf':
-            # TODO: Implement actual PDF generation with a library like ReportLab or WeasyPrint
-            # For now, we'll return HTML that could be converted to PDF
-            html = render_template(
+            # Generate HTML content first
+            html_content = render_template(
                 'reports/pdf_template.html',
                 report_type=report_type,
                 date_range_text=get_date_range_text(date_range, start, end),
                 data=data,
                 current_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             )
-            return jsonify({
-                "status": "success",
-                "html": html,
-                "message": "PDF report generation is simulated for demonstration. In a production environment, this would generate and download a PDF file."
-            })
+            
+            # Check if WeasyPrint is available for actual PDF generation
+            if WEASYPRINT_AVAILABLE:
+                try:
+                    # Create PDF from HTML using WeasyPrint
+                    pdf_file = io.BytesIO()
+                    HTML(string=html_content).write_pdf(pdf_file)
+                    pdf_file.seek(0)
+                    
+                    # Convert PDF to base64 for AJAX response
+                    pdf_base64 = base64.b64encode(pdf_file.read()).decode('utf-8')
+                    
+                    return jsonify({
+                        "status": "success",
+                        "pdf_base64": pdf_base64,
+                        "filename": f"{filename}.pdf",
+                        "html": html_content  # Also include HTML for preview
+                    })
+                except Exception as e:
+                    # If PDF generation fails, fall back to HTML preview
+                    print(f"PDF generation failed: {str(e)}")
+                    return jsonify({
+                        "status": "success",
+                        "html": html_content,
+                        "message": f"PDF generation failed: {str(e)}. Falling back to HTML preview."
+                    })
+            else:
+                # WeasyPrint not available, return HTML preview only
+                return jsonify({
+                    "status": "success",
+                    "html": html_content,
+                    "message": "PDF generation is not available. Install WeasyPrint for actual PDF generation."
+                })
         
         elif report_format == 'excel':
             # For simplicity, we'll actually return CSV data
@@ -210,13 +320,36 @@ def generate_checkout_report(start_date, end_date, include_fields):
     # Filter history by date range if specified
     if start_date and end_date:
         filtered_history = []
+        errors = []
         for entry in history:
             try:
-                entry_date = datetime.fromisoformat(entry.get('timestamp', '').split('T')[0])
-                if start_date <= entry_date <= end_date:
-                    filtered_history.append(entry)
-            except:
-                pass
+                timestamp = entry.get('timestamp', '')
+                if timestamp:
+                    # Handle both ISO format and other formats
+                    if 'T' in timestamp:
+                        entry_date = datetime.fromisoformat(timestamp.split('T')[0])
+                    else:
+                        # Try multiple date formats
+                        for fmt in ['%Y-%m-%d', '%Y/%m/%d', '%m/%d/%Y', '%d-%m-%Y']:
+                            try:
+                                entry_date = datetime.strptime(timestamp.split(' ')[0], fmt)
+                                break
+                            except ValueError:
+                                continue
+                        else:
+                            # If we get here, none of the formats worked
+                            raise ValueError(f"Could not parse date: {timestamp}")
+                    
+                    if start_date <= entry_date <= end_date:
+                        filtered_history.append(entry)
+            except Exception as e:
+                # Log the error but continue processing other entries
+                print(f"Error parsing timestamp '{entry.get('timestamp', '')}': {str(e)}")
+                errors.append(entry)
+        
+        if errors:
+            print(f"Warning: {len(errors)} entries had invalid timestamps and were excluded from the report.")
+            
         history = filtered_history
     
     return {
@@ -305,13 +438,35 @@ def generate_maintenance_report(start_date, end_date, include_fields):
     
     # Filter by date range
     if start_date and end_date:
+        errors = []
         for record in sample_records:
             try:
-                record_date = datetime.strptime(record['date'], '%Y-%m-%d')
-                if start_date <= record_date <= end_date:
+                date_str = record.get('date', '')
+                if date_str:
+                    # Try multiple date formats
+                    for fmt in ['%Y-%m-%d', '%Y/%m/%d', '%m/%d/%Y', '%d-%m-%Y']:
+                        try:
+                            record_date = datetime.strptime(date_str, fmt)
+                            break
+                        except ValueError:
+                            continue
+                    else:
+                        # If we get here, none of the formats worked
+                        raise ValueError(f"Could not parse date: {date_str}")
+                    
+                    if start_date <= record_date <= end_date:
+                        maintenance_records.append(record)
+                else:
+                    # If no date, we can't filter it, so include it with a warning
+                    print(f"Warning: Maintenance record has no date field: {record}")
                     maintenance_records.append(record)
-            except:
-                maintenance_records.append(record)
+            except Exception as e:
+                # Log the error but continue processing other records
+                print(f"Error parsing date '{record.get('date', '')}': {str(e)}")
+                errors.append(record)
+        
+        if errors:
+            print(f"Warning: {len(errors)} maintenance records had invalid dates and were excluded from the report.")
     else:
         maintenance_records = sample_records
     

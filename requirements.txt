@@ -20,6 +20,5 @@ argparse>=1.4.0
 python-dateutil>=2.8.0
 pytz>=2022.0
 
-# For PDF generation in a production environment (commented for now)
-# weasyprint>=60.0
-# reportlab>=4.0.0
+# For PDF generation
+weasyprint>=60.0
