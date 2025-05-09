@@ -3,6 +3,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - initializing app...');
+
     // Enable tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -22,7 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setupDataTables();
     
     // Set up theme switcher
+    console.log('Setting up theme switcher...');
     setupThemeSwitcher();
+    console.log('Theme switcher setup complete');
     
     // Add fade-out to alerts after 3 seconds
     setTimeout(function() {
@@ -121,47 +125,109 @@ async function fetchFromApi(endpoint, params = {}) {
  * Set up theme switcher functionality
  */
 function setupThemeSwitcher() {
+    // Ensure the button exists in the DOM
     const themeBtn = document.getElementById('theme-btn');
+    console.log('Theme button found:', themeBtn);
+    
     if (!themeBtn) {
-        console.warn('Theme button element not found');
+        console.error('Theme button element not found');
         return;
     }
     
     // Check for saved theme preference or default to light theme
     const currentTheme = localStorage.getItem('theme') || 'light';
+    console.log('Current theme from localStorage:', currentTheme);
     
     // Set initial button icon based on current theme
     if (currentTheme === 'dark') {
         themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+        console.log('Applying dark mode on page load');
         applyDarkMode(); // Apply dark mode on page load
     } else {
         themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
+        console.log('Ensuring light mode is applied');
         // Ensure light mode is properly applied
         removeDarkMode();
     }
     
+    // Remove any existing click listeners to avoid duplicates
+    const newThemeBtn = themeBtn.cloneNode(true);
+    themeBtn.parentNode.replaceChild(newThemeBtn, themeBtn);
+    
     // Toggle theme when button is clicked
-    themeBtn.addEventListener('click', function() {
+    newThemeBtn.addEventListener('click', function(e) {
+        console.log('Theme button clicked!');
+        e.preventDefault();
+        
         const isDarkMode = document.documentElement.classList.contains('dark-mode');
+        console.log('Current dark mode state:', isDarkMode);
         
         if (isDarkMode) {
             // Switch to light mode
+            console.log('Switching to light mode');
             removeDarkMode();
             localStorage.setItem('theme', 'light');
-            themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
+            this.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
         } else {
             // Switch to dark mode
+            console.log('Switching to dark mode');
             applyDarkMode();
             localStorage.setItem('theme', 'dark');
-            themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+            this.innerHTML = '<i class="bi bi-sun-fill"></i>';
         }
         
         // Add a highlight effect to show the button was clicked
+        this.classList.add('btn-primary');
+        setTimeout(() => {
+            this.classList.remove('btn-primary');
+        }, 300);
+        
+        console.log('Theme toggle complete');
+    });
+    
+    // Explicitly make sure the button is clickable by adding this style
+    newThemeBtn.style.cursor = 'pointer';
+    newThemeBtn.title = 'Toggle dark/light mode';
+    
+    console.log('Theme switcher initialized successfully');
+}
+
+/**
+ * Toggle theme function - can be called directly from HTML
+ */
+function toggleTheme(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    
+    console.log('toggleTheme called directly');
+    
+    const isDarkMode = document.documentElement.classList.contains('dark-mode');
+    const themeBtn = document.getElementById('theme-btn');
+    
+    if (isDarkMode) {
+        // Switch to light mode
+        removeDarkMode();
+        localStorage.setItem('theme', 'light');
+        if (themeBtn) {
+            themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
+        }
+    } else {
+        // Switch to dark mode
+        applyDarkMode();
+        localStorage.setItem('theme', 'dark');
+        if (themeBtn) {
+            themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+        }
+    }
+    
+    // Add a highlight effect to show the button was clicked
+    if (themeBtn) {
         themeBtn.classList.add('btn-primary');
         setTimeout(() => {
             themeBtn.classList.remove('btn-primary');
         }, 300);
-    });
+    }
 }
 
 /**

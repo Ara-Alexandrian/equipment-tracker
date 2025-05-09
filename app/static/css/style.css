@@ -6,9 +6,9 @@ body {
 }
 
 /* Theme toggle button styles */
-#theme-btn {
+#theme-btn, .theme-toggle-btn {
     position: relative;
-    z-index: 10;
+    z-index: 999; /* Ensure it's above other elements */
     margin-top: 0;
     margin-bottom: 0;
     width: 36px;
@@ -19,21 +19,32 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    cursor: pointer !important;
+    pointer-events: auto !important;
 }
 
-#theme-btn:hover {
+#theme-btn:hover, .theme-toggle-btn:hover {
     transform: rotate(15deg);
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    opacity: 1;
 }
 
 /* Animation for theme icon */
-#theme-btn i {
+#theme-btn i, .theme-toggle-btn i {
     font-size: 1.1em;
     transition: transform 0.3s ease;
+    pointer-events: none; /* Make sure clicks pass through to the button */
 }
 
-#theme-btn:hover i {
+#theme-btn:hover i, .theme-toggle-btn:hover i {
     transform: scale(1.1);
+}
+
+/* Ensure the button is more visible when active */
+#theme-btn:active, .theme-toggle-btn:active,
+#theme-btn:focus, .theme-toggle-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
 }
 
 /* Prevent UI elements from overlapping */
