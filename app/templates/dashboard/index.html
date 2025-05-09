@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1>Equipment Dashboard</h1>
+        <p class="lead">Welcome to the Equipment Tracker Dashboard. Manage your equipment inventory and track calibrations.</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Equipment</h5>
+                <h2 class="display-4">{{ stats.total_equipment }}</h2>
+                <p class="card-text">Total pieces of equipment</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Chambers</h5>
+                <h2 class="display-4">{{ stats.chambers_count }}</h2>
+                <p class="card-text">Ionization chambers and related equipment</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Electrometers</h5>
+                <h2 class="display-4">{{ stats.electrometers_count }}</h2>
+                <p class="card-text">Electrometer devices</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Survey Meters</h5>
+                <h2 class="display-4">{{ stats.survey_meters_count }}</h2>
+                <p class="card-text">Survey and neutron meters</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Equipment</h5>
+                <a href="{{ url_for('dashboard.equipment_list') }}" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Manufacturer</th>
+                                <th>Model</th>
+                                <th>Serial Number</th>
+                                <th>Location</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in latest_equipment %}
+                            <tr>
+                                <td>{{ item.category }}</td>
+                                <td>{{ item.equipment_type }}</td>
+                                <td>{{ item.manufacturer }}</td>
+                                <td>{{ item.model }}</td>
+                                <td>{{ item.serial_number }}</td>
+                                <td>{{ item.location }}</td>
+                                <td>
+                                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">No equipment found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add charts or other dynamic content here
+</script>
+{% endblock %}

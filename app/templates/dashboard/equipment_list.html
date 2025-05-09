@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Equipment List - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Equipment List</h1>
+        <p class="lead">Browse and search all equipment in the inventory.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('dashboard.equipment_list') }}" class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+            <a href="{{ url_for('dashboard.equipment_list', category='Chamber') }}" class="btn {% if selected_category == 'Chamber' %}btn-primary{% else %}btn-outline-primary{% endif %}">Chambers</a>
+            <a href="{{ url_for('dashboard.equipment_list', category='Electrometer') }}" class="btn {% if selected_category == 'Electrometer' %}btn-primary{% else %}btn-outline-primary{% endif %}">Electrometers</a>
+            <a href="{{ url_for('dashboard.equipment_list', category='Survey Meter') }}" class="btn {% if selected_category == 'Survey Meter' %}btn-primary{% else %}btn-outline-primary{% endif %}">Survey Meters</a>
+        </div>
+    </div>
+</div>
+
+{% if search_query %}
+<div class="alert alert-info">
+    Search results for: <strong>{{ search_query }}</strong>
+    <a href="{{ url_for('dashboard.equipment_list') }}" class="float-end">Clear search</a>
+</div>
+{% endif %}
+
+{% if selected_location %}
+<div class="alert alert-info">
+    Filtering by location: <strong>{{ selected_location }}</strong>
+    <a href="{{ url_for('dashboard.equipment_list') }}" class="float-end">Clear filter</a>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Filters</h5>
+            </div>
+            <div class="card-body">
+                <h6>Locations</h6>
+                <div class="list-group">
+                    {% for location in locations %}
+                    <a href="{{ url_for('dashboard.equipment_list', location=location) }}" class="list-group-item list-group-item-action {% if selected_location == location %}active{% endif %}">
+                        {{ location }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Manufacturer</th>
+                                <th>Model</th>
+                                <th>Serial Number</th>
+                                <th>Location</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in equipment %}
+                            <tr>
+                                <td>{{ item.category }}</td>
+                                <td>{{ item.equipment_type }}</td>
+                                <td>{{ item.manufacturer }}</td>
+                                <td>{{ item.model }}</td>
+                                <td>{{ item.serial_number }}</td>
+                                <td>{{ item.location }}</td>
+                                <td>
+                                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">No equipment found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

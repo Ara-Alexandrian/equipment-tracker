@@ -1,0 +1,79 @@
+[
+  {
+    "id": "hist-001",
+    "equipment_id": "Chamber-CNMC-456789",
+    "timestamp": "2025-05-03T09:15:00",
+    "previous_status": "In Storage",
+    "new_status": "Checked Out",
+    "previous_location": "Physics Lab 1",
+    "new_location": "Treatment Room 2",
+    "user": "physicist",
+    "notes": "Weekly QA measurements"
+  },
+  {
+    "id": "hist-002",
+    "equipment_id": "Chamber-PTW-987654",
+    "timestamp": "2025-05-01T10:30:00",
+    "previous_status": "In Storage",
+    "new_status": "In Calibration",
+    "previous_location": "Physics Lab 2",
+    "new_location": "Calibration Lab",
+    "user": "admin",
+    "notes": "Annual calibration"
+  },
+  {
+    "id": "hist-003",
+    "equipment_id": "Chamber-PTW-333222",
+    "timestamp": "2025-05-02T14:45:00",
+    "previous_status": "In Storage",
+    "new_status": "Under Repair",
+    "previous_location": "Physics Lab 3",
+    "new_location": "Service Center",
+    "user": "admin",
+    "notes": "Cable repair needed"
+  },
+  {
+    "id": "hist-004",
+    "equipment_id": "Electrometer-CNMC-445566",
+    "timestamp": "2025-05-04T10:30:00",
+    "previous_status": "In Storage",
+    "new_status": "Checked Out",
+    "previous_location": "Physics Lab 2",
+    "new_location": "Treatment Room 3",
+    "user": "physicist",
+    "notes": "Monthly QA measurements"
+  },
+  {
+    "id": "hist-005",
+    "equipment_id": "Electrometer-Keithley-665544",
+    "timestamp": "2025-05-03T13:20:00",
+    "previous_status": "In Storage",
+    "new_status": "Out of Service",
+    "previous_location": "Physics Lab 1",
+    "new_location": "Physics Lab 1",
+    "user": "admin",
+    "notes": "Failed battery test, waiting for replacement"
+  },
+  {
+    "id": "hist-006",
+    "equipment_id": "Survey-Meter-Ludlum-332211",
+    "timestamp": "2025-05-02T09:45:00",
+    "previous_status": "In Storage",
+    "new_status": "Checked Out",
+    "previous_location": "Radiation Safety Office",
+    "new_location": "Brachytherapy Suite",
+    "user": "user",
+    "notes": "Patient treatment"
+  },
+  {
+    "id": "hist-007",
+    "equipment_id": "Survey-Meter-Mirion-665544",
+    "timestamp": "2025-05-01T10:30:00",
+    "previous_status": "In Storage",
+    "new_status": "In Calibration",
+    "previous_location": "Radiation Safety Office",
+    "new_location": "Calibration Lab",
+    "user": "admin",
+    "notes": "Annual calibration"
+  }
+]

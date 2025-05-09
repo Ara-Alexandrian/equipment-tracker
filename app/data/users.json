@@ -1,0 +1,20 @@
+{
+  "admin": {
+    "name": "Administrator",
+    "email": "admin@example.com",
+    "role": "admin",
+    "password": "admin123"
+  },
+  "physicist": {
+    "name": "Clinical Physicist",
+    "email": "physicist@example.com",
+    "role": "physicist",
+    "password": "physicist123"
+  },
+  "user": {
+    "name": "Regular User",
+    "email": "user@example.com",
+    "role": "user",
+    "password": "user123"
+  }
+}

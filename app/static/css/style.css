@@ -1,0 +1,136 @@
+/* Custom styles for Equipment Tracker */
+
+/* Main layout */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    flex: 1;
+}
+
+/* Dashboard cards */
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Table improvements */
+.table-responsive {
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* Status indicators */
+.status-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.status-ok {
+    background-color: #28a745;
+}
+
+.status-warning {
+    background-color: #ffc107;
+}
+
+.status-danger {
+    background-color: #dc3545;
+}
+
+/* Dashboard metrics */
+.metric-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.metric-card .value {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.metric-card .label {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+/* Equipment detail page */
+.equipment-detail .property-name {
+    font-weight: bold;
+    color: #495057;
+}
+
+/* Filter sidebar */
+.filter-item {
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.filter-item:hover {
+    background-color: #f8f9fa;
+}
+
+.filter-item.active {
+    background-color: #e9ecef;
+    font-weight: bold;
+}
+
+/* Navigation active state */
+.navbar-nav .nav-link.active {
+    font-weight: bold;
+    border-bottom: 2px solid #fff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .table thead {
+        display: none;
+    }
+    
+    .table, .table tbody, .table tr, .table td {
+        display: block;
+        width: 100%;
+    }
+    
+    .table tr {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
+    
+    .table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        padding-left: 15px;
+        font-weight: bold;
+        text-align: left;
+    }
+}

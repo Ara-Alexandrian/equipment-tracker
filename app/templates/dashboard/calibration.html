@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Calibration Overview - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1>Calibration Overview</h1>
+        <p class="lead">View and manage equipment calibration schedules.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Calibration Due Soon</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Manufacturer</th>
+                                <th>Model</th>
+                                <th>Serial Number</th>
+                                <th>Calibration Due Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in due_soon %}
+                            <tr>
+                                <td>{{ item.category }}</td>
+                                <td>{{ item.manufacturer }}</td>
+                                <td>{{ item.model }}</td>
+                                <td>{{ item.serial_number }}</td>
+                                <td class="{% if item.calibration_status == 'overdue' %}text-danger{% else %}text-warning{% endif %}">
+                                    {% if item.calibration_status == 'overdue' %}
+                                        <i class="bi bi-x-circle-fill"></i> Overdue
+                                        {% if item.days_overdue %}
+                                            by {{ item.days_overdue }} days
+                                        {% endif %}
+                                    {% else %}
+                                        <i class="bi bi-exclamation-triangle-fill"></i> Due soon
+                                        {% if item.days_until_due %}
+                                            ({{ item.days_until_due }} days)
+                                        {% endif %}
+                                    {% endif %}
+                                    <br>
+                                    <small>{{ item.calibration_due_date }}</small>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">No equipment calibrations due soon</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Calibration Schedule</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="calibrationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Calibration by Equipment Type</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="equipmentTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calibration Schedule Chart
+    var ctxCal = document.getElementById('calibrationChart').getContext('2d');
+    var calibrationChart = new Chart(ctxCal, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Calibrations Due',
+                data: [3, 5, 2, 8, 6, 3, 1, 4, 7, 2, 5, 3],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Calibrations'
+                    }
+                }
+            }
+        }
+    });
+
+    // Equipment Type Chart
+    var ctxType = document.getElementById('equipmentTypeChart').getContext('2d');
+    var equipmentTypeChart = new Chart(ctxType, {
+        type: 'pie',
+        data: {
+            labels: ['Chambers', 'Electrometers', 'Survey Meters'],
+            datasets: [{
+                data: [15, 10, 25],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(153, 102, 255, 0.6)'
+                ],
+                borderColor: [
+                    'rgb(75, 192, 192)',
+                    'rgb(255, 159, 64)',
+                    'rgb(153, 102, 255)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+});
+</script>
+{% endblock %}

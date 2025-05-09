@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  equipment-tracker:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./Resources:/app/Resources
+      - ./output:/app/output
+      - ./app/data:/app/app/data
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=run.py
+      - DATA_DIR=Resources
+      - JSON_DATA_DIR=app/data

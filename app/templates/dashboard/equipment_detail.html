@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ equipment.category }} - {{ equipment.serial_number }} - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>{{ equipment.manufacturer }} {{ equipment.model }}</h1>
+        <p class="lead">{{ equipment.category }} - {{ equipment.equipment_type }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('dashboard.equipment_list') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th style="width: 25%">Category</th>
+                            <td>{{ equipment.category }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ equipment.equipment_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Manufacturer</th>
+                            <td>{{ equipment.manufacturer }}</td>
+                        </tr>
+                        <tr>
+                            <th>Model</th>
+                            <td>{{ equipment.model }}</td>
+                        </tr>
+                        <tr>
+                            <th>Serial Number</th>
+                            <td>{{ equipment.serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>{{ equipment.location }}</td>
+                        </tr>
+                        <tr>
+                            <th>Calibration Due Date</th>
+                            <td>{{ equipment.calibration_due_date }}</td>
+                        </tr>
+                        {% if equipment.check_source %}
+                        <tr>
+                            <th>Check Source</th>
+                            <td>{{ equipment.check_source }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Notes</th>
+                            <td>{{ equipment.notes }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Equipment ID</h6>
+                    <p class="text-muted">{{ equipment.id }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Calibration Status</h6>
+                    {% if equipment.calibration_status == 'overdue' %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle-fill"></i> Overdue
+                        {% if equipment.days_overdue %}
+                            by {{ equipment.days_overdue }} days
+                        {% endif %}
+                    </div>
+                    {% elif equipment.calibration_status == 'due_soon' %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Due Soon
+                        {% if equipment.days_until_due %}
+                            ({{ equipment.days_until_due }} days remaining)
+                        {% endif %}
+                    </div>
+                    {% elif 'due soon' in equipment.calibration_due_date|string|lower %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Due Soon
+                    </div>
+                    {% elif 'overdue' in equipment.calibration_due_date|string|lower %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle-fill"></i> Overdue
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i> Up to Date
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Raw Data</h5>
+            </div>
+            <div class="card-body">
+                <pre class="small">{{ equipment.raw_data }}</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

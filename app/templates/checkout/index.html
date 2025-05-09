@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Equipment Checkout - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Equipment Checkout System</h1>
+        <p class="lead">Track and manage equipment locations and status.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if session.user.role in ['admin', 'physicist'] %}
+        <a href="{{ url_for('checkout.admin') }}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-gear"></i> Admin Dashboard
+        </a>
+        {% endif %}
+        <a href="{{ url_for('checkout.history') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-clock-history"></i> View Full History
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Currently Checked Out</h5>
+                <span class="badge bg-primary rounded-pill">{{ checked_out|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if checked_out %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Location</th>
+                                <th>Checked Out By</th>
+                                <th>Expected Return</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in checked_out %}
+                            <tr>
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.location }}</td>
+                                <td>{{ item.checked_out_by }}</td>
+                                <td>{{ item.expected_return }}</td>
+                                <td>
+                                    <a href="{{ url_for('checkout.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle-fill"></i> No equipment is currently checked out.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Overdue Equipment</h5>
+                <span class="badge bg-danger rounded-pill">{{ overdue|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if overdue %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Location</th>
+                                <th>Checked Out By</th>
+                                <th>Days Overdue</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in overdue %}
+                            <tr>
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.location }}</td>
+                                <td>{{ item.checked_out_by }}</td>
+                                <td class="text-danger fw-bold">{{ item.days_overdue }}</td>
+                                <td>
+                                    <a href="{{ url_for('checkout.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success mb-0">
+                    <i class="bi bi-check-circle-fill"></i> No equipment is currently overdue.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Activity</h5>
+                <a href="{{ url_for('checkout.history') }}" class="btn btn-sm btn-outline-primary">
+                    View All
+                </a>
+            </div>
+            <div class="card-body">
+                {% if history %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Equipment ID</th>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                            <tr>
+                                <td>{{ entry.timestamp }}</td>
+                                <td>
+                                    <a href="{{ url_for('checkout.equipment_detail', equipment_id=entry.equipment_id) }}">
+                                        {{ entry.equipment_id }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if entry.previous_status != entry.new_status %}
+                                        Status changed from <strong>{{ entry.previous_status }}</strong> to <strong>{{ entry.new_status }}</strong>
+                                    {% elif entry.previous_location != entry.new_location %}
+                                        Location changed from <strong>{{ entry.previous_location }}</strong> to <strong>{{ entry.new_location }}</strong>
+                                    {% else %}
+                                        Updated
+                                    {% endif %}
+                                </td>
+                                <td>{{ entry.user }}</td>
+                                <td>
+                                    {% if entry.notes %}
+                                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ entry.notes }}">
+                                        <i class="bi bi-info-circle"></i> Notes
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle-fill"></i> No recent activity found.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

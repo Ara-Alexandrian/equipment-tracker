@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ equipment.category }} - {{ equipment.serial_number }} - Checkout{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>{{ equipment.manufacturer }} {{ equipment.model }}</h1>
+        <p class="lead">{{ equipment.category }} - {{ equipment.equipment_type }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('dashboard.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-file-earmark-text"></i> View Equipment Details
+        </a>
+        <a href="{{ url_for('checkout.index') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back to Checkout
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Current Status</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                <span class="badge {% if status.status == 'In Storage' %}bg-success{% elif status.status == 'Checked Out' %}bg-primary{% elif status.status == 'In Calibration' %}bg-info{% elif status.status == 'Under Repair' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ status.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>{{ status.location }}</td>
+                        </tr>
+                        {% if status.status == 'Checked Out' %}
+                        <tr>
+                            <th>Checked Out By</th>
+                            <td>{{ status.checked_out_by }}</td>
+                        </tr>
+                        <tr>
+                            <th>Checkout Time</th>
+                            <td>{{ status.checked_out_time }}</td>
+                        </tr>
+                        <tr>
+                            <th>Expected Return</th>
+                            <td>{{ status.expected_return }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Last Updated</th>
+                            <td>{{ status.last_updated }} by {{ status.updated_by }}</td>
+                        </tr>
+                        {% if status.notes %}
+                        <tr>
+                            <th>Notes</th>
+                            <td>{{ status.notes }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="actionTabs" role="tablist">
+                    {% if status.status != 'Checked Out' %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="checkout-tab" data-bs-toggle="tab" data-bs-target="#checkout" type="button" role="tab" aria-controls="checkout" aria-selected="true">
+                            <i class="bi bi-box-arrow-right"></i> Check Out
+                        </button>
+                    </li>
+                    {% endif %}
+                    
+                    {% if status.status == 'Checked Out' %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if status.status == 'Checked Out' %}active{% endif %}" id="return-tab" data-bs-toggle="tab" data-bs-target="#return" type="button" role="tab" aria-controls="return" aria-selected="{% if status.status == 'Checked Out' %}true{% else %}false{% endif %}">
+                            <i class="bi bi-box-arrow-in-left"></i> Return
+                        </button>
+                    </li>
+                    {% endif %}
+                    
+                    {% if session.user.role in ['admin', 'physicist'] %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if status.status != 'Checked Out' and session.user.role in ['admin', 'physicist'] %}active{% endif %}" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab" aria-controls="status" aria-selected="{% if status.status != 'Checked Out' and session.user.role in ['admin', 'physicist'] %}true{% else %}false{% endif %}">
+                            <i class="bi bi-pencil-square"></i> Update Status
+                        </button>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <div class="tab-content p-3" id="actionTabsContent">
+                    {% if status.status != 'Checked Out' %}
+                    <div class="tab-pane fade show active" id="checkout" role="tabpanel" aria-labelledby="checkout-tab">
+                        <form method="post">
+                            <input type="hidden" name="action" value="checkout">
+                            
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Temporary Location</label>
+                                <input type="text" class="form-control" id="location" name="location" required>
+                                <div class="form-text">Enter the location where this equipment will be used.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="expected_return_days" class="form-label">Expected Return (Days)</label>
+                                <select class="form-select" id="expected_return_days" name="expected_return_days">
+                                    <option value="1">1 day</option>
+                                    <option value="2">2 days</option>
+                                    <option value="3">3 days</option>
+                                    <option value="5">5 days</option>
+                                    <option value="7">1 week</option>
+                                    <option value="14">2 weeks</option>
+                                    <option value="30">1 month</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="checkout_notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="checkout_notes" name="notes" rows="3"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-right"></i> Check Out Equipment
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                    
+                    {% if status.status == 'Checked Out' %}
+                    <div class="tab-pane fade show active" id="return" role="tabpanel" aria-labelledby="return-tab">
+                        <form method="post">
+                            <input type="hidden" name="action" value="return">
+                            
+                            <div class="mb-3">
+                                <label for="return_location" class="form-label">Return Location</label>
+                                <input type="text" class="form-control" id="return_location" name="return_location" placeholder="Leave blank for default location">
+                                <div class="form-text">Enter the location where this equipment should be returned to. If left blank, the default location will be used.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="return_notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="return_notes" name="notes" rows="3"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-box-arrow-in-left"></i> Return Equipment
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                    
+                    {% if session.user.role in ['admin', 'physicist'] %}
+                    <div class="tab-pane fade {% if status.status != 'Checked Out' and session.user.role in ['admin', 'physicist'] %}show active{% endif %}" id="status" role="tabpanel" aria-labelledby="status-tab">
+                        <form method="post">
+                            <input type="hidden" name="action" value="update_status">
+                            
+                            <div class="mb-3">
+                                <label for="status_select" class="form-label">Equipment Status</label>
+                                <select class="form-select" id="status_select" name="status">
+                                    {% for option in status_options %}
+                                    <option value="{{ option }}" {% if status.status == option %}selected{% endif %}>{{ option }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="status_location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="status_location" name="location" value="{{ status.location }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="status_notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="status_notes" name="notes" rows="3">{{ status.notes }}</textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Update Status
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Checkout History</h5>
+            </div>
+            <div class="card-body">
+                {% if history %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Status Change</th>
+                                <th>Location Change</th>
+                                <th>User</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                            <tr>
+                                <td>{{ entry.timestamp }}</td>
+                                <td>
+                                    {% if entry.previous_status != entry.new_status %}
+                                    <span class="badge bg-secondary">{{ entry.previous_status }}</span>
+                                    <i class="bi bi-arrow-right"></i>
+                                    <span class="badge {% if entry.new_status == 'In Storage' %}bg-success{% elif entry.new_status == 'Checked Out' %}bg-primary{% elif entry.new_status == 'In Calibration' %}bg-info{% elif entry.new_status == 'Under Repair' %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ entry.new_status }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted">No change</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.previous_location != entry.new_location %}
+                                    <strong>{{ entry.previous_location }}</strong>
+                                    <i class="bi bi-arrow-right"></i>
+                                    <strong>{{ entry.new_location }}</strong>
+                                    {% else %}
+                                    <span class="text-muted">No change</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ entry.user }}</td>
+                                <td>{{ entry.notes }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle-fill"></i> No checkout history found for this equipment.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

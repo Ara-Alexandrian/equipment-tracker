@@ -1,0 +1,156 @@
+[
+  {
+    "id": "Chamber-CNMC-123456",
+    "category": "Chamber",
+    "equipment_type": "ionization chamber",
+    "manufacturer": "CNMC",
+    "model": "TN30013",
+    "serial_number": "123456",
+    "location": "Physics Lab 1",
+    "calibration_due_date": "08/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Chamber-CNMC-456789",
+    "category": "Chamber",
+    "equipment_type": "ionization chamber",
+    "manufacturer": "CNMC",
+    "model": "TN30013",
+    "serial_number": "456789",
+    "location": "Physics Lab 1",
+    "calibration_due_date": "10/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Chamber-PTW-987654",
+    "category": "Chamber",
+    "equipment_type": "ionization chamber",
+    "manufacturer": "PTW",
+    "model": "31010",
+    "serial_number": "987654",
+    "location": "Physics Lab 2",
+    "calibration_due_date": "06/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Chamber-IBA-555123",
+    "category": "Chamber",
+    "equipment_type": "ionization chamber",
+    "manufacturer": "IBA",
+    "model": "FC65-G",
+    "serial_number": "555123",
+    "location": "Treatment Room 1",
+    "calibration_due_date": "11/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Chamber-PTW-333222",
+    "category": "Chamber",
+    "equipment_type": "ionization chamber",
+    "manufacturer": "PTW",
+    "model": "30013",
+    "serial_number": "333222",
+    "location": "Physics Lab 3",
+    "calibration_due_date": "09/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Electrometer-Standard-112233",
+    "category": "Electrometer",
+    "equipment_type": "electrometer",
+    "manufacturer": "Standard Imaging",
+    "model": "MAX-4000",
+    "serial_number": "112233",
+    "location": "Physics Lab 1",
+    "calibration_due_date": "07/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Electrometer-CNMC-445566",
+    "category": "Electrometer",
+    "equipment_type": "electrometer",
+    "manufacturer": "CNMC",
+    "model": "K602",
+    "serial_number": "445566",
+    "location": "Physics Lab 2",
+    "calibration_due_date": "05/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Electrometer-PTW-778899",
+    "category": "Electrometer",
+    "equipment_type": "electrometer",
+    "manufacturer": "PTW",
+    "model": "Unidos E",
+    "serial_number": "778899",
+    "location": "Physics Lab 3",
+    "calibration_due_date": "12/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Electrometer-Keithley-665544",
+    "category": "Electrometer",
+    "equipment_type": "electrometer",
+    "manufacturer": "Keithley",
+    "model": "35040",
+    "serial_number": "665544",
+    "location": "Physics Lab 1",
+    "calibration_due_date": "01/2026",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Survey-Meter-Ludlum-221100",
+    "category": "Survey Meter",
+    "equipment_type": "survey meter",
+    "manufacturer": "Ludlum",
+    "model": "14C",
+    "serial_number": "221100",
+    "location": "Radiation Safety Office",
+    "calibration_due_date": "06/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Survey-Meter-Ludlum-332211",
+    "category": "Survey Meter",
+    "equipment_type": "survey meter",
+    "manufacturer": "Ludlum",
+    "model": "3",
+    "serial_number": "332211",
+    "location": "Radiation Safety Office",
+    "calibration_due_date": "07/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Survey-Meter-Fluke-443322",
+    "category": "Survey Meter",
+    "equipment_type": "survey meter",
+    "manufacturer": "Fluke",
+    "model": "451P",
+    "serial_number": "443322",
+    "location": "Treatment Room 1",
+    "calibration_due_date": "08/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Survey-Meter-Fluke-554433",
+    "category": "Survey Meter",
+    "equipment_type": "survey meter",
+    "manufacturer": "Fluke",
+    "model": "451B",
+    "serial_number": "554433",
+    "location": "Treatment Room 2",
+    "calibration_due_date": "09/2025",
+    "notes": "Annual calibration required"
+  },
+  {
+    "id": "Survey-Meter-Mirion-665544",
+    "category": "Survey Meter",
+    "equipment_type": "survey meter",
+    "manufacturer": "Mirion",
+    "model": "RDS-31",
+    "serial_number": "665544",
+    "location": "Radiation Safety Office",
+    "calibration_due_date": "10/2025",
+    "notes": "Annual calibration required"
+  }
+]

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Login to Equipment Tracker</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <input type="hidden" name="next" value="{{ next_url }}">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-muted">
+                <div class="alert alert-info mb-0">
+                    <h5 class="alert-heading">Demo Users</h5>
+                    <p class="mb-0">For testing purposes, you can login with these credentials:</p>
+                    <ul class="mb-0">
+                        <li><strong>Administrator:</strong> Username: admin, Password: admin123</li>
+                        <li><strong>Clinical Physicist:</strong> Username: physicist, Password: physicist123</li>
+                        <li><strong>Regular User:</strong> Username: user, Password: user123</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

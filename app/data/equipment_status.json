@@ -1,0 +1,142 @@
+{
+  "Chamber-CNMC-123456": {
+    "status": "In Storage",
+    "location": "Physics Lab 1",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": null,
+    "notes": "",
+    "last_updated": "2025-05-01T09:00:00",
+    "updated_by": "admin"
+  },
+  "Chamber-CNMC-456789": {
+    "status": "Checked Out",
+    "location": "Treatment Room 2",
+    "checked_out_by": "physicist",
+    "checked_out_time": "2025-05-03T09:15:00",
+    "expected_return": "2025-05-10T09:15:00",
+    "notes": "Weekly QA measurements",
+    "last_updated": "2025-05-03T09:15:00",
+    "updated_by": "physicist"
+  },
+  "Chamber-PTW-987654": {
+    "status": "In Calibration",
+    "location": "Calibration Lab",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": "2025-05-15T00:00:00",
+    "notes": "Annual calibration",
+    "last_updated": "2025-05-01T10:30:00",
+    "updated_by": "admin"
+  },
+  "Chamber-IBA-555123": {
+    "status": "In Storage",
+    "location": "Treatment Room 1",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": null,
+    "notes": "",
+    "last_updated": "2025-05-01T09:00:00",
+    "updated_by": "admin"
+  },
+  "Chamber-PTW-333222": {
+    "status": "Under Repair",
+    "location": "Service Center",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": "2025-05-20T00:00:00",
+    "notes": "Cable repair needed",
+    "last_updated": "2025-05-02T14:45:00",
+    "updated_by": "admin"
+  },
+  "Electrometer-Standard-112233": {
+    "status": "In Storage",
+    "location": "Physics Lab 1",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": null,
+    "notes": "",
+    "last_updated": "2025-05-01T09:00:00",
+    "updated_by": "admin"
+  },
+  "Electrometer-CNMC-445566": {
+    "status": "Checked Out",
+    "location": "Treatment Room 3",
+    "checked_out_by": "physicist",
+    "checked_out_time": "2025-05-04T10:30:00",
+    "expected_return": "2025-05-11T10:30:00",
+    "notes": "Monthly QA measurements",
+    "last_updated": "2025-05-04T10:30:00",
+    "updated_by": "physicist"
+  },
+  "Electrometer-PTW-778899": {
+    "status": "In Storage",
+    "location": "Physics Lab 3",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": null,
+    "notes": "",
+    "last_updated": "2025-05-01T09:00:00",
+    "updated_by": "admin"
+  },
+  "Electrometer-Keithley-665544": {
+    "status": "Out of Service",
+    "location": "Physics Lab 1",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": null,
+    "notes": "Failed battery test, waiting for replacement",
+    "last_updated": "2025-05-03T13:20:00",
+    "updated_by": "admin"
+  },
+  "Survey-Meter-Ludlum-221100": {
+    "status": "In Storage",
+    "location": "Radiation Safety Office",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": null,
+    "notes": "",
+    "last_updated": "2025-05-01T09:00:00",
+    "updated_by": "admin"
+  },
+  "Survey-Meter-Ludlum-332211": {
+    "status": "Checked Out",
+    "location": "Brachytherapy Suite",
+    "checked_out_by": "user",
+    "checked_out_time": "2025-05-02T09:45:00",
+    "expected_return": "2025-05-03T09:45:00",
+    "notes": "Patient treatment",
+    "last_updated": "2025-05-02T09:45:00",
+    "updated_by": "user"
+  },
+  "Survey-Meter-Fluke-443322": {
+    "status": "In Storage",
+    "location": "Treatment Room 1",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": null,
+    "notes": "",
+    "last_updated": "2025-05-01T09:00:00",
+    "updated_by": "admin"
+  },
+  "Survey-Meter-Fluke-554433": {
+    "status": "In Storage",
+    "location": "Treatment Room 2",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": null,
+    "notes": "",
+    "last_updated": "2025-05-01T09:00:00",
+    "updated_by": "admin"
+  },
+  "Survey-Meter-Mirion-665544": {
+    "status": "In Calibration",
+    "location": "Calibration Lab",
+    "checked_out_by": null,
+    "checked_out_time": null,
+    "expected_return": "2025-05-25T00:00:00",
+    "notes": "Annual calibration",
+    "last_updated": "2025-05-01T10:30:00",
+    "updated_by": "admin"
+  }
+}

@@ -1,0 +1,749 @@
+{% extends 'base.html' %}
+
+{% block title %}Visual Dashboard - Equipment Tracker{% endblock %}
+
+{% block head %}
+<style>
+    .network-container {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+    
+    .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+    
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 10px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .legend-color {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    
+    .tooltip {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+        z-index: 1000;
+        display: none;
+    }
+    
+    .node {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Visual Equipment Dashboard</h1>
+        <p class="lead">Interactive visualization of equipment status and relationships.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="dropdown d-inline-block me-2">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="categoryFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-filter"></i> Filter by Category
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="categoryFilterDropdown">
+                <li><a class="dropdown-item category-filter" href="#" data-category="all">All Categories</a></li>
+                <li><hr class="dropdown-divider"></li>
+                {% for category in categories %}
+                <li><a class="dropdown-item category-filter" href="#" data-category="{{ category }}">{{ category }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Equipment Relationship Network</h5>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary layout-btn" data-layout="force">Force Directed</button>
+                    <button class="btn btn-sm btn-outline-primary layout-btn" data-layout="radial">Radial</button>
+                    <button class="btn btn-sm btn-outline-primary layout-btn" data-layout="tree">Tree</button>
+                </div>
+            </div>
+            <div class="card-body p-2">
+                <div id="networkTooltip" class="tooltip"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #28a745;"></div>
+                        <span>In Storage</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #007bff;"></div>
+                        <span>Checked Out</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #17a2b8;"></div>
+                        <span>In Calibration</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #ffc107;"></div>
+                        <span>Under Repair</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #dc3545;"></div>
+                        <span>Out of Service</span>
+                    </div>
+                </div>
+                <div id="networkContainer" class="network-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div id="statusChartContainer" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment by Category</h5>
+            </div>
+            <div class="card-body">
+                <div id="categoryChartContainer" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Calibration Schedule</h5>
+            </div>
+            <div class="card-body">
+                <div id="calibrationChartContainer" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- D3.js for visualization -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Network Visualization
+    let selectedCategory = 'all';
+    let currentLayout = 'force';
+    let simulation;
+    let svg, link, node;
+    
+    function initializeNetworkVisualization() {
+        const container = document.getElementById('networkContainer');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        const tooltip = document.getElementById('networkTooltip');
+        
+        // Clear previous visualization
+        d3.select('#networkContainer').selectAll('*').remove();
+        
+        // Create SVG
+        svg = d3.select('#networkContainer')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+        
+        // Load data from API
+        let url = '/visual/api/equipment';
+        if (selectedCategory !== 'all') {
+            url += `?category=${selectedCategory}`;
+        }
+        
+        d3.json(url).then(data => {
+            // Create links
+            link = svg.append('g')
+                .selectAll('line')
+                .data(data.links)
+                .enter()
+                .append('line')
+                .attr('stroke-width', d => d.value)
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.6);
+            
+            // Create nodes
+            node = svg.append('g')
+                .selectAll('circle')
+                .data(data.nodes)
+                .enter()
+                .append('circle')
+                .attr('r', d => d.size || 10)
+                .attr('fill', d => d.color || (d.type === 'category' ? '#007bff' : (d.type === 'manufacturer' ? '#6f42c1' : '#28a745')))
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 1.5)
+                .attr('class', 'node')
+                .on('mouseover', function(event, d) {
+                    // Show tooltip
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (event.pageX + 10) + 'px';
+                    tooltip.style.top = (event.pageY - 20) + 'px';
+                    
+                    // Set tooltip content based on node type
+                    if (d.type === 'equipment') {
+                        tooltip.innerHTML = `
+                            <div><strong>${d.name}</strong></div>
+                            <div>Serial: ${d.serial}</div>
+                            <div>Status: ${d.status}</div>
+                            <div>Location: ${d.location}</div>
+                        `;
+                    } else if (d.type === 'manufacturer') {
+                        tooltip.innerHTML = `
+                            <div><strong>${d.name}</strong></div>
+                            <div>Manufacturer</div>
+                            <div>Equipment Count: ${d.count}</div>
+                        `;
+                    } else {
+                        tooltip.innerHTML = `
+                            <div><strong>${d.name}</strong></div>
+                            <div>Category</div>
+                            <div>Equipment Count: ${d.count}</div>
+                        `;
+                    }
+                })
+                .on('mouseout', function() {
+                    tooltip.style.display = 'none';
+                })
+                .on('click', function(event, d) {
+                    if (d.type === 'equipment' && d.equipment_id) {
+                        // Navigate to equipment detail page
+                        window.location.href = `/checkout/equipment/${d.equipment_id}`;
+                    }
+                })
+                .call(drag(simulation));
+            
+            // Apply the selected layout
+            applyLayout(currentLayout, data, width, height);
+        });
+    }
+    
+    function applyLayout(layout, data, width, height) {
+        // Stop any existing simulation
+        if (simulation) simulation.stop();
+        
+        if (layout === 'force') {
+            // Force-directed layout
+            simulation = d3.forceSimulation(data.nodes)
+                .force('link', d3.forceLink(data.links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => d.size + 5));
+            
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                
+                node
+                    .attr('cx', d => d.x = Math.max(d.size, Math.min(width - d.size, d.x)))
+                    .attr('cy', d => d.y = Math.max(d.size, Math.min(height - d.size, d.y)));
+            });
+        } else if (layout === 'radial') {
+            // Radial layout
+            const radius = Math.min(width, height) / 2 - 50;
+            
+            // Group nodes by type
+            const categoryNodes = data.nodes.filter(d => d.type === 'category');
+            const manufacturerNodes = data.nodes.filter(d => d.type === 'manufacturer');
+            const equipmentNodes = data.nodes.filter(d => d.type === 'equipment');
+            
+            // Position category nodes in the center
+            categoryNodes.forEach((d, i) => {
+                const angle = (i / categoryNodes.length) * 2 * Math.PI;
+                d.x = width / 2 + 50 * Math.cos(angle);
+                d.y = height / 2 + 50 * Math.sin(angle);
+            });
+            
+            // Position manufacturer nodes in the middle ring
+            manufacturerNodes.forEach((d, i) => {
+                const angle = (i / manufacturerNodes.length) * 2 * Math.PI;
+                d.x = width / 2 + (radius / 2) * Math.cos(angle);
+                d.y = height / 2 + (radius / 2) * Math.sin(angle);
+            });
+            
+            // Position equipment nodes in the outer ring
+            equipmentNodes.forEach((d, i) => {
+                const angle = (i / equipmentNodes.length) * 2 * Math.PI;
+                d.x = width / 2 + radius * Math.cos(angle);
+                d.y = height / 2 + radius * Math.sin(angle);
+            });
+            
+            // Update positions
+            node
+                .transition()
+                .duration(1000)
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y);
+            
+            link
+                .transition()
+                .duration(1000)
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+        } else if (layout === 'tree') {
+            // Tree layout
+            const categoryNodes = data.nodes.filter(d => d.type === 'category');
+            
+            // Position category nodes at the top
+            categoryNodes.forEach((d, i) => {
+                d.x = width / 2 + (i - (categoryNodes.length - 1) / 2) * 150;
+                d.y = 50;
+            });
+            
+            // Find manufacturer nodes for each category
+            categoryNodes.forEach(category => {
+                const connectedMfgs = data.links
+                    .filter(l => l.target === category.id)
+                    .map(l => l.source);
+                
+                const mfgNodes = data.nodes.filter(d => 
+                    d.type === 'manufacturer' && connectedMfgs.includes(d.id));
+                
+                // Position manufacturer nodes below their category
+                mfgNodes.forEach((d, i) => {
+                    d.x = category.x + (i - (mfgNodes.length - 1) / 2) * 80;
+                    d.y = 150;
+                });
+                
+                // Find equipment nodes for each manufacturer
+                mfgNodes.forEach(mfg => {
+                    const connectedEquipment = data.links
+                        .filter(l => l.target === mfg.id)
+                        .map(l => l.source);
+                    
+                    const equipNodes = data.nodes.filter(d => 
+                        d.type === 'equipment' && connectedEquipment.includes(d.id));
+                    
+                    // Position equipment nodes below their manufacturer
+                    equipNodes.forEach((d, i) => {
+                        const offset = (i - (equipNodes.length - 1) / 2) * 20;
+                        d.x = mfg.x + offset;
+                        d.y = 250 + (i % 3) * 70; // Stagger vertically to avoid overlap
+                    });
+                });
+            });
+            
+            // Update positions
+            node
+                .transition()
+                .duration(1000)
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y);
+            
+            link
+                .transition()
+                .duration(1000)
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+        }
+    }
+    
+    function drag(simulation) {
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+        
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+        
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+        
+        return d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended);
+    }
+    
+    // Initialize network visualization
+    initializeNetworkVisualization();
+    
+    // Handle category filter changes
+    document.querySelectorAll('.category-filter').forEach(filter => {
+        filter.addEventListener('click', event => {
+            event.preventDefault();
+            selectedCategory = event.target.getAttribute('data-category');
+            document.getElementById('categoryFilterDropdown').textContent = 
+                selectedCategory === 'all' ? 'All Categories' : selectedCategory;
+            initializeNetworkVisualization();
+        });
+    });
+    
+    // Handle layout button clicks
+    document.querySelectorAll('.layout-btn').forEach(btn => {
+        btn.addEventListener('click', event => {
+            event.preventDefault();
+            
+            // Update active button
+            document.querySelectorAll('.layout-btn').forEach(b => 
+                b.classList.remove('active', 'btn-primary', 'text-white'));
+            event.target.classList.add('active', 'btn-primary', 'text-white');
+            
+            currentLayout = event.target.getAttribute('data-layout');
+            
+            // Get current data and dimensions
+            const container = document.getElementById('networkContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            let url = '/visual/api/equipment';
+            if (selectedCategory !== 'all') {
+                url += `?category=${selectedCategory}`;
+            }
+            
+            d3.json(url).then(data => {
+                applyLayout(currentLayout, data, width, height);
+            });
+        });
+    });
+    
+    // Status Distribution Chart
+    function drawStatusChart() {
+        const container = document.getElementById('statusChartContainer');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        // Clear previous visualization
+        d3.select('#statusChartContainer').selectAll('*').remove();
+        
+        // Create SVG
+        const svg = d3.select('#statusChartContainer')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+        
+        // Load data from API
+        d3.json('/visual/api/equipment/status').then(data => {
+            // Sort data by count (descending)
+            data.sort((a, b) => b.count - a.count);
+            
+            // Create scales
+            const xScale = d3.scaleBand()
+                .domain(data.map(d => d.status))
+                .range([50, width - 20])
+                .padding(0.3);
+            
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.count) * 1.1])
+                .range([height - 40, 20]);
+            
+            // Create axes
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+            
+            svg.append('g')
+                .attr('transform', `translate(0, ${height - 40})`)
+                .call(xAxis)
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .attr('text-anchor', 'end')
+                .attr('dx', '-.8em')
+                .attr('dy', '.15em');
+            
+            svg.append('g')
+                .attr('transform', 'translate(50, 0)')
+                .call(yAxis);
+            
+            // Create bars
+            svg.selectAll('.bar')
+                .data(data)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => xScale(d.status))
+                .attr('y', d => yScale(d.count))
+                .attr('width', xScale.bandwidth())
+                .attr('height', d => height - 40 - yScale(d.count))
+                .attr('fill', d => d.color);
+            
+            // Add bar labels
+            svg.selectAll('.bar-label')
+                .data(data)
+                .enter()
+                .append('text')
+                .attr('class', 'bar-label')
+                .attr('x', d => xScale(d.status) + xScale.bandwidth() / 2)
+                .attr('y', d => yScale(d.count) - 5)
+                .attr('text-anchor', 'middle')
+                .text(d => d.count);
+        });
+    }
+    
+    // Category Distribution Chart
+    function drawCategoryChart() {
+        const container = document.getElementById('categoryChartContainer');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        // Clear previous visualization
+        d3.select('#categoryChartContainer').selectAll('*').remove();
+        
+        // Create SVG
+        const svg = d3.select('#categoryChartContainer')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+        
+        // Load data from API
+        d3.json('/visual/api/equipment/category').then(data => {
+            // Set up pie chart
+            const radius = Math.min(width, height) / 2 - 40;
+            
+            const pie = d3.pie()
+                .value(d => d.count)
+                .sort(null);
+            
+            const arc = d3.arc()
+                .innerRadius(radius * 0.4)
+                .outerRadius(radius);
+            
+            const outerArc = d3.arc()
+                .innerRadius(radius * 0.9)
+                .outerRadius(radius * 0.9);
+            
+            const color = d3.scaleOrdinal()
+                .domain(data.map(d => d.category))
+                .range(['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8']);
+            
+            // Create chart
+            const g = svg.append('g')
+                .attr('transform', `translate(${width / 2}, ${height / 2})`);
+            
+            // Draw arcs
+            const arcs = g.selectAll('.arc')
+                .data(pie(data))
+                .enter()
+                .append('g')
+                .attr('class', 'arc');
+            
+            arcs.append('path')
+                .attr('d', arc)
+                .attr('fill', d => color(d.data.category))
+                .attr('stroke', '#fff')
+                .style('stroke-width', '2px');
+            
+            // Add labels with polylines
+            arcs.selectAll('.label-line')
+                .data(pie(data))
+                .enter()
+                .append('polyline')
+                .attr('points', function(d) {
+                    const pos = outerArc.centroid(d);
+                    pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+                    return [arc.centroid(d), outerArc.centroid(d), pos];
+                })
+                .attr('fill', 'none')
+                .attr('stroke', '#999');
+            
+            arcs.selectAll('.label-text')
+                .data(pie(data))
+                .enter()
+                .append('text')
+                .attr('dy', '.35em')
+                .html(d => 
+                    `${d.data.category}: ${d.data.count}`)
+                .attr('transform', function(d) {
+                    const pos = outerArc.centroid(d);
+                    pos[0] = radius * (midAngle(d) < Math.PI ? 1.05 : -1.05);
+                    return `translate(${pos})`;
+                })
+                .style('text-anchor', d => 
+                    midAngle(d) < Math.PI ? 'start' : 'end');
+            
+            function midAngle(d) {
+                return d.startAngle + (d.endAngle - d.startAngle) / 2;
+            }
+            
+            // Add center text
+            g.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.35em')
+                .attr('class', 'total')
+                .text(`Total: ${data.reduce((sum, d) => sum + d.count, 0)}`);
+        });
+    }
+    
+    // Calibration Schedule Chart
+    function drawCalibrationChart() {
+        const container = document.getElementById('calibrationChartContainer');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        // Clear previous visualization
+        d3.select('#calibrationChartContainer').selectAll('*').remove();
+        
+        // Create SVG
+        const svg = d3.select('#calibrationChartContainer')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+        
+        // Load data from API
+        d3.json('/visual/api/calibration/schedule').then(data => {
+            const months = data.months;
+            const allData = data.data.all;
+            
+            // Create scales
+            const xScale = d3.scaleBand()
+                .domain(months)
+                .range([50, width - 100])
+                .padding(0.3);
+            
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(Object.values(allData)) * 1.2])
+                .range([height - 40, 20]);
+            
+            // Create axes
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+            
+            svg.append('g')
+                .attr('transform', `translate(0, ${height - 40})`)
+                .call(xAxis);
+            
+            svg.append('g')
+                .attr('transform', 'translate(50, 0)')
+                .call(yAxis);
+            
+            // Create color scale for categories
+            const categoryColors = {
+                'all': '#007bff',
+                'Chamber': '#28a745',
+                'Electrometer': '#dc3545',
+                'Survey Meter': '#ffc107'
+            };
+            
+            // Create line generator
+            const line = d3.line()
+                .x(d => xScale(d.month) + xScale.bandwidth() / 2)
+                .y(d => yScale(d.count))
+                .curve(d3.curveMonotoneX);
+            
+            // Draw lines for each category
+            Object.entries(data.data).forEach(([category, monthData]) => {
+                // Convert to array of {month, count} objects
+                const lineData = months.map(month => ({
+                    month: month,
+                    count: monthData[month]
+                }));
+                
+                // Draw line
+                svg.append('path')
+                    .datum(lineData)
+                    .attr('fill', 'none')
+                    .attr('stroke', categoryColors[category])
+                    .attr('stroke-width', category === 'all' ? 3 : 2)
+                    .attr('stroke-dasharray', category === 'all' ? 'none' : '5,5')
+                    .attr('d', line);
+                
+                // Add dots
+                svg.selectAll(`.dot-${category}`)
+                    .data(lineData)
+                    .enter()
+                    .append('circle')
+                    .attr('class', `dot-${category}`)
+                    .attr('cx', d => xScale(d.month) + xScale.bandwidth() / 2)
+                    .attr('cy', d => yScale(d.count))
+                    .attr('r', 4)
+                    .attr('fill', categoryColors[category]);
+            });
+            
+            // Add legend
+            const legend = svg.append('g')
+                .attr('transform', `translate(${width - 80}, 20)`)
+                .attr('font-family', 'sans-serif')
+                .attr('font-size', 10);
+            
+            Object.entries(categoryColors).forEach(([category, color], i) => {
+                const legendItem = legend.append('g')
+                    .attr('transform', `translate(0, ${i * 20})`);
+                
+                legendItem.append('rect')
+                    .attr('width', 12)
+                    .attr('height', 12)
+                    .attr('fill', color);
+                
+                legendItem.append('text')
+                    .attr('x', 20)
+                    .attr('y', 6)
+                    .attr('dy', '0.35em')
+                    .text(category);
+            });
+        });
+    }
+    
+    // Draw all charts
+    drawStatusChart();
+    drawCategoryChart();
+    drawCalibrationChart();
+    
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            initializeNetworkVisualization();
+            drawStatusChart();
+            drawCategoryChart();
+            drawCalibrationChart();
+        }, 300);
+    });
+});
+</script>
+{% endblock %}
