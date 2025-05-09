@@ -6,7 +6,8 @@
 /* Base dark mode body and background */
 :root.dark-mode,
 html.dark-mode,
-body.dark-mode {
+body.dark-mode,
+.dark-mode {
   --bs-body-bg: #121212 !important;
   --bs-body-color: #e0e0e0 !important;
   --bs-card-bg: #2d2d2d !important;
@@ -18,6 +19,25 @@ body.dark-mode {
   
   background-color: #121212 !important;
   color: #e0e0e0 !important;
+}
+
+/* Strengthen selector for body in dark mode */
+html[class*="dark-mode"],
+body[class*="dark-mode"] {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+/* Direct element targeting for key components when dark mode is active */
+html.dark-mode body, 
+body.dark-mode {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+/* Ensure the entire page gets the dark background even if classes are missing */
+html.dark-mode {
+  background-color: #121212 !important;
 }
 
 /* Navbar adjustments */
