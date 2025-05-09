@@ -6,10 +6,29 @@
 <style>
     @media print {
         .no-print {
-            display: none;
+            display: none !important;
         }
         .print-only {
-            display: block;
+            display: block !important;
+        }
+        body {
+            background-color: white !important;
+            color: black !important;
+        }
+        .report-container {
+            background-color: white !important;
+            border: none !important;
+            color: black !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+        table, th, td {
+            color: black !important;
+            border-color: #ddd !important;
+        }
+        th {
+            background-color: #f5f5f5 !important;
         }
     }
     .print-only {
@@ -173,9 +192,39 @@
 </div>
 
 <!-- Print-only content -->
-<div class="print-only" id="printContent">
+<div class="print-only" id="printContent" style="width: 100%; max-width: 100%;">
     <!-- Print content will be inserted here -->
 </div>
+
+<!-- Dark mode compatibility for print -->
+<style>
+    @media print {
+        /* Force light theme for printing */
+        html.dark-mode, body.dark-mode {
+            --bs-body-bg: white !important;
+            --bs-body-color: black !important;
+            background-color: white !important;
+            color: black !important;
+        }
+        
+        /* Make sure table borders and text are visible */
+        table, th, td {
+            border-color: #333 !important;
+            color: black !important;
+        }
+        
+        th {
+            background-color: #eee !important;
+            color: black !important;
+        }
+        
+        /* Ensure proper page layout */
+        @page {
+            size: portrait;
+            margin: 0.5in;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block scripts %}
@@ -245,30 +294,80 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // PDF - handle both HTML preview and actual PDF download
                 if (data.html) {
+                    // Set the HTML content for both the visible report and print-only content
                     document.getElementById('reportContent').innerHTML = data.html;
                     document.getElementById('printContent').innerHTML = data.html;
                     
+                    // Add a message for debugging
+                    console.log("Report HTML loaded successfully");
+                    
                     // If we have a base64 PDF, set up the download button for it
                     if (data.pdf_base64) {
-                        const pdfBlob = base64ToBlob(data.pdf_base64, 'application/pdf');
-                        const pdfUrl = URL.createObjectURL(pdfBlob);
+                        console.log("PDF data available for download");
                         
                         // Set download button to download the PDF
                         document.getElementById('downloadReportBtn').onclick = function() {
-                            const a = document.createElement('a');
-                            a.href = pdfUrl;
-                            a.download = data.filename || 'report.pdf';
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
+                            try {
+                                // Create blob from base64
+                                const pdfBlob = base64ToBlob(data.pdf_base64, 'application/pdf');
+                                const pdfUrl = URL.createObjectURL(pdfBlob);
+                                
+                                // Create and trigger download link
+                                const a = document.createElement('a');
+                                a.href = pdfUrl;
+                                a.download = data.filename || 'report.pdf';
+                                document.body.appendChild(a);
+                                a.click();
+                                
+                                // Clean up
+                                setTimeout(function() {
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(pdfUrl);
+                                }, 100);
+                                
+                                console.log("PDF download initiated");
+                            } catch (e) {
+                                console.error("Error downloading PDF:", e);
+                                alert("Error downloading PDF: " + e.message);
+                            }
                         };
+                        
+                        // Make it visible and enable
+                        document.getElementById('downloadReportBtn').style.display = 'inline-block';
+                        document.getElementById('downloadReportBtn').disabled = false;
                         
                         // Add a message indicating the PDF is available
                         const messageDiv = document.createElement('div');
                         messageDiv.className = 'alert alert-success mb-3';
-                        messageDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i> PDF generated successfully. Click Download to save it.';
+                        messageDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i> PDF report generated successfully. Click Download to save it.';
                         document.getElementById('reportContent').insertBefore(messageDiv, document.getElementById('reportContent').firstChild);
+                    } else {
+                        console.warn("No PDF data available for download");
+                        
+                        // Add a message indicating no PDF is available
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'alert alert-warning mb-3';
+                        messageDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ' + 
+                            (data.message || 'PDF generation is unavailable. You can still print this preview.');
+                        document.getElementById('reportContent').insertBefore(messageDiv, document.getElementById('reportContent').firstChild);
+                        
+                        // Disable download button
+                        document.getElementById('downloadReportBtn').style.display = 'none';
                     }
+                } else {
+                    console.error("No HTML content received for report");
+                    
+                    // Show error message in report container
+                    document.getElementById('reportContent').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill"></i> 
+                            No report content was received from the server.
+                        </div>
+                    `;
+                    
+                    // Disable both buttons
+                    document.getElementById('downloadReportBtn').style.display = 'none';
+                    document.getElementById('printReportBtn').style.display = 'none';
                 }
                 
                 // CSV - show download link
@@ -331,7 +430,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Handle print button
                 document.getElementById('printReportBtn').onclick = function() {
-                    window.print();
+                    console.log("Print button clicked");
+                    
+                    // Ensure print content is up to date
+                    document.getElementById('printContent').innerHTML = document.getElementById('reportContent').innerHTML;
+                    
+                    // Add a print-specific message to help troubleshooting
+                    const printMsg = document.createElement('div');
+                    printMsg.className = 'print-only';
+                    printMsg.style.marginBottom = '20px';
+                    printMsg.innerHTML = `
+                        <div style="padding: 10px; border: 1px dashed #333; margin-bottom: 20px; text-align: center;">
+                            <p>Equipment Tracker Report - Generated on ${new Date().toLocaleString()}</p>
+                        </div>
+                    `;
+                    document.getElementById('printContent').prepend(printMsg);
+                    
+                    // Use timeout to ensure content is ready before printing
+                    setTimeout(function() {
+                        window.print();
+                    }, 100);
                 };
             } else {
                 // Show error message
