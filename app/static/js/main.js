@@ -246,10 +246,28 @@ function applyDarkMode() {
         svg.classList.add('dark-mode');
     });
     
-    // Apply dark mode to table elements
-    const tables = document.querySelectorAll('table');
-    tables.forEach(table => {
-        table.classList.add('dark-mode');
+    // Apply to all other elements that might need dark mode classes
+    document.querySelectorAll('table, .navbar, .card, .footer, footer').forEach(el => {
+        el.classList.add('dark-mode');
+    });
+    
+    // Add direct styles for immediate effect
+    document.body.style.backgroundColor = '#121212';
+    document.body.style.color = '#e0e0e0';
+    document.documentElement.style.setProperty('--bs-body-bg', '#121212');
+    document.documentElement.style.setProperty('--bs-body-color', '#e0e0e0');
+    
+    // Enhance navigation appearance
+    document.querySelectorAll('.navbar').forEach(navbar => {
+        navbar.style.backgroundColor = '#1a1a1a';
+        navbar.style.boxShadow = '0 3px 8px rgba(0, 0, 0, 0.3)';
+    });
+    
+    // Enhance form controls
+    document.querySelectorAll('.form-control, .form-select').forEach(control => {
+        control.style.backgroundColor = '#2d2d2d';
+        control.style.borderColor = '#3d3d3d';
+        control.style.color = '#e0e0e0';
     });
     
     // Update chart themes
@@ -272,10 +290,28 @@ function removeDarkMode() {
         svg.classList.remove('dark-mode');
     });
     
-    // Remove dark mode from table elements
-    const tables = document.querySelectorAll('table');
-    tables.forEach(table => {
-        table.classList.remove('dark-mode');
+    // Apply to all other elements that might need dark mode classes
+    document.querySelectorAll('table, .navbar, .card, .footer, footer').forEach(el => {
+        el.classList.remove('dark-mode');
+    });
+    
+    // Disable direct styles
+    document.body.style.backgroundColor = '';
+    document.body.style.color = '';
+    document.documentElement.style.setProperty('--bs-body-bg', '');
+    document.documentElement.style.setProperty('--bs-body-color', '');
+    
+    // Reset navigation styles
+    document.querySelectorAll('.navbar').forEach(navbar => {
+        navbar.style.backgroundColor = '';
+        navbar.style.boxShadow = '';
+    });
+    
+    // Reset form controls
+    document.querySelectorAll('.form-control, .form-select').forEach(control => {
+        control.style.backgroundColor = '';
+        control.style.borderColor = '';
+        control.style.color = '';
     });
     
     // Update chart themes
