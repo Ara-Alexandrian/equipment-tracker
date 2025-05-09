@@ -38,7 +38,6 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='img/Equipment Tracker.png') }}" alt="Equipment Tracker Logo" height="40" class="d-inline-block align-text-top me-2">
                 Equipment Tracker
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -49,7 +48,7 @@
                     <!-- Main Dashboard section -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {% if request.path == url_for('index') or request.path == url_for('dashboard.equipment_list') or request.path == url_for('dashboard.calibration_overview') %}active{% endif %}" href="#" id="dashboardDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            Dashboard
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="dashboardDropdown">
                             <li><a class="dropdown-item {% if request.path == url_for('index') %}active{% endif %}" href="{{ url_for('index') }}">Overview</a></li>
@@ -57,7 +56,7 @@
                             <li><a class="dropdown-item {% if request.path == url_for('dashboard.calibration_overview') %}active{% endif %}" href="{{ url_for('dashboard.calibration_overview') }}">Calibration Status</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item {% if '/visual/' in request.path %}active{% endif %}" href="{{ url_for('visual.index') }}">
-                                <i class="bi bi-bar-chart-fill me-1"></i> Visual Dashboard
+                                Visual Dashboard
                             </a></li>
                         </ul>
                     </li>
@@ -65,7 +64,7 @@
                     <!-- Checkout section -->
                     <li class="nav-item">
                         <a class="nav-link {% if '/checkout' in request.path and not '/checkout/admin' in request.path %}active{% endif %}" href="{{ url_for('checkout.index') }}">
-                            <i class="bi bi-box-arrow-right me-1"></i> Checkout
+                            Checkout
                         </a>
                     </li>
                     
@@ -73,7 +72,7 @@
                     {% if user and user.role in ['admin', 'physicist'] %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {% if '/checkout/admin' in request.path or '/reports' in request.path %}active{% endif %}" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-gear-fill me-1"></i> Administration
+                            Administration
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('checkout.admin') }}">Admin Dashboard</a></li>
