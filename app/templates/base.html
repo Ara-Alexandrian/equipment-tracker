@@ -121,33 +121,6 @@
             <div class="alert alert-{{ category }}">{{ message }}</div>
         {% endfor %}
 
-        <!-- Debug dark mode test (only visible in development) -->
-        {% if config.DEBUG %}
-        <div id="darkmode-debug" style="position: fixed; top: 80px; right: 10px; z-index: 9999; background-color: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; color: white;">
-            <h6>Theme Tester</h6>
-            <button onclick="forceDarkMode()" class="btn btn-sm btn-secondary">Force Dark</button>
-            <button onclick="forceLightMode()" class="btn btn-sm btn-secondary">Force Light</button>
-            <button onclick="toggleTheme()" class="btn btn-sm btn-primary">Toggle</button>
-        </div>
-        <script>
-            function forceDarkMode() {
-                document.documentElement.classList.add('dark-mode');
-                document.body.classList.add('dark-mode');
-                document.body.style.backgroundColor = '#121212';
-                document.body.style.color = '#e0e0e0';
-                document.querySelector('.navbar').style.backgroundColor = '#1f1f1f';
-                localStorage.setItem('theme', 'dark');
-            }
-            function forceLightMode() {
-                document.documentElement.classList.remove('dark-mode');
-                document.body.classList.remove('dark-mode');
-                document.body.style.backgroundColor = '';
-                document.body.style.color = '';
-                document.querySelector('.navbar').style.backgroundColor = '';
-                localStorage.setItem('theme', 'light');
-            }
-        </script>
-        {% endif %}
 
         {% block content %}{% endblock %}
     </div>
@@ -202,30 +175,10 @@
         function toggleTheme(event) {
             if (event) event.preventDefault();
             
-            // Create a temporary notification to show we're toggling
-            const notification = document.createElement('div');
-            notification.style.position = 'fixed';
-            notification.style.top = '10px';
-            notification.style.right = '10px';
-            notification.style.padding = '10px 20px';
-            notification.style.backgroundColor = 'rgba(0,0,0,0.7)';
-            notification.style.color = 'white';
-            notification.style.borderRadius = '5px';
-            notification.style.zIndex = '9999';
-            notification.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-            
             const isDarkMode = document.documentElement.classList.contains('dark-mode');
             const themeBtn = document.getElementById('theme-btn');
             
             if (isDarkMode) {
-                // Show notification
-                notification.textContent = "Switching to Light Mode...";
-                document.body.appendChild(notification);
-                
-                // Try to directly style the body
-                document.body.style.backgroundColor = '';
-                document.body.style.color = '';
-                
                 // Switch to light mode
                 document.documentElement.classList.remove('dark-mode');
                 document.body.classList.remove('dark-mode');
@@ -242,25 +195,12 @@
                     table.classList.remove('dark-mode');
                 });
                 
-                // Try CSS variables approach
+                // Disable direct styles
+                document.body.style.backgroundColor = '';
+                document.body.style.color = '';
                 document.documentElement.style.setProperty('--bs-body-bg', '');
                 document.documentElement.style.setProperty('--bs-body-color', '');
-                
-                // Disable any dark stylesheets
-                Array.from(document.styleSheets).forEach(styleSheet => {
-                    if (styleSheet.href && styleSheet.href.includes('dark-mode.css')) {
-                        styleSheet.disabled = true;
-                    }
-                });
             } else {
-                // Show notification
-                notification.textContent = "Switching to Dark Mode...";
-                document.body.appendChild(notification);
-                
-                // Try to directly style the body
-                document.body.style.backgroundColor = '#121212';
-                document.body.style.color = '#e0e0e0';
-                
                 // Switch to dark mode
                 document.documentElement.classList.add('dark-mode');
                 document.body.classList.add('dark-mode');
@@ -277,73 +217,17 @@
                     table.classList.add('dark-mode');
                 });
                 
-                // Try CSS variables approach
+                // Add direct styles for immediate effect
+                document.body.style.backgroundColor = '#121212';
+                document.body.style.color = '#e0e0e0';
                 document.documentElement.style.setProperty('--bs-body-bg', '#121212');
                 document.documentElement.style.setProperty('--bs-body-color', '#e0e0e0');
-                
-                // Enable any dark stylesheets
-                Array.from(document.styleSheets).forEach(styleSheet => {
-                    if (styleSheet.href && styleSheet.href.includes('dark-mode.css')) {
-                        styleSheet.disabled = false;
-                    }
-                });
-                
-                // Try direct style application to major elements
-                document.querySelectorAll('.navbar').forEach(nav => {
-                    nav.style.backgroundColor = '#1f1f1f';
-                });
-                
-                document.querySelectorAll('.card').forEach(card => {
-                    card.style.backgroundColor = '#2d2d2d';
-                    card.style.borderColor = '#3d3d3d';
-                    card.style.color = '#e0e0e0';
-                });
             }
             
             // Force a redraw to ensure changes take effect
             document.body.style.display = 'none';
             document.body.offsetHeight; // Force a reflow
             document.body.style.display = '';
-            
-            // Remove notification after 2 seconds
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 2000);
-            
-            // Debug info
-            const debugInfo = document.createElement('div');
-            debugInfo.style.position = 'fixed';
-            debugInfo.style.top = '50px';
-            debugInfo.style.right = '10px';
-            debugInfo.style.padding = '10px';
-            debugInfo.style.backgroundColor = 'rgba(0,0,0,0.7)';
-            debugInfo.style.color = 'white';
-            debugInfo.style.borderRadius = '5px';
-            debugInfo.style.zIndex = '9999';
-            debugInfo.style.maxWidth = '300px';
-            debugInfo.style.fontSize = '12px';
-            
-            const cssFiles = Array.from(document.styleSheets)
-                .filter(sheet => sheet.href)
-                .map(sheet => sheet.href + (sheet.disabled ? ' (disabled)' : ' (enabled)'))
-                .join('<br>');
-            
-            debugInfo.innerHTML = `
-                <div><strong>Theme state:</strong> ${isDarkMode ? 'was dark, toggling to light' : 'was light, toggling to dark'}</div>
-                <div><strong>Dark mode class on HTML:</strong> ${document.documentElement.classList.contains('dark-mode')}</div>
-                <div><strong>Dark mode class on body:</strong> ${document.body.classList.contains('dark-mode')}</div>
-                <hr>
-                <div><strong>Style sheets:</strong><br>${cssFiles}</div>
-            `;
-            
-            document.body.appendChild(debugInfo);
-            setTimeout(() => {
-                if (debugInfo.parentNode) {
-                    debugInfo.parentNode.removeChild(debugInfo);
-                }
-            }, 5000);
         }
     </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
