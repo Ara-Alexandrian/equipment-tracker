@@ -13,17 +13,57 @@
     {% block head %}{% endblock %}
     
     <script>
-        // Enhanced dark mode initializer
+        // Enhanced dark mode initializer - with immediate application
         (function() {
             const savedTheme = localStorage.getItem('theme');
             
             if (savedTheme === 'dark') {
-                // Apply dark mode class to html and body elements
+                // Apply dark mode immediately to prevent flash
                 document.documentElement.classList.add('dark-mode');
                 document.body.classList.add('dark-mode');
                 
-                // The full dark mode application will occur when main.js loads
-                // This early application prevents initial flash of light theme
+                // Direct application of critical styles to prevent flash
+                document.documentElement.style.backgroundColor = '#121212';
+                document.documentElement.style.color = '#e0e0e0';
+                document.body.style.backgroundColor = '#121212';
+                document.body.style.color = '#e0e0e0';
+                
+                // Create and append a style element for immediate effect
+                const style = document.createElement('style');
+                style.textContent = `
+                    html.dark-mode, body.dark-mode {
+                        background-color: #121212 !important;
+                        color: #e0e0e0 !important;
+                    }
+                    
+                    .navbar, .navbar-dark {
+                        background-color: #1a1a1a !important;
+                    }
+                    
+                    .card {
+                        background-color: #2d2d2d !important;
+                        border-color: #3d3d3d !important;
+                        color: #e0e0e0 !important;
+                    }
+                    
+                    table, .table {
+                        color: #e0e0e0 !important;
+                        border-color: #3d3d3d !important;
+                    }
+                    
+                    footer, .footer {
+                        background-color: #1a1a1a !important;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Initialize the button to the sun icon
+                window.addEventListener('DOMContentLoaded', function() {
+                    const themeBtn = document.getElementById('theme-btn');
+                    if (themeBtn) {
+                        themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+                    }
+                });
             }
         })();
     </script>
@@ -84,7 +124,15 @@
                     </form>
                     
                     <div class="ms-2 me-3">
-                        <button id="theme-btn" type="button" class="btn btn-outline-light theme-toggle-btn" title="Toggle light/dark mode" onclick="toggleTheme(event); return false;">
+                        <!-- Dark mode toggle with direct JS call -->
+                        <button 
+                            id="theme-btn" 
+                            type="button" 
+                            class="btn btn-outline-light theme-toggle-btn" 
+                            title="Toggle light/dark mode" 
+                            onclick="return toggleTheme(event);"
+                            style="cursor: pointer !important; z-index: 999 !important;"
+                        >
                             <i class="bi bi-moon-stars-fill"></i>
                         </button>
                     </div>
@@ -171,91 +219,150 @@
             }
         });
         
-        // Direct function for onclick
+        // Direct function for onclick - simplified and more direct approach
         function toggleTheme(event) {
             if (event) event.preventDefault();
             
+            // Create debug notification
+            const debugInfo = document.createElement('div');
+            debugInfo.style.position = 'fixed';
+            debugInfo.style.bottom = '10px';
+            debugInfo.style.right = '10px';
+            debugInfo.style.padding = '10px';
+            debugInfo.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            debugInfo.style.color = 'white';
+            debugInfo.style.zIndex = '9999';
+            debugInfo.style.fontSize = '12px';
+            debugInfo.style.borderRadius = '4px';
+            
+            // Check current mode
             const isDarkMode = document.documentElement.classList.contains('dark-mode');
             const themeBtn = document.getElementById('theme-btn');
             
+            // Force toggle by directly styling HTML and body
             if (isDarkMode) {
-                // Switch to light mode
+                // LIGHT MODE
+                debugInfo.textContent = "Switching to light mode...";
+                document.body.appendChild(debugInfo);
+                
+                // Direct element styling - most effective
+                document.documentElement.style.backgroundColor = '';
+                document.documentElement.style.color = '';
+                document.body.style.backgroundColor = '';
+                document.body.style.color = '';
+                
+                // Remove classes
                 document.documentElement.classList.remove('dark-mode');
                 document.body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
+                
+                // Update theme button
                 if (themeBtn) themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
                 
-                // Apply to SVGs and other elements
-                document.querySelectorAll('svg').forEach(svg => {
-                    svg.classList.remove('dark-mode');
-                    if (svg.parentElement) svg.parentElement.classList.remove('dark-mode');
+                // Store preference
+                localStorage.setItem('theme', 'light');
+                
+                // Manual cascade to key elements
+                document.querySelectorAll('.navbar, .navbar-dark, nav').forEach(el => {
+                    el.style.backgroundColor = '';
+                    el.style.boxShadow = '';
                 });
                 
-                // Apply to all other elements that might need dark mode classes
-                document.querySelectorAll('table, .navbar, .card, .footer, footer').forEach(el => {
+                document.querySelectorAll('.card, table, .table, footer, .footer').forEach(el => {
+                    el.style.backgroundColor = '';
+                    el.style.borderColor = '';
+                    el.style.color = '';
+                    el.style.boxShadow = '';
+                });
+                
+                // Force stylesheet update
+                const darkStylesheet = document.querySelector('link[href*="dark-override.css"]');
+                if (darkStylesheet) darkStylesheet.disabled = true;
+                
+                // Remove all dark-mode classes from everywhere
+                document.querySelectorAll('.dark-mode, [class*="dark-mode"]').forEach(el => {
                     el.classList.remove('dark-mode');
                 });
                 
-                // Disable direct styles
-                document.body.style.backgroundColor = '';
-                document.body.style.color = '';
-                document.documentElement.style.setProperty('--bs-body-bg', '');
-                document.documentElement.style.setProperty('--bs-body-color', '');
-                
-                // Reset navigation styles
-                document.querySelectorAll('.navbar').forEach(navbar => {
-                    navbar.style.backgroundColor = '';
-                    navbar.style.boxShadow = '';
-                });
-                
-                // Reset form controls
-                document.querySelectorAll('.form-control, .form-select').forEach(control => {
-                    control.style.backgroundColor = '';
-                    control.style.borderColor = '';
-                    control.style.color = '';
-                });
+                // Hard CSS reset using !important through inline style
+                document.head.insertAdjacentHTML('beforeend', `
+                    <style id="light-mode-force">
+                    html, body { 
+                        background-color: #fff !important;
+                        color: #212529 !important;
+                    }
+                    .navbar {
+                        background-color: #343a40 !important;
+                    }
+                    </style>
+                `);
             } else {
-                // Switch to dark mode
-                document.documentElement.classList.add('dark-mode');
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
-                if (themeBtn) themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+                // DARK MODE
+                debugInfo.textContent = "Switching to dark mode...";
+                document.body.appendChild(debugInfo);
                 
-                // Apply to SVGs and other elements
-                document.querySelectorAll('svg').forEach(svg => {
-                    svg.classList.add('dark-mode');
-                    if (svg.parentElement) svg.parentElement.classList.add('dark-mode');
-                });
-                
-                // Apply to all other elements that might need dark mode classes
-                document.querySelectorAll('table, .navbar, .card, .footer, footer').forEach(el => {
-                    el.classList.add('dark-mode');
-                });
-                
-                // Add direct styles for immediate effect
+                // Direct element styling - most effective
+                document.documentElement.style.backgroundColor = '#121212';
+                document.documentElement.style.color = '#e0e0e0';
                 document.body.style.backgroundColor = '#121212';
                 document.body.style.color = '#e0e0e0';
-                document.documentElement.style.setProperty('--bs-body-bg', '#121212');
-                document.documentElement.style.setProperty('--bs-body-color', '#e0e0e0');
                 
-                // Enhance navigation appearance
-                document.querySelectorAll('.navbar').forEach(navbar => {
-                    navbar.style.backgroundColor = '#1a1a1a';
-                    navbar.style.boxShadow = '0 3px 8px rgba(0, 0, 0, 0.3)';
+                // Add classes
+                document.documentElement.classList.add('dark-mode');
+                document.body.classList.add('dark-mode');
+                
+                // Update theme button
+                if (themeBtn) themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+                
+                // Store preference
+                localStorage.setItem('theme', 'dark');
+                
+                // Manual cascade to key elements
+                document.querySelectorAll('.navbar, .navbar-dark, nav').forEach(el => {
+                    el.style.backgroundColor = '#1a1a1a';
+                    el.style.boxShadow = '0 3px 8px rgba(0, 0, 0, 0.3)';
                 });
                 
-                // Enhance form controls
-                document.querySelectorAll('.form-control, .form-select').forEach(control => {
-                    control.style.backgroundColor = '#2d2d2d';
-                    control.style.borderColor = '#3d3d3d';
-                    control.style.color = '#e0e0e0';
+                document.querySelectorAll('.card').forEach(el => {
+                    el.style.backgroundColor = '#2d2d2d';
+                    el.style.borderColor = '#3d3d3d';
+                    el.style.color = '#e0e0e0';
+                    el.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.2)';
                 });
+                
+                document.querySelectorAll('table, .table').forEach(el => {
+                    el.style.color = '#e0e0e0';
+                    el.style.borderColor = '#3d3d3d';
+                });
+                
+                document.querySelectorAll('footer, .footer').forEach(el => {
+                    el.style.backgroundColor = '#1a1a1a';
+                    el.style.color = '#e0e0e0';
+                    el.style.borderColor = '#333';
+                });
+                
+                // Force stylesheet update
+                const darkStylesheet = document.querySelector('link[href*="dark-override.css"]');
+                if (darkStylesheet) darkStylesheet.disabled = false;
+                
+                // Remove any light mode force style
+                const lightModeStyle = document.getElementById('light-mode-force');
+                if (lightModeStyle) lightModeStyle.remove();
             }
             
-            // Force a redraw to ensure changes take effect
+            // Force a hard redraw
             document.body.style.display = 'none';
             document.body.offsetHeight; // Force a reflow
             document.body.style.display = '';
+            
+            // Remove debug info after 2 seconds
+            setTimeout(() => {
+                if (debugInfo.parentNode) {
+                    debugInfo.parentNode.removeChild(debugInfo);
+                }
+            }, 2000);
+            
+            // Return true to allow the event to continue
+            return true;
         }
     </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
