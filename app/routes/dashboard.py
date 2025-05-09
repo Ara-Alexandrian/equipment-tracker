@@ -4,6 +4,7 @@ Dashboard routes for the Equipment Tracker
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models.equipment import EquipmentDataManager
 from app import equipment_manager
+from datetime import datetime
 
 bp = Blueprint('dashboard', __name__)
 
@@ -69,11 +70,89 @@ def equipment_detail(equipment_id):
 
 @bp.route('/calibration')
 def calibration_overview():
-    """Render the calibration overview page."""
-    # Get equipment with calibration due soon
-    due_soon = equipment_manager.get_calibration_due_soon()
+    """Render the calibration overview page with filtering options."""
+    # Get filter parameters
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+    status = request.args.get('status')
+    
+    # Parse dates if provided
+    start_date = None
+    end_date = None
+    
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        except ValueError:
+            pass
+            
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        except ValueError:
+            pass
+    
+    # If no filters, just show equipment due soon
+    if not start_date and not end_date and not status:
+        due_soon = equipment_manager.get_calibration_due_soon()
+        filtered_items = due_soon
+    else:
+        # Use the new filter function
+        filtered_items = equipment_manager.filter_by_calibration_date(
+            start_date=start_date,
+            end_date=end_date,
+            status=status
+        )
+    
+    # Group by category
+    items_by_category = {}
+    for item in filtered_items:
+        category = item.get('category', 'Unknown')
+        if category not in items_by_category:
+            items_by_category[category] = []
+        items_by_category[category].append(item)
+    
+    # Calculate overall counts and percentages
+    all_equipment = equipment_manager.get_all_equipment()
+    total_count = len(all_equipment)
+    filtered_count = len(filtered_items)
+    
+    filtered_percent = round(filtered_count / total_count * 100) if total_count > 0 else 0
+    
+    # Get counts by status for chart
+    status_counts = {
+        'current': 0,
+        'due_soon': 0,
+        'overdue': 0,
+        'unknown': 0
+    }
+    
+    for item in all_equipment:
+        date_str = str(item.get('calibration_due_date', ''))
+        cal_date = equipment_manager._parse_calibration_date(date_str)
+        
+        if not cal_date:
+            status_counts['unknown'] += 1
+            continue
+            
+        delta = cal_date - datetime.now()
+        
+        if delta.days < 0:
+            status_counts['overdue'] += 1
+        elif delta.days <= 30:
+            status_counts['due_soon'] += 1
+        else:
+            status_counts['current'] += 1
     
     return render_template(
         'dashboard/calibration.html',
-        due_soon=due_soon
+        filtered_items=filtered_items,
+        items_by_category=items_by_category,
+        filtered_count=filtered_count,
+        total_count=total_count,
+        filtered_percent=filtered_percent,
+        status_counts=status_counts,
+        start_date=start_date_str,
+        end_date=end_date_str,
+        status=status
     )

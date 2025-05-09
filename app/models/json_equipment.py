@@ -281,6 +281,74 @@ class JsonEquipmentDataManager:
                 due_soon_items.append(item)
         
         return due_soon_items
+        
+    def filter_by_calibration_date(self, start_date=None, end_date=None, status=None):
+        """Filter equipment by calibration date range or status.
+        
+        Args:
+            start_date: Optional datetime object for start of date range
+            end_date: Optional datetime object for end of date range
+            status: Optional status filter ('current', 'due_soon', 'overdue', 'unknown')
+            
+        Returns:
+            List of dictionaries, each representing one piece of equipment
+        """
+        all_equipment = self.get_all_equipment()
+        filtered_items = []
+        current_date = datetime.now()
+        
+        for item in all_equipment:
+            # Skip items without calibration date if filtering by date
+            if not item.get('calibration_due_date') and (start_date or end_date or status):
+                if status == 'unknown':
+                    # Include items with unknown status when explicitly filtering for it
+                    item['calibration_status'] = 'unknown'
+                    filtered_items.append(item)
+                continue
+            
+            date_str = str(item.get('calibration_due_date', ''))
+                
+            # Parse calibration date
+            cal_date = self._parse_calibration_date(date_str)
+            
+            # Determine calibration status
+            if not cal_date:
+                item['calibration_status'] = 'unknown'
+                if status == 'unknown':
+                    filtered_items.append(item)
+                continue
+                
+            # Calculate time until calibration
+            delta = cal_date - current_date
+            
+            # Assign status
+            if delta.days < 0:
+                item['calibration_status'] = 'overdue'
+                item['days_overdue'] = abs(delta.days)
+            elif delta.days <= 30:
+                item['calibration_status'] = 'due_soon'
+                item['days_until_due'] = delta.days
+            else:
+                item['calibration_status'] = 'current'
+                item['days_until_due'] = delta.days
+                
+            # Apply date range filter if specified
+            date_in_range = True
+            if start_date and cal_date < start_date:
+                date_in_range = False
+            if end_date and cal_date > end_date:
+                date_in_range = False
+                
+            # Apply status filter if specified
+            status_matches = True
+            if status and item['calibration_status'] != status:
+                status_matches = False
+                
+            # Add to filtered list if it passes all filters
+            if date_in_range and (not status or status_matches):
+                filtered_items.append(item)
+                
+        return filtered_items
     
     def get_unique_locations(self):
         """Get a list of unique locations from all equipment.

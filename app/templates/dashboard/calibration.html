@@ -10,11 +10,58 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Filter Calibration Data</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('dashboard.calibration_overview') }}" method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Calibration Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="" {% if not status %}selected{% endif %}>All</option>
+                            <option value="current" {% if status == 'current' %}selected{% endif %}>Current</option>
+                            <option value="due_soon" {% if status == 'due_soon' %}selected{% endif %}>Due Soon</option>
+                            <option value="overdue" {% if status == 'overdue' %}selected{% endif %}>Overdue</option>
+                            <option value="unknown" {% if status == 'unknown' %}selected{% endif %}>Unknown</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="d-grid gap-2 w-100">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            <a href="{{ url_for('dashboard.calibration_overview') }}" class="btn btn-outline-secondary">Clear Filters</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-12">
         <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Calibration Due Soon</h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    {% if status %}
+                        {{ status|replace('_', ' ')|title }} Calibrations
+                    {% elif start_date or end_date %}
+                        Filtered Calibrations
+                    {% else %}
+                        Calibrations Due Soon
+                    {% endif %}
+                </h5>
+                <span class="badge bg-info">{{ filtered_count }} of {{ total_count }} equipment ({{ filtered_percent }}%)</span>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -30,23 +77,35 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in due_soon %}
+                            {% for item in filtered_items %}
                             <tr>
                                 <td>{{ item.category }}</td>
                                 <td>{{ item.manufacturer }}</td>
                                 <td>{{ item.model }}</td>
                                 <td>{{ item.serial_number }}</td>
-                                <td class="{% if item.calibration_status == 'overdue' %}text-danger{% else %}text-warning{% endif %}">
+                                <td class="
+                                    {% if item.calibration_status == 'overdue' %}text-danger
+                                    {% elif item.calibration_status == 'due_soon' %}text-warning
+                                    {% elif item.calibration_status == 'current' %}text-success
+                                    {% else %}text-muted{% endif %}
+                                ">
                                     {% if item.calibration_status == 'overdue' %}
                                         <i class="bi bi-x-circle-fill"></i> Overdue
                                         {% if item.days_overdue %}
                                             by {{ item.days_overdue }} days
                                         {% endif %}
-                                    {% else %}
+                                    {% elif item.calibration_status == 'due_soon' %}
                                         <i class="bi bi-exclamation-triangle-fill"></i> Due soon
                                         {% if item.days_until_due %}
                                             ({{ item.days_until_due }} days)
                                         {% endif %}
+                                    {% elif item.calibration_status == 'current' %}
+                                        <i class="bi bi-check-circle-fill"></i> Current
+                                        {% if item.days_until_due %}
+                                            ({{ item.days_until_due }} days)
+                                        {% endif %}
+                                    {% else %}
+                                        <i class="bi bi-question-circle-fill"></i> Unknown
                                     {% endif %}
                                     <br>
                                     <small>{{ item.calibration_due_date }}</small>
@@ -59,7 +118,7 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="6" class="text-center">No equipment calibrations due soon</td>
+                                <td colspan="6" class="text-center">No equipment found matching the current filters</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -101,29 +160,51 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Calibration Schedule Chart
+    // Calibration Status Chart
     var ctxCal = document.getElementById('calibrationChart').getContext('2d');
     var calibrationChart = new Chart(ctxCal, {
-        type: 'bar',
+        type: 'doughnut',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            labels: ['Current', 'Due Soon', 'Overdue', 'Unknown'],
             datasets: [{
-                label: 'Calibrations Due',
-                data: [3, 5, 2, 8, 6, 3, 1, 4, 7, 2, 5, 3],
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgb(54, 162, 235)',
+                data: [
+                    {{ status_counts.current }},
+                    {{ status_counts.due_soon }},
+                    {{ status_counts.overdue }},
+                    {{ status_counts.unknown }}
+                ],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',  // green for current
+                    'rgba(255, 193, 7, 0.7)',  // yellow for due soon
+                    'rgba(220, 53, 69, 0.7)',  // red for overdue
+                    'rgba(108, 117, 125, 0.7)'  // gray for unknown
+                ],
+                borderColor: [
+                    'rgb(40, 167, 69)',
+                    'rgb(255, 193, 7)',
+                    'rgb(220, 53, 69)',
+                    'rgb(108, 117, 125)'
+                ],
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Number of Calibrations'
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Calibration Status Distribution'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var label = context.label || '';
+                            var value = context.raw || 0;
+                            var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            var percentage = Math.round((value / total) * 100);
+                            return label + ': ' + value + ' (' + percentage + '%)';
+                        }
                     }
                 }
             }
@@ -133,20 +214,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Equipment Type Chart
     var ctxType = document.getElementById('equipmentTypeChart').getContext('2d');
     var equipmentTypeChart = new Chart(ctxType, {
-        type: 'pie',
+        type: 'bar',
         data: {
-            labels: ['Chambers', 'Electrometers', 'Survey Meters'],
+            labels: Object.keys({{ items_by_category|tojson }}),
             datasets: [{
-                data: [15, 10, 25],
+                label: 'Number of Items',
+                data: Object.values({{ items_by_category|tojson }}).map(arr => arr.length),
                 backgroundColor: [
                     'rgba(75, 192, 192, 0.6)',
                     'rgba(255, 159, 64, 0.6)',
-                    'rgba(153, 102, 255, 0.6)'
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)'
                 ],
                 borderColor: [
                     'rgb(75, 192, 192)',
                     'rgb(255, 159, 64)',
-                    'rgb(153, 102, 255)'
+                    'rgb(153, 102, 255)',
+                    'rgb(255, 99, 132)',
+                    'rgb(54, 162, 235)'
                 ],
                 borderWidth: 1
             }]
@@ -154,6 +240,21 @@ document.addEventListener('DOMContentLoaded', function() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Equipment by Category'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Items'
+                    }
+                }
+            }
         }
     });
 });
