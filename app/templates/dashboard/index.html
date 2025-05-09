@@ -4,9 +4,13 @@
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-md-12">
+    <div class="col-md-9">
         <h1>Equipment Dashboard</h1>
         <p class="lead">Welcome to the Equipment Tracker Dashboard. Manage your equipment inventory and track calibrations.</p>
+    </div>
+    <div class="col-md-3 text-center">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Equipment Tracker Logo" class="img-fluid dashboard-logo" style="max-height: 120px;">
+        <h5 class="mt-2 text-muted">Health Physics Department</h5>
     </div>
 </div>
 
