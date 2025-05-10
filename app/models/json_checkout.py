@@ -6,6 +6,14 @@ import json
 from datetime import datetime, timedelta
 import uuid
 from app.models.json_utils import save_json
+try:
+    # Import werkzeug for password hashing (safer than trying inside functions)
+    from werkzeug.security import generate_password_hash, check_password_hash
+    WERKZEUG_AVAILABLE = True
+except ImportError:
+    # Define a fallback if werkzeug is not available
+    WERKZEUG_AVAILABLE = False
+    print("Warning: werkzeug not available - password hashing disabled")
 
 class JsonCheckoutManager:
     """Manages equipment checkout, location tracking, and status using JSON files."""
@@ -128,7 +136,26 @@ class JsonCheckoutManager:
     
     def _save_users(self):
         """Save users to file."""
-        save_json(self.users, self.users_file)
+        try:
+            # First make a copy to ensure it's serializable
+            serializable_users = {}
+
+            # Create a clean copy without any potential non-serializable objects
+            for username, user_data in self.users.items():
+                serializable_users[username] = {
+                    key: value for key, value in user_data.items()
+                    if key != '_temp' and not callable(value)
+                }
+
+            # Save to file
+            save_json(serializable_users, self.users_file)
+            print(f"Users saved successfully to {self.users_file}")
+            return True
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print(f"Error saving users to {self.users_file}: {str(e)}")
+            return False
     
     def get_equipment_status(self, equipment_id):
         """Get the current status of a piece of equipment.
@@ -376,19 +403,23 @@ class JsonCheckoutManager:
             stored_password = user.get("password", "")
 
             # Check if the password is stored as a hash
-            if stored_password.startswith('scrypt:'):
-                try:
-                    from werkzeug.security import check_password_hash
-                    if check_password_hash(stored_password, password):
-                        # Return user without password
-                        user_info = user.copy()
-                        user_info.pop("password", None)
-                        # Add username to the user info
-                        user_info["username"] = username
-                        return user_info
-                except ImportError:
-                    # If werkzeug is not available, fall back to plain text comparison
-                    pass
+            if stored_password and stored_password.startswith('scrypt:'):
+                if WERKZEUG_AVAILABLE:
+                    try:
+                        if check_password_hash(stored_password, password):
+                            # Return user without password
+                            user_info = user.copy()
+                            user_info.pop("password", None)
+                            # Add username to the user info
+                            user_info["username"] = username
+                            return user_info
+                    except Exception as e:
+                        print(f"Error checking password hash: {str(e)}")
+                        # Fall back to plain text comparison
+                        pass
+                else:
+                    # If werkzeug is not available, log a warning
+                    print("Warning: Cannot verify scrypt hash without werkzeug")
 
             # Fall back to plain text comparison for backward compatibility
             if stored_password == password:
@@ -447,15 +478,35 @@ class JsonCheckoutManager:
 
         # Hash the password if it's not already hashed
         hashed_password = password
-        if not password.startswith('scrypt:'):
-            try:
-                from werkzeug.security import generate_password_hash
-                hashed_password = generate_password_hash(password)
-            except ImportError:
-                # If werkzeug is not available, use the plain password
-                pass
+        if password and not str(password).startswith('scrypt:'):
+            if WERKZEUG_AVAILABLE:
+                try:
+                    hashed_password = generate_password_hash(password)
+                    print(f"Password hashed successfully")
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    print(f"Error hashing password: {str(e)}")
+            else:
+                print("Warning: Using plain text password as werkzeug is not available")
 
-        # Add new user
+        # Add new user with notification preferences matching existing users
+        if any(user.get("notification_preferences", {}).get("email_enabled") is not None for user in self.users.values()):
+            # Use modern notification preference format like existing custom users
+            notification_prefs = {
+                "email_enabled": True,
+                "calibration_due_days": 30
+            }
+        else:
+            # Use legacy notification preference format like default users
+            notification_prefs = {
+                "receive_due_soon": True,
+                "receive_overdue": True,
+                "days_before_due": 30,
+                "email_format": "html"
+            }
+
+        # Create the user entry
         self.users[username] = {
             "name": name,
             "email": email,
@@ -463,10 +514,7 @@ class JsonCheckoutManager:
             "password": hashed_password,
             "created_by": admin_user,
             "created_at": datetime.now().isoformat(),
-            "notification_preferences": {
-                "email_enabled": True,
-                "calibration_due_days": 30
-            }
+            "notification_preferences": notification_prefs
         }
 
         # Save users
@@ -511,13 +559,14 @@ class JsonCheckoutManager:
         if password is not None and password.strip():
             # Hash the password if it's not already hashed
             hashed_password = password
-            if not password.startswith('scrypt:'):
-                try:
-                    from werkzeug.security import generate_password_hash
-                    hashed_password = generate_password_hash(password)
-                except ImportError:
-                    # If werkzeug is not available, use the plain password
-                    pass
+            if not str(password).startswith('scrypt:'):
+                if WERKZEUG_AVAILABLE:
+                    try:
+                        hashed_password = generate_password_hash(password)
+                    except Exception as e:
+                        print(f"Error hashing password during update: {str(e)}")
+                else:
+                    print("Warning: Using plain text password as werkzeug is not available")
             user["password"] = hashed_password
 
         user["updated_by"] = admin_user

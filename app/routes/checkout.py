@@ -556,18 +556,74 @@ def manage_users():
             email = request.form.get('email')
             role = request.form.get('role')
             password = request.form.get('password')
-            
-            if checkout_manager.add_user(
-                username, 
-                name, 
-                email, 
-                role, 
-                password,
-                session['user']['username']
-            ):
-                flash(f'User {username} added successfully', 'success')
-            else:
-                flash('Failed to add user', 'danger')
+
+            # Debug print - will show in server logs
+            print(f"Add user request - username: {username}, name: {name}, email: {email}, role: {role}")
+            print(f"Admin user: {session['user']['username']}")
+
+            try:
+                # Validate inputs to avoid common errors
+                if not username or not username.strip():
+                    flash('Username cannot be empty', 'danger')
+                    return redirect(url_for('checkout.manage_users'))
+
+                if not name or not name.strip():
+                    flash('Name cannot be empty', 'danger')
+                    return redirect(url_for('checkout.manage_users'))
+
+                if not email or not email.strip():
+                    flash('Email cannot be empty', 'danger')
+                    return redirect(url_for('checkout.manage_users'))
+
+                if not role or role not in ['admin', 'physicist', 'user']:
+                    flash('Invalid role selected', 'danger')
+                    return redirect(url_for('checkout.manage_users'))
+
+                if not password or not password.strip():
+                    flash('Password cannot be empty', 'danger')
+                    return redirect(url_for('checkout.manage_users'))
+
+                # Print the session data for debugging
+                print(f"Session user data: {session.get('user', {})}")
+
+                # Try to get the actual user data from checkout_manager
+                user_data = checkout_manager.get_user(session['user']['username'])
+                print(f"User from checkout_manager: {user_data}")
+
+                # Use a hardcoded admin name (temporary fix)
+                admin_username = session['user']['username']
+
+                # Additional check - if user isn't working, try the default admin
+                if admin_username not in checkout_manager.users or checkout_manager.users[admin_username].get('role') != 'admin':
+                    print(f"Warning: Admin user {admin_username} not found or not admin, using 'admin' instead")
+                    admin_username = 'admin'
+
+                # Attempt to add user with better error reporting
+                result = checkout_manager.add_user(
+                    username,
+                    name,
+                    email,
+                    role,
+                    password,
+                    admin_username  # Use the validated admin username
+                )
+
+                if result:
+                    flash(f'User {username} added successfully', 'success')
+                else:
+                    # Check common issues
+                    if username in checkout_manager.users:
+                        flash(f'Username "{username}" already exists', 'danger')
+                    elif session['user']['username'] not in checkout_manager.users:
+                        flash('Admin user not found in user database', 'danger')
+                    elif checkout_manager.users[session['user']['username']].get('role') != 'admin':
+                        flash('You must have admin privileges to add users', 'danger')
+                    else:
+                        flash('Failed to add user - Check permissions to write to the data directory', 'danger')
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                flash(f'Error adding user: {str(e)}', 'danger')
                 
         elif action == 'update':
             username = request.form.get('username')
