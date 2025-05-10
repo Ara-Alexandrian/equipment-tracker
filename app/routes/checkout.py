@@ -428,7 +428,6 @@ def check_in(equipment_id):
     )
 
 @bp.route('/equipment/<string:equipment_id>', methods=('GET', 'POST'))
-@login_required
 def equipment_detail(equipment_id):
     """Equipment checkout status and history."""
     # Get equipment details
