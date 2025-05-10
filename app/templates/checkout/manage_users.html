@@ -110,7 +110,18 @@
                     
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="generateAddPasswordBtn" onclick="generateAndSetPassword('password')">
+                                <i class="bi bi-key"></i> Generate
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="showAddPasswordBtn" onclick="togglePasswordVisibility('password')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Generate a strong password or create your own. Make note of generated passwords to share with users.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -157,8 +168,19 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="edit_password" class="form-label">Password (leave blank to keep current)</label>
-                        <input type="password" class="form-control" id="edit_password" name="password">
+                        <label for="edit_password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="edit_password" name="password" placeholder="Leave blank to keep current">
+                            <button class="btn btn-outline-secondary" type="button" id="generateEditPasswordBtn" onclick="generateAndSetPassword('edit_password')">
+                                <i class="bi bi-key"></i> Generate
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="showEditPasswordBtn" onclick="togglePasswordVisibility('edit_password')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            As an admin, you can reset any user's password. If you generate a password, please make note of it to share with the user.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -202,6 +224,88 @@
 
 {% block scripts %}
 <script>
+// Function to generate a random password
+function generatePassword(length = 10) {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=";
+    let password = "";
+
+    // Ensure we have at least one character from each category
+    password += "abcdefghijklmnopqrstuvwxyz".charAt(Math.floor(Math.random() * 26));
+    password += "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(Math.floor(Math.random() * 26));
+    password += "0123456789".charAt(Math.floor(Math.random() * 10));
+    password += "!@#$%^&*()_-+=".charAt(Math.floor(Math.random() * 14));
+
+    // Fill the rest randomly
+    for (let i = 4; i < length; i++) {
+        password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+
+    // Shuffle the password characters
+    return password.split('').sort(() => 0.5 - Math.random()).join('');
+}
+
+// Function to set a generated password to an input field
+function generateAndSetPassword(inputId) {
+    const password = generatePassword();
+    const input = document.getElementById(inputId);
+    input.value = password;
+    input.type = 'text'; // Show the password temporarily
+
+    // Create a temporary message to indicate the password was generated
+    const messageId = `${inputId}-message`;
+    let message = document.getElementById(messageId);
+
+    if (!message) {
+        message = document.createElement('div');
+        message.id = messageId;
+        message.className = 'alert alert-success mt-2';
+        message.role = 'alert';
+        input.parentElement.after(message);
+    }
+
+    message.innerHTML = `
+        <strong>Password generated!</strong>
+        <div class="d-flex align-items-center mt-1">
+            <code class="me-2">${password}</code>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('${password}')">
+                <i class="bi bi-clipboard"></i> Copy
+            </button>
+        </div>
+    `;
+
+    // After 30 seconds, hide the password again
+    setTimeout(() => {
+        if (document.getElementById(inputId)) {
+            document.getElementById(inputId).type = 'password';
+        }
+    }, 30000);
+}
+
+// Function to copy text to clipboard
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            alert('Password copied to clipboard!');
+        })
+        .catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+}
+
+// Function to toggle password visibility
+function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(`show${inputId.charAt(0).toUpperCase() + inputId.slice(1)}PasswordBtn`);
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+    } else {
+        input.type = 'password';
+        btn.innerHTML = '<i class="bi bi-eye"></i>';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Handle edit user button clicks
     document.querySelectorAll('.edit-user-btn').forEach(function(button) {
@@ -210,27 +314,33 @@ document.addEventListener('DOMContentLoaded', function() {
             var name = this.getAttribute('data-name');
             var email = this.getAttribute('data-email');
             var role = this.getAttribute('data-role');
-            
+
             document.getElementById('edit_username').value = username;
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_email').value = email;
             document.getElementById('edit_role').value = role;
             document.getElementById('edit_password').value = '';
-            
+
+            // Remove any previous password messages
+            const messageId = 'edit_password-message';
+            if (document.getElementById(messageId)) {
+                document.getElementById(messageId).remove();
+            }
+
             var editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
             editModal.show();
         });
     });
-    
+
     // Handle delete user button clicks
     document.querySelectorAll('.delete-user-btn').forEach(function(button) {
         button.addEventListener('click', function() {
             var username = this.getAttribute('data-username');
             var name = this.getAttribute('data-name');
-            
+
             document.getElementById('delete_username').value = username;
             document.getElementById('delete_user_name').textContent = name + ' (' + username + ')';
-            
+
             var deleteModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
             deleteModal.show();
         });
