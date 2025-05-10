@@ -132,13 +132,13 @@
                 <div class="col-md-6 mb-3">
                     {% if status and status.checked_out %}
                         <!-- Check in button -->
-                        <a href="{{ url_for('checkout.quick_check_in', equipment_id=equipment.id) }}" class="btn btn-primary btn-lg w-100 p-4 shadow">
+                        <a href="{{ url_for('qr.quick_checkin', equipment_id=equipment.id) }}" class="btn btn-primary btn-lg w-100 p-4 shadow">
                             <i class="bi bi-box-arrow-in-left fs-1 d-block mb-2"></i>
                             Check In Equipment
                         </a>
                     {% else %}
                         <!-- Check out button -->
-                        <a href="{{ url_for('checkout.quick_check_out', equipment_id=equipment.id) }}" class="btn btn-primary btn-lg w-100 p-4 shadow">
+                        <a href="{{ url_for('qr.quick_checkout', equipment_id=equipment.id) }}" class="btn btn-primary btn-lg w-100 p-4 shadow">
                             <i class="bi bi-box-arrow-right fs-1 d-block mb-2"></i>
                             Check Out Equipment
                         </a>
@@ -147,7 +147,7 @@
                 
                 <div class="col-md-6 mb-3">
                     <!-- Submit ticket button -->
-                    <a href="{{ url_for('ticket.quick_create_ticket', equipment_id=equipment.id) }}" class="btn btn-warning btn-lg w-100 p-4 shadow">
+                    <a href="{{ url_for('qr.quick_ticket', equipment_id=equipment.id) }}" class="btn btn-warning btn-lg w-100 p-4 shadow">
                         <i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i>
                         Submit Issue/Ticket
                     </a>

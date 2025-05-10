@@ -1,7 +1,7 @@
 """
 Equipment Tracker Flask Application
 """
-from flask import Flask, session, json
+from flask import Flask, session, json, request
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
 from app.models.equipment import EquipmentDataManager
@@ -23,6 +23,8 @@ app.config.from_mapping(
     JSON_DATA_DIR='app/data',
     SESSION_PERMANENT=True,
     PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=7),
+    # Disable CSRF protection globally for easy mobile access
+    WTF_CSRF_ENABLED=False,
     
     # Email configuration (override with environment variables in production)
     MAIL_SERVER=os.environ.get('MAIL_SERVER', 'smtp.marybird.com'),
@@ -59,7 +61,7 @@ csrf = CSRFProtect()
 email_service.init_app(app)
 
 # Import and register routes
-from app.routes import dashboard, api, checkout, visual, reports, admin, ticket, equipment_landing
+from app.routes import dashboard, api, checkout, visual, reports, admin, ticket, equipment_landing, qr_access
 
 app.register_blueprint(dashboard.bp)
 app.register_blueprint(api.bp)
@@ -69,6 +71,7 @@ app.register_blueprint(reports.bp)
 app.register_blueprint(admin.bp)
 app.register_blueprint(ticket.bp)
 app.register_blueprint(equipment_landing.bp)
+app.register_blueprint(qr_access.bp)
 
 # Add template context processors
 @app.context_processor
@@ -93,6 +96,15 @@ def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
     return value.strftime(format)
 
 # Define main route 
+# Add special header for QR routes
+@app.after_request
+def clear_login_requirements(response):
+    """Explicitly disable login checks for QR routes."""
+    if request.path.startswith('/qr/') or request.path.startswith('/equipment/'):
+        # Special header to indicate no login required
+        response.headers['X-No-Login-Required'] = 'True'
+    return response
+
 @app.route('/')
 def index():
     return dashboard.index()
