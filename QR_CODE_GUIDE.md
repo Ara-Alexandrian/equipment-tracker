@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Equipment Tracker QR code system provides a frictionless way for users to check out, check in, and report issues with equipment without requiring login. This guide explains how to use and implement the QR code system.
+The Equipment Tracker QR code system provides a completely frictionless way for users to check out, check in, and report issues with equipment without requiring login. This guide explains how to use and implement the QR code system.
+
+> **Zero-Friction Access**: Users can scan QR codes and immediately take action without any login barriers.
 
 ## How It Works
 
@@ -29,7 +31,7 @@ When a user scans a QR code, they see a landing page with:
 
 ## Available Actions
 
-From the landing page, users can:
+From the landing page, users can immediately take action without login:
 
 ### 1. Check Out Equipment
 
@@ -40,6 +42,8 @@ Users can check out equipment by:
 - Setting an expected return date
 - Adding optional notes
 
+The equipment is instantly checked out with no login credentials required!
+
 ### 2. Check In Equipment
 
 Users can return equipment by:
@@ -48,13 +52,17 @@ Users can return equipment by:
 - Specifying where they're returning the equipment to
 - Adding optional notes about the equipment's condition
 
+The equipment is instantly checked in without login barriers!
+
 ### 3. Submit Tickets/Issues
 
 Users can report problems by:
 - Clicking the "Submit Issue/Ticket" button
-- Identifying themselves
+- Identifying themselves (selecting from dropdown or entering name/initials)
 - Selecting an issue type and priority
 - Providing a title and description of the issue
+
+The issue is immediately logged with appropriate traffic light status indicators!
 
 ## Best Practices
 
@@ -75,7 +83,19 @@ Only administrators and physicists can change equipment condition status through
 
 ## Benefits
 
-- **Increased Compliance**: Lower barrier to proper equipment tracking
+- **Instant Access**: Users can immediately take action without login barriers
+- **Increased Compliance**: Ultra-low friction leads to better equipment tracking
 - **Better Visibility**: Easy to see who has equipment and its current condition
 - **Reduced Training**: Intuitive interface requires minimal training
 - **Improved Reporting**: Issues get reported more quickly with less friction
+- **Mobile Optimized**: Designed specifically for smartphones scanning QR codes
+
+## Technical Implementation
+
+The QR code system uses several techniques to ensure completely frictionless access:
+
+1. **Dedicated QR Routes**: Special `/qr` routes bypass all login requirements
+2. **CSRF Protection Disabled**: Forms work without security tokens for mobile users
+3. **Mobile-First Design**: Templates optimized for smaller touch screens
+4. **User Selection**: Simple dropdown or name/initials entry for identification
+5. **Traffic Light System**: Visual indicators make equipment status immediately clear

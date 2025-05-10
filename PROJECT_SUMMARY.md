@@ -81,24 +81,37 @@ The Equipment Tracker is a web-based application designed for clinical physicist
 
 ## Testing the Application
 
-1. **Login with different users**:
+1. **Test the QR code system** (main way users will interact):
+   - Scan a QR code for equipment (admins can generate these)
+   - Check out equipment without login
+   - Submit an issue ticket without login
+   - Check in equipment without login
+   - View the traffic light status indicators
+
+2. **Login with different users** (for administrative functions):
    - Administrator: username `admin`, password `admin123`
    - Clinical Physicist: username `physicist`, password `physicist123`
    - Regular User: username `user`, password `user123`
 
-2. **Test the visual dashboard**:
+3. **Test the ticket system**:
+   - Create a ticket for equipment
+   - View ticket details and add comments
+   - Change equipment condition (admin/physicist only)
+   - View equipment with different conditions
+
+4. **Test the visual dashboard**:
    - Navigate to the Visual Dashboard
    - Try different visualization layouts
    - Filter by equipment category
 
-3. **Test the checkout system**:
+5. **Test the checkout system**:
    - Find a piece of equipment
    - Click "View" to see details
    - Check out the equipment
    - Return to the checkout dashboard to see status
    - Return the equipment
 
-4. **Test report generation**:
+6. **Test report generation**:
    - Login as admin or physicist
    - Go to Administration > Generate Reports
    - Select different report types
@@ -106,18 +119,36 @@ The Equipment Tracker is a web-based application designed for clinical physicist
 
 ## Recent Enhancements
 
-1. **Dark Mode Support**:
+1. **Zero-Friction QR Code System**:
+   - Scan equipment QR codes for instant access with no login
+   - Mobile-optimized interface for smartphones
+   - Check out equipment and submit issues directly from QR scan
+   - Visual traffic light system (green/yellow/red) for equipment status
+
+2. **Equipment Ticket System**:
+   - Create and track equipment issues and maintenance requests
+   - Visual condition indicators (normal/warning/critical)
+   - Role-based permissions for condition changes
+   - Complete comment and history tracking
+
+3. **Enhanced User Information**:
+   - Clear visibility of who has checked out equipment
+   - Full user names displayed throughout the system
+   - Ticket and checkout history with user details
+   - Simplified user selection for mobile users
+
+4. **Dark Mode Support**:
    - Toggle between light and dark themes
    - Persistent theme selection using localStorage
    - Improved UI with appropriate color schemes for both modes
 
-2. **Notifications System**:
+5. **Notifications System**:
    - Email alerts for upcoming calibrations
    - Overdue equipment notifications
    - User-configurable notification preferences
    - Notification history tracking
 
-3. **Administrative Interface**:
+6. **Administrative Interface**:
    - Equipment management with CRUD operations
    - User management with role assignment
    - Advanced report generation options
@@ -129,9 +160,10 @@ The Equipment Tracker is a web-based application designed for clinical physicist
    - Direct database connection options
    - API-based data import
 
-2. **Mobile Application**:
-   - Companion mobile app for scanning equipment
-   - QR code integration
+2. **QR Code System** ✅ IMPLEMENTED:
+   - Zero-friction equipment interaction without login
+   - Mobile-optimized interface for QR code scanning
+   - Traffic light system for equipment status tracking
 
 3. **Advanced Analytics**:
    - Predictive maintenance suggestions

@@ -7,7 +7,7 @@ A comprehensive web-based application for tracking medical physics equipment, th
 - **Equipment Dashboard:** Overview of all equipment with status indicators
 - **Calibration Tracking:** Monitor calibration due dates and receive email notifications for upcoming and overdue calibrations
 - **Equipment Checkout System:** Track equipment locations and checkout history
-- **QR Code Integration:** Scan QR codes for quick equipment access with no login required
+- **Zero-Friction QR Code System:** Scan equipment QR codes for instant access - no login required
 - **Ticketing System:** Submit and track equipment issues with status indicators (green/yellow/red)
 - **Visual Interface:** Interactive network visualization of equipment relationships
 - **User Management:** Role-based access control (Admin, Physicist, Regular User)
@@ -74,6 +74,24 @@ The application uses JSON files for data storage, located in the `app/data` dire
 - `users.json`: User accounts, roles, and notification preferences
 - `checkout_history.json`: History of equipment checkout activities
 - `notification_logs.json`: History of sent calibration notifications
+- `tickets.json`: Equipment issue tickets and comments
+- `equipment_conditions.json`: Traffic light status indicators (green/yellow/red)
+
+### QR Code System
+
+The application features a zero-friction QR code system that allows users to:
+
+1. Scan QR codes attached to equipment to view details
+2. Check equipment in/out without login
+3. Submit issue tickets directly from mobile devices
+4. View equipment status with visual traffic light indicators
+
+To use the QR code system:
+1. Administrators can generate QR codes from the equipment detail page
+2. Print and attach QR codes to physical equipment
+3. Users can scan codes with their mobile devices and immediately take action
+
+See [QR_CODE_GUIDE.md](QR_CODE_GUIDE.md) for detailed instructions and best practices.
 
 ### Email Notifications
 
