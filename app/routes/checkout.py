@@ -657,10 +657,18 @@ def manage_users():
             else:
                 flash('Failed to delete user - cannot delete last admin', 'danger')
     
-    # Get all users
-    users = {username: info for username, info in checkout_manager.users.items() 
-             if 'password' not in info}
-    
+    # Get all users - make a clean copy without passwords
+    users = {}
+    for username, info in checkout_manager.users.items():
+        # Create a copy of the user info without the password
+        user_info = info.copy()
+        if 'password' in user_info:
+            user_info.pop('password')
+        users[username] = user_info
+
+    # Debug output
+    print(f"Found {len(users)} users to display")
+
     return render_template(
         'checkout/manage_users.html',
         users=users
