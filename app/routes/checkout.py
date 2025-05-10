@@ -503,7 +503,8 @@ def equipment_detail(equipment_id):
         equipment=equipment,
         status=status,
         history=history,
-        status_options=checkout_manager.STATUS_OPTIONS
+        status_options=checkout_manager.STATUS_OPTIONS,
+        checkout_manager=checkout_manager
     )
 
 @bp.route('/history')
