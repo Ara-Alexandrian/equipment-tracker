@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Ticket - {{ equipment.manufacturer }} {{ equipment.model }} - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Create Ticket</h1>
+        <p class="lead">Submit a new issue or request for {{ equipment.manufacturer }} {{ equipment.model }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('ticket.equipment_tickets', equipment_id=equipment.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back to Equipment Tickets
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Ticket Information</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('ticket.create_ticket', equipment_id=equipment.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="title" name="title" required
+                               placeholder="Brief description of the issue or request">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="description" name="description" rows="5" required
+                                  placeholder="Provide detailed information about the issue or request"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="ticket_type" class="form-label">Type</label>
+                            <select class="form-select" id="ticket_type" name="ticket_type">
+                                {% for type_value, type_label in ticket_types %}
+                                <option value="{{ type_value }}">{{ type_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                {% for priority_value, priority_label in priorities %}
+                                <option value="{{ priority_value }}">{{ priority_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    {% if user and user.role in ['admin', 'physicist'] %}
+                    <div class="mb-4">
+                        <label for="equipment_condition" class="form-label">Equipment Condition</label>
+                        <select class="form-select" id="equipment_condition" name="equipment_condition">
+                            {% for condition_value, condition_label in conditions %}
+                            <option value="{{ condition_value }}" {% if condition_value == condition %}selected{% endif %}>
+                                {{ condition_label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            This sets the operational status of the equipment (traffic light system).
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- For regular users, condition is always kept as is (or normal for new equipment) -->
+                    <input type="hidden" name="equipment_condition" value="{{ condition }}">
+                    <div class="mb-4">
+                        <label class="form-label">Equipment Condition</label>
+                        <div class="form-control bg-light" readonly>
+                            {% if condition == 'normal' %}
+                                <span class="text-success"><i class="bi bi-circle-fill"></i> Normal - Fully Operational</span>
+                            {% elif condition == 'warning' %}
+                                <span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Warning - Needs Attention</span>
+                            {% elif condition == 'critical' %}
+                                <span class="text-danger"><i class="bi bi-x-circle-fill"></i> Critical - Out of Service</span>
+                            {% endif %}
+                        </div>
+                        <div class="form-text">
+                            Only administrators and physicists can change equipment condition status.
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create Ticket
+                    </button>
+                    <a href="{{ url_for('ticket.equipment_tickets', equipment_id=equipment.id) }}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Equipment Information Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Category</th>
+                            <td>{{ equipment.category }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ equipment.equipment_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Manufacturer</th>
+                            <td>{{ equipment.manufacturer }}</td>
+                        </tr>
+                        <tr>
+                            <th>Model</th>
+                            <td>{{ equipment.model }}</td>
+                        </tr>
+                        <tr>
+                            <th>Serial Number</th>
+                            <td>{{ equipment.serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>{{ equipment.location }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Current Status Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Current Status</h5>
+            </div>
+            <div class="card-body">
+                <!-- Checkout Status -->
+                <div class="mb-3">
+                    <h6>Checkout Status</h6>
+                    {% if status and status.checked_out %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-box-arrow-right"></i> Checked Out
+                        <br>by {{ status.checked_out_by }}
+                        {% if status.due_date %}
+                            <br>Due back: {{ status.due_date }}
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-box-arrow-in-left"></i> Available
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Current Condition -->
+                <div class="mb-3">
+                    <h6>Current Condition</h6>
+                    {% if condition == 'normal' %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-circle-fill text-success"></i> Normal - Fully Operational
+                    </div>
+                    {% elif condition == 'warning' %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill text-warning"></i> Warning - Needs Attention
+                    </div>
+                    {% elif condition == 'critical' %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle-fill text-danger"></i> Critical - Out of Service
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-select the appropriate condition based on ticket type
+    document.addEventListener('DOMContentLoaded', function() {
+        const ticketTypeSelect = document.getElementById('ticket_type');
+        const conditionSelect = document.getElementById('equipment_condition');
+        
+        ticketTypeSelect.addEventListener('change', function() {
+            const type = this.value;
+            
+            // If selecting an issue or maintenance, suggest updating condition
+            if (type === 'issue' || type === 'maintenance') {
+                // Suggest warning for issues, but don't force it
+                if (conditionSelect.value === 'normal') {
+                    conditionSelect.value = 'warning';
+                }
+            } else if (type === 'calibration') {
+                // For calibration requests, generally suggest normal condition
+                conditionSelect.value = 'normal';
+            }
+        });
+    });
+</script>
+{% endblock %}

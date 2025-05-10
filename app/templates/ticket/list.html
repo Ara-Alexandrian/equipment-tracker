@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}All Tickets - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>All Tickets</h1>
+        <p class="lead">Search and filter all equipment tickets</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('ticket.index') }}" class="btn btn-outline-primary">
+            <i class="bi bi-speedometer"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Tickets</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('ticket.list_tickets') }}" method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    {% for status_value, status_label in statuses %}
+                    <option value="{{ status_value }}" {% if filter_status == status_value %}selected{% endif %}>
+                        {{ status_label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="priority" class="form-label">Priority</label>
+                <select class="form-select" id="priority" name="priority">
+                    <option value="">All Priorities</option>
+                    {% for priority_value, priority_label in priorities %}
+                    <option value="{{ priority_value }}" {% if filter_priority == priority_value %}selected{% endif %}>
+                        {{ priority_label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="type" class="form-label">Type</label>
+                <select class="form-select" id="type" name="type">
+                    <option value="">All Types</option>
+                    {% for type_value, type_label in types %}
+                    <option value="{{ type_value }}" {% if filter_type == type_value %}selected{% endif %}>
+                        {{ type_label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="assigned_to" class="form-label">Assigned To</label>
+                <input type="text" class="form-control" id="assigned_to" name="assigned_to" 
+                       value="{{ filter_assigned_to }}" placeholder="Username">
+            </div>
+            
+            <div class="col-md-4">
+                <label for="created_by" class="form-label">Created By</label>
+                <input type="text" class="form-control" id="created_by" name="created_by"
+                       value="{{ filter_created_by }}" placeholder="Username">
+            </div>
+            
+            <div class="col-md-4">
+                <label for="equipment_id" class="form-label">Equipment ID</label>
+                <input type="text" class="form-control" id="equipment_id" name="equipment_id"
+                       value="{{ filter_equipment_id }}" placeholder="Equipment ID">
+            </div>
+            
+            <div class="col-12 text-end">
+                <a href="{{ url_for('ticket.list_tickets') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear Filters
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tickets Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            {% if tickets|length == 0 %}
+                No tickets found
+            {% elif tickets|length == 1 %}
+                1 ticket found
+            {% else %}
+                {{ tickets|length }} tickets found
+            {% endif %}
+        </h5>
+        {% if tickets|length > 0 %}
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-sort-down"></i> Sort
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item sort-tickets" href="#" data-sort="created_at" data-order="desc">Newest First</a></li>
+                <li><a class="dropdown-item sort-tickets" href="#" data-sort="created_at" data-order="asc">Oldest First</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item sort-tickets" href="#" data-sort="priority" data-order="desc">Highest Priority</a></li>
+                <li><a class="dropdown-item sort-tickets" href="#" data-sort="priority" data-order="asc">Lowest Priority</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        {% if tickets|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="tickets-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Equipment</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Type</th>
+                        <th>Created</th>
+                        <th>Created By</th>
+                        <th>Assigned To</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td><a href="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}">{{ ticket.id[:8] }}</a></td>
+                        <td>{{ ticket.title }}</td>
+                        <td>
+                            {% set equipment = equipment_manager.get_equipment_by_id(ticket.equipment_id) %}
+                            {% if equipment %}
+                                <a href="{{ url_for('ticket.equipment_tickets', equipment_id=ticket.equipment_id) }}">
+                                    {{ equipment.manufacturer }} {{ equipment.model }}
+                                </a>
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ticket.status == ticket_status.OPEN %}
+                                <span class="badge bg-info">Open</span>
+                            {% elif ticket.status == ticket_status.IN_PROGRESS %}
+                                <span class="badge bg-primary">In Progress</span>
+                            {% elif ticket.status == ticket_status.RESOLVED %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% elif ticket.status == ticket_status.CLOSED %}
+                                <span class="badge bg-secondary">Closed</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ticket.priority == ticket_priority.LOW %}
+                                <span class="badge bg-secondary">Low</span>
+                            {% elif ticket.priority == ticket_priority.MEDIUM %}
+                                <span class="badge bg-info">Medium</span>
+                            {% elif ticket.priority == ticket_priority.HIGH %}
+                                <span class="badge bg-warning">High</span>
+                            {% elif ticket.priority == ticket_priority.CRITICAL %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ticket.ticket_type == ticket_type.ISSUE %}
+                                Issue
+                            {% elif ticket.ticket_type == ticket_type.REQUEST %}
+                                Request
+                            {% elif ticket.ticket_type == ticket_type.MAINTENANCE %}
+                                Maintenance
+                            {% elif ticket.ticket_type == ticket_type.CALIBRATION %}
+                                Calibration
+                            {% endif %}
+                        </td>
+                        <td>{{ ticket.created_at.strftime('%Y-%m-%d') if ticket.created_at else 'Unknown' }}</td>
+                        <td>
+                            {% set creator = checkout_manager.get_user(ticket.created_by) %}
+                            {% if creator %}
+                                <strong>{{ creator.name }}</strong>
+                                <br><small class="text-muted">{{ ticket.created_by }}</small>
+                            {% else %}
+                                {{ ticket.created_by }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ticket.assigned_to %}
+                                {% set assignee = checkout_manager.get_user(ticket.assigned_to) %}
+                                {% if assignee %}
+                                    {{ assignee.name }}
+                                    <br><small class="text-muted">{{ ticket.assigned_to }}</small>
+                                {% else %}
+                                    {{ ticket.assigned_to }}
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">Unassigned</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info m-3">
+            <i class="bi bi-info-circle"></i> No tickets found matching your criteria.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Sort tickets table
+    document.addEventListener('DOMContentLoaded', function() {
+        const sortLinks = document.querySelectorAll('.sort-tickets');
+        
+        sortLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const sortBy = this.getAttribute('data-sort');
+                const sortOrder = this.getAttribute('data-order');
+                
+                const table = document.getElementById('tickets-table');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                
+                rows.sort((a, b) => {
+                    let aValue, bValue;
+                    
+                    if (sortBy === 'created_at') {
+                        // For dates, get the text of the 7th cell (0-indexed)
+                        aValue = a.cells[6].textContent;
+                        bValue = b.cells[6].textContent;
+                        
+                        // Convert to dates for comparison
+                        const aDate = new Date(aValue);
+                        const bDate = new Date(bValue);
+                        
+                        // Compare dates
+                        if (sortOrder === 'asc') {
+                            return aDate - bDate;
+                        } else {
+                            return bDate - aDate;
+                        }
+                    } else if (sortBy === 'priority') {
+                        // For priority, get the text content
+                        const priorityMap = {
+                            'Critical': 4,
+                            'High': 3,
+                            'Medium': 2,
+                            'Low': 1
+                        };
+                        
+                        const aText = a.cells[4].textContent.trim();
+                        const bText = b.cells[4].textContent.trim();
+                        
+                        aValue = priorityMap[aText] || 0;
+                        bValue = priorityMap[bText] || 0;
+                        
+                        // Compare priorities
+                        if (sortOrder === 'asc') {
+                            return aValue - bValue;
+                        } else {
+                            return bValue - aValue;
+                        }
+                    }
+                });
+                
+                // Remove existing rows
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+                
+                // Append sorted rows
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+</script>
+{% endblock %}

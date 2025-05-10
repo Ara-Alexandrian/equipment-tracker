@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Check In {{ equipment.manufacturer }} {{ equipment.model }} - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-4">
+        <img src="{{ url_for('static', filename='img/Equipment Tracker.png') }}" alt="Equipment Tracker Logo" style="max-height: 100px;">
+        <h1 class="display-5 mt-3">Equipment Check In</h1>
+    </div>
+
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">{{ equipment.manufacturer }} {{ equipment.model }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <!-- Equipment Details -->
+                    <h5>Equipment Details</h5>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%">Category</th>
+                                <td>{{ equipment.category }}</td>
+                            </tr>
+                            <tr>
+                                <th>Type</th>
+                                <td>{{ equipment.equipment_type }}</td>
+                            </tr>
+                            <tr>
+                                <th>Serial Number</th>
+                                <td>{{ equipment.serial_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Primary Location</th>
+                                <td>{{ equipment.location }}</td>
+                            </tr>
+                            <tr>
+                                <th>Equipment ID</th>
+                                <td><code>{{ equipment.id }}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Checkout Details -->
+                    <h5 class="mt-4">Current Checkout</h5>
+                    <div class="alert alert-info">
+                        <div class="mb-2">
+                            <strong>Checked out by:</strong> 
+                            {% set user_info = checkout_manager.get_user(status.checked_out_by) %}
+                            {% if user_info %}
+                                {{ user_info.name }} ({{ status.checked_out_by }})
+                            {% else %}
+                                {{ status.checked_out_by }}
+                            {% endif %}
+                        </div>
+                        <div class="mb-2">
+                            <strong>Current location:</strong> {{ status.location }}
+                        </div>
+                        {% if status.checked_out_time %}
+                        <div class="mb-2">
+                            <strong>Checked out on:</strong> {{ status.checked_out_time[:10] }}
+                        </div>
+                        {% endif %}
+                        {% if status.expected_return %}
+                        <div>
+                            <strong>Expected return:</strong> {{ status.expected_return[:10] }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <form method="POST" class="needs-validation" novalidate>
+                        <h4 class="mb-3">Enter Check In Information</h4>
+                        
+                        <!-- User Selection -->
+                        <div class="mb-3">
+                            <label for="selected_user" class="form-label">Select Your Name</label>
+                            <select class="form-select mb-2" id="selected_user" name="selected_user">
+                                <option value="">-- Select from common users --</option>
+                                {% for username, user in users.items() %}
+                                <option value="{{ username }}">{{ user.name }} ({{ username }})</option>
+                                {% endfor %}
+                                <option value="other">Other / Enter manually</option>
+                            </select>
+                            
+                            <div id="manual_entry" class="border p-3 rounded mt-2" style="display: none;">
+                                <div class="mb-2">
+                                    <label for="user_name" class="form-label">Your Name</label>
+                                    <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter your full name">
+                                </div>
+                                <div class="mb-0">
+                                    <label for="user_initials" class="form-label">Or Initials</label>
+                                    <input type="text" class="form-control" id="user_initials" name="user_initials" placeholder="Enter your initials" maxlength="5">
+                                    <div class="form-text">At least one of these is required if not selecting from the list above</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Return Location -->
+                        <div class="mb-3">
+                            <label for="return_location" class="form-label">Return Location</label>
+                            <input type="text" class="form-control" id="return_location" name="return_location" 
+                                   required list="location_list" value="{{ equipment.location }}">
+                            <div class="invalid-feedback">Please specify where the equipment will be returned.</div>
+                            
+                            <datalist id="location_list">
+                                {% for location in locations %}
+                                <option value="{{ location }}">
+                                {% endfor %}
+                            </datalist>
+                            <div class="form-text">Default is the primary location for this equipment</div>
+                        </div>
+                        
+                        <!-- Notes Field -->
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3"
+                                     placeholder="Any additional notes about the equipment condition or return"></textarea>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-left me-2"></i>Check In Equipment
+                            </button>
+                            <a href="{{ url_for('equipment.landing_page', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Equipment
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        });
+        
+        // Toggle manual entry fields
+        const userSelect = document.getElementById('selected_user');
+        const manualEntry = document.getElementById('manual_entry');
+        
+        userSelect.addEventListener('change', function() {
+            if (this.value === 'other') {
+                manualEntry.style.display = 'block';
+            } else {
+                manualEntry.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

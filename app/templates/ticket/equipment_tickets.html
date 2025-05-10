@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}Tickets for {{ equipment.manufacturer }} {{ equipment.model }} - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>{{ equipment.manufacturer }} {{ equipment.model }} Tickets</h1>
+        <p class="lead">{{ equipment.category }} - {{ equipment.serial_number }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('dashboard.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-info-circle"></i> Equipment Details
+        </a>
+        <a href="{{ url_for('ticket.create_ticket', equipment_id=equipment.id) }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Ticket
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Tickets History</h5>
+                <span class="badge bg-primary">{{ tickets|length }} tickets</span>
+            </div>
+            <div class="card-body p-0">
+                {% if tickets|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Type</th>
+                                <th>Created By</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in tickets %}
+                            <tr>
+                                <td><a href="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}">{{ ticket.id[:8] }}</a></td>
+                                <td>{{ ticket.title }}</td>
+                                <td>
+                                    {% if ticket.status == ticket_status.OPEN %}
+                                        <span class="badge bg-info">Open</span>
+                                    {% elif ticket.status == ticket_status.IN_PROGRESS %}
+                                        <span class="badge bg-primary">In Progress</span>
+                                    {% elif ticket.status == ticket_status.RESOLVED %}
+                                        <span class="badge bg-success">Resolved</span>
+                                    {% elif ticket.status == ticket_status.CLOSED %}
+                                        <span class="badge bg-secondary">Closed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ticket.priority == ticket_priority.LOW %}
+                                        <span class="badge bg-secondary">Low</span>
+                                    {% elif ticket.priority == ticket_priority.MEDIUM %}
+                                        <span class="badge bg-info">Medium</span>
+                                    {% elif ticket.priority == ticket_priority.HIGH %}
+                                        <span class="badge bg-warning">High</span>
+                                    {% elif ticket.priority == ticket_priority.CRITICAL %}
+                                        <span class="badge bg-danger">Critical</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ticket.ticket_type == ticket_type.ISSUE %}
+                                        Issue
+                                    {% elif ticket.ticket_type == ticket_type.REQUEST %}
+                                        Request
+                                    {% elif ticket.ticket_type == ticket_type.MAINTENANCE %}
+                                        Maintenance
+                                    {% elif ticket.ticket_type == ticket_type.CALIBRATION %}
+                                        Calibration
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set creator = checkout_manager.get_user(ticket.created_by) %}
+                                    {% if creator %}
+                                        <strong>{{ creator.name }}</strong>
+                                        <br><small class="text-muted">{{ ticket.created_by }}</small>
+                                    {% else %}
+                                        {{ ticket.created_by }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ ticket.created_at.strftime('%Y-%m-%d') if ticket.created_at else 'Unknown' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info m-3">
+                    <i class="bi bi-info-circle"></i> No tickets found for this equipment.
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('ticket.create_ticket', equipment_id=equipment.id) }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create New Ticket
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Equipment Status Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment Status</h5>
+            </div>
+            <div class="card-body">
+                <!-- Equipment Condition -->
+                <div class="mb-3">
+                    <h6>Current Condition</h6>
+                    {% if condition == equipment_condition.NORMAL %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-circle-fill text-success me-2"></i>
+                        <strong>Normal</strong> - Fully Operational
+                    </div>
+                    {% elif condition == equipment_condition.WARNING %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                        <strong>Warning</strong> - Needs Attention
+                    </div>
+                    {% elif condition == equipment_condition.CRITICAL %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle-fill text-danger me-2"></i>
+                        <strong>Critical</strong> - Out of Service
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Checkout Status -->
+                <div class="mb-3">
+                    <h6>Checkout Status</h6>
+                    {% if status and status.checked_out %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        <strong>Checked Out</strong> by 
+                        {% set user_info = checkout_manager.get_user(status.checked_out_by) %}
+                        {% if user_info %}
+                            <strong>{{ user_info.name }}</strong>
+                            <span class="text-muted">({{ status.checked_out_by }})</span>
+                        {% else %}
+                            {{ status.checked_out_by }}
+                        {% endif %}
+                        {% if status.due_date %}
+                            <br>Due back: {{ status.due_date }}
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-box-arrow-in-left me-2"></i>
+                        <strong>Available</strong> - Ready for checkout
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <hr>
+                
+                <!-- Equipment Details -->
+                <h6>Equipment Details</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Category</th>
+                            <td>{{ equipment.category }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ equipment.equipment_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Serial #</th>
+                            <td>{{ equipment.serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>{{ equipment.location }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <div class="d-grid gap-2">
+                    <!-- QR Code Button (for authorized users) -->
+                    {% if user and user.role in ['admin', 'physicist'] %}
+                    <a href="{{ url_for('ticket.generate_qr', equipment_id=equipment.id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-qr-code"></i> Generate QR Code
+                    </a>
+                    {% endif %}
+                    
+                    <!-- Equipment Landing Page Button -->
+                    <a href="{{ url_for('equipment.landing_page', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-display"></i> View Landing Page
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Traffic Light Explanation Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment Condition Guide</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge rounded-pill bg-success me-2" style="width: 20px; height: 20px;">&nbsp;</span>
+                        <strong>Normal</strong>
+                    </div>
+                    <p class="small text-muted">Equipment is fully operational with no known issues.</p>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge rounded-pill bg-warning me-2" style="width: 20px; height: 20px;">&nbsp;</span>
+                        <strong>Warning</strong>
+                    </div>
+                    <p class="small text-muted">Equipment needs attention but is still usable with caution.</p>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge rounded-pill bg-danger me-2" style="width: 20px; height: 20px;">&nbsp;</span>
+                        <strong>Critical</strong>
+                    </div>
+                    <p class="small text-muted">Equipment is out of service and should not be used.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -7,6 +7,8 @@ A comprehensive web-based application for tracking medical physics equipment, th
 - **Equipment Dashboard:** Overview of all equipment with status indicators
 - **Calibration Tracking:** Monitor calibration due dates and receive email notifications for upcoming and overdue calibrations
 - **Equipment Checkout System:** Track equipment locations and checkout history
+- **QR Code Integration:** Scan QR codes for quick equipment access with no login required
+- **Ticketing System:** Submit and track equipment issues with status indicators (green/yellow/red)
 - **Visual Interface:** Interactive network visualization of equipment relationships
 - **User Management:** Role-based access control (Admin, Physicist, Regular User)
 - **Reporting:** Generate PDF, CSV, and Excel reports for audits and reviews

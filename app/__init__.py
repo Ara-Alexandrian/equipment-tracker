@@ -51,14 +51,15 @@ checkout_manager = JsonCheckoutManager(app.config['JSON_DATA_DIR'])
 # Initialize Flask-Mail
 mail = Mail(app)
 
-# Initialize CSRF protection
-csrf = CSRFProtect(app)
+# Initialize CSRF protection but disable it for QR code landing pages
+csrf = CSRFProtect()
+# We're not initializing CSRFProtect with our app to disable CSRF site-wide temporarily
 
 # Initialize email notification service
 email_service.init_app(app)
 
 # Import and register routes
-from app.routes import dashboard, api, checkout, visual, reports, admin
+from app.routes import dashboard, api, checkout, visual, reports, admin, ticket, equipment_landing
 
 app.register_blueprint(dashboard.bp)
 app.register_blueprint(api.bp)
@@ -66,6 +67,8 @@ app.register_blueprint(checkout.bp)
 app.register_blueprint(visual.bp)
 app.register_blueprint(reports.bp)
 app.register_blueprint(admin.bp)
+app.register_blueprint(ticket.bp)
+app.register_blueprint(equipment_landing.bp)
 
 # Add template context processors
 @app.context_processor

@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket #{{ ticket.id[:8] }} - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Ticket #{{ ticket.id[:8] }}</h1>
+        <p class="lead">{{ ticket.title }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('ticket.list_tickets') }}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-list-ul"></i> All Tickets
+        </a>
+        <a href="{{ url_for('ticket.equipment_tickets', equipment_id=ticket.equipment_id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Equipment Tickets
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Ticket Information Card -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Ticket Information</h5>
+                <div>
+                    {% if ticket.status == ticket_status.OPEN %}
+                        <span class="badge bg-info">Open</span>
+                    {% elif ticket.status == ticket_status.IN_PROGRESS %}
+                        <span class="badge bg-primary">In Progress</span>
+                    {% elif ticket.status == ticket_status.RESOLVED %}
+                        <span class="badge bg-success">Resolved</span>
+                    {% elif ticket.status == ticket_status.CLOSED %}
+                        <span class="badge bg-secondary">Closed</span>
+                    {% endif %}
+                    
+                    {% if ticket.priority == ticket_priority.LOW %}
+                        <span class="badge bg-secondary">Low Priority</span>
+                    {% elif ticket.priority == ticket_priority.MEDIUM %}
+                        <span class="badge bg-info">Medium Priority</span>
+                    {% elif ticket.priority == ticket_priority.HIGH %}
+                        <span class="badge bg-warning">High Priority</span>
+                    {% elif ticket.priority == ticket_priority.CRITICAL %}
+                        <span class="badge bg-danger">Critical Priority</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5>Description</h5>
+                    <div class="p-3 bg-light rounded">
+                        <p>{{ ticket.description|replace('\n', '<br>')|safe }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Details</h5>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <td><code>{{ ticket.id }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th>Type</th>
+                                    <td>
+                                        {% if ticket.ticket_type == ticket_type.ISSUE %}
+                                            Issue/Problem
+                                        {% elif ticket.ticket_type == ticket_type.REQUEST %}
+                                            Request
+                                        {% elif ticket.ticket_type == ticket_type.MAINTENANCE %}
+                                            Maintenance
+                                        {% elif ticket.ticket_type == ticket_type.CALIBRATION %}
+                                            Calibration
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h5 class="mt-4">People</h5>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Created By</th>
+                                    <td>
+                                        {% set creator = checkout_manager.get_user(ticket.created_by) %}
+                                        {% if creator %}
+                                            <strong>{{ creator.name }}</strong> 
+                                            <span class="text-muted">({{ ticket.created_by }})</span>
+                                        {% else %}
+                                            {{ ticket.created_by }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Created At</th>
+                                    <td>{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else 'Unknown' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Assigned To</th>
+                                    <td>
+                                        {% if ticket.assigned_to %}
+                                            {% set assignee = checkout_manager.get_user(ticket.assigned_to) %}
+                                            {% if assignee %}
+                                                <strong>{{ assignee.name }}</strong> 
+                                                <span class="text-muted">({{ ticket.assigned_to }})</span>
+                                            {% else %}
+                                                {{ ticket.assigned_to }}
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">Unassigned</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Equipment Condition</th>
+                                    <td>
+                                        {% if ticket.equipment_condition == equipment_condition.NORMAL %}
+                                            <span class="badge bg-success">Normal - Fully Operational</span>
+                                        {% elif ticket.equipment_condition == equipment_condition.WARNING %}
+                                            <span class="badge bg-warning">Warning - Needs Attention</span>
+                                        {% elif ticket.equipment_condition == equipment_condition.CRITICAL %}
+                                            <span class="badge bg-danger">Critical - Out of Service</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Timeline</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <i class="bi bi-plus-circle text-success me-2"></i>
+                                <strong>Created</strong>
+                                <div class="text-muted small">{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else 'Unknown' }}</div>
+                            </li>
+                            
+                            {% if ticket.updated_at and ticket.updated_at != ticket.created_at %}
+                            <li class="list-group-item">
+                                <i class="bi bi-pencil text-primary me-2"></i>
+                                <strong>Last Updated</strong>
+                                <div class="text-muted small">{{ ticket.updated_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                            </li>
+                            {% endif %}
+                            
+                            {% if ticket.resolved_at %}
+                            <li class="list-group-item">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <strong>Resolved</strong>
+                                <div class="text-muted small">{{ ticket.resolved_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                            </li>
+                            {% endif %}
+                            
+                            {% if ticket.closed_at %}
+                            <li class="list-group-item">
+                                <i class="bi bi-x-circle text-secondary me-2"></i>
+                                <strong>Closed</strong>
+                                <div class="text-muted small">{{ ticket.closed_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comments Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Comments</h5>
+            </div>
+            <div class="card-body">
+                {% if ticket.comments %}
+                    <div class="comments-timeline">
+                        {% for comment in ticket.comments %}
+                        <div class="comment mb-4">
+                            <div class="d-flex">
+                                <div class="avatar me-3">
+                                    <span class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        {{ comment.user[0]|upper }}
+                                    </span>
+                                </div>
+                                <div class="comment-content flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            {% set commenter = checkout_manager.get_user(comment.user) %}
+                                            {% if commenter %}
+                                                <strong>{{ commenter.name }}</strong>
+                                                <span class="text-muted small ms-2">({{ comment.user }})</span>
+                                            {% else %}
+                                                <strong>{{ comment.user }}</strong>
+                                            {% endif %}
+                                            <span class="text-muted small ms-2">
+                                                {% if comment.created_at %}
+                                                    {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                                {% else %}
+                                                    Unknown time
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-light text-dark">Comment #{{ loop.index }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-text p-3 bg-light rounded">
+                                        {{ comment.comment|replace('\n', '<br>')|safe }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-light text-center">
+                        <i class="bi bi-chat-left"></i> No comments yet
+                    </div>
+                {% endif %}
+                
+                <!-- Add Comment Form -->
+                <form action="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" method="POST" class="mt-4">
+                    <input type="hidden" name="action" value="add_comment">
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Add a comment</label>
+                        <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-chat-left-text"></i> Post Comment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Equipment Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment</h5>
+            </div>
+            <div class="card-body">
+                <h6>{{ equipment.manufacturer }} {{ equipment.model }}</h6>
+                <p>{{ equipment.category }} - {{ equipment.equipment_type }}</p>
+                <div class="mb-2">
+                    <small class="text-muted">Serial Number:</small>
+                    <div>{{ equipment.serial_number }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Location:</small>
+                    <div>{{ equipment.location }}</div>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">ID:</small>
+                    <div><code>{{ equipment.id }}</code></div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-info-circle"></i> View Equipment Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Actions -->
+        {% if user and user.role in ['admin', 'physicist'] %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Admin Actions</h5>
+            </div>
+            <div class="card-body">
+                <!-- Update Status Form -->
+                <form action="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" method="POST" class="mb-3">
+                    <input type="hidden" name="action" value="update_status">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Update Status</label>
+                        <select class="form-select" id="status" name="status">
+                            {% for status_value, status_label in statuses %}
+                            <option value="{{ status_value }}" {% if status_value == ticket.status %}selected{% endif %}>
+                                {{ status_label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Update Status
+                    </button>
+                </form>
+                
+                <hr>
+                
+                <!-- Assign Ticket Form -->
+                <form action="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" method="POST" class="mb-3">
+                    <input type="hidden" name="action" value="assign">
+                    <div class="mb-3">
+                        <label for="assigned_to" class="form-label">Assign To</label>
+                        <select class="form-select" id="assigned_to" name="assigned_to">
+                            <option value="">-- Unassigned --</option>
+                            {% for username, user_info in users.items() %}
+                            <option value="{{ username }}" {% if username == ticket.assigned_to %}selected{% endif %}>
+                                {{ user_info.name }} ({{ username }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-person-check"></i> Assign Ticket
+                    </button>
+                </form>
+                
+                <hr>
+                
+                <!-- Update Equipment Condition Form -->
+                <form action="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" method="POST">
+                    <input type="hidden" name="action" value="update_condition">
+                    <div class="mb-3">
+                        <label for="equipment_condition" class="form-label">Equipment Condition</label>
+                        <select class="form-select" id="equipment_condition" name="equipment_condition">
+                            {% for condition_value, condition_label in conditions %}
+                            <option value="{{ condition_value }}" {% if condition_value == ticket.equipment_condition %}selected{% endif %}>
+                                {{ condition_label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Update Condition
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

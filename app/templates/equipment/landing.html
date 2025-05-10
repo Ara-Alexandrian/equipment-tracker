@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ equipment.manufacturer }} {{ equipment.model }} - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-4">
+        <img src="{{ url_for('static', filename='img/Equipment Tracker.png') }}" alt="Equipment Tracker Logo" style="max-height: 100px;">
+        <h1 class="display-5 mt-3">Equipment Action Portal</h1>
+    </div>
+
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">{{ equipment.manufacturer }} {{ equipment.model }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Equipment Details</h5>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%">Category</th>
+                                <td>{{ equipment.category }}</td>
+                            </tr>
+                            <tr>
+                                <th>Type</th>
+                                <td>{{ equipment.equipment_type }}</td>
+                            </tr>
+                            <tr>
+                                <th>Serial Number</th>
+                                <td>{{ equipment.serial_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Primary Location</th>
+                                <td>{{ equipment.location }}</td>
+                            </tr>
+                            {% if status and status.checked_out %}
+                            <tr>
+                                <th>Current Location</th>
+                                <td>{{ status.location }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th>Equipment ID</th>
+                                <td><code>{{ equipment.id }}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Current Status</h5>
+                    
+                    <!-- Equipment operational condition (traffic light system) -->
+                    <div class="mb-3">
+                        <label class="form-label">Operational Status:</label>
+                        <div class="alert alert-{{ condition_class }}">
+                            {% if condition == 'normal' %}
+                                <i class="bi bi-circle-fill text-success fs-4 me-2"></i> <strong>Normal</strong> - Fully Operational
+                            {% elif condition == 'warning' %}
+                                <i class="bi bi-exclamation-triangle-fill text-warning fs-4 me-2"></i> <strong>Warning</strong> - Needs Attention
+                            {% elif condition == 'critical' %}
+                                <i class="bi bi-x-circle-fill text-danger fs-4 me-2"></i> <strong>Critical</strong> - Out of Service
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Checkout status -->
+                    <div class="mb-3">
+                        <label class="form-label">Checkout Status:</label>
+                        {% if status and status.checked_out %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-box-arrow-right me-2"></i> <strong>Checked Out</strong> by 
+                                {% set user_info = checkout_manager.get_user(status.checked_out_by) %}
+                                {% if user_info %}
+                                    <strong>{{ user_info.name }}</strong>
+                                    <span class="text-muted">({{ status.checked_out_by }})</span>
+                                {% else %}
+                                    {{ status.checked_out_by }}
+                                {% endif %}
+                                {% if status.due_date %}
+                                    <br>Due back: {{ status.due_date }}
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-box-arrow-in-left me-2"></i> <strong>Available</strong> - Ready for checkout
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Calibration status -->
+                    <div class="mb-3">
+                        <label class="form-label">Calibration:</label>
+                        {% if equipment.calibration_status == 'overdue' %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-x-circle-fill me-2"></i> <strong>Overdue</strong>
+                            {% if equipment.days_overdue %}
+                                by {{ equipment.days_overdue }} days
+                            {% endif %}
+                        </div>
+                        {% elif equipment.calibration_status == 'due_soon' %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Due Soon</strong>
+                            {% if equipment.days_until_due %}
+                                ({{ equipment.days_until_due }} days remaining)
+                            {% endif %}
+                        </div>
+                        {% elif 'due soon' in equipment.calibration_due_date|string|lower %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Due Soon</strong>
+                        </div>
+                        {% elif 'overdue' in equipment.calibration_due_date|string|lower %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-x-circle-fill me-2"></i> <strong>Overdue</strong>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill me-2"></i> <strong>Up to Date</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action buttons -->
+            <div class="row text-center mt-2">
+                <div class="col-12">
+                    <h4 class="mb-4">What would you like to do?</h4>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    {% if status and status.checked_out %}
+                        <!-- Check in button -->
+                        <a href="{{ url_for('checkout.quick_check_in', equipment_id=equipment.id) }}" class="btn btn-primary btn-lg w-100 p-4 shadow">
+                            <i class="bi bi-box-arrow-in-left fs-1 d-block mb-2"></i>
+                            Check In Equipment
+                        </a>
+                    {% else %}
+                        <!-- Check out button -->
+                        <a href="{{ url_for('checkout.quick_check_out', equipment_id=equipment.id) }}" class="btn btn-primary btn-lg w-100 p-4 shadow">
+                            <i class="bi bi-box-arrow-right fs-1 d-block mb-2"></i>
+                            Check Out Equipment
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <!-- Submit ticket button -->
+                    <a href="{{ url_for('ticket.quick_create_ticket', equipment_id=equipment.id) }}" class="btn btn-warning btn-lg w-100 p-4 shadow">
+                        <i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i>
+                        Submit Issue/Ticket
+                    </a>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-info-circle"></i> View Detailed Information
+                    </a>
+                    
+                    {% if is_logged_in %}
+                    <a href="{{ url_for('ticket.equipment_tickets', equipment_id=equipment.id) }}" class="btn btn-outline-secondary ms-2">
+                        <i class="bi bi-card-list"></i> View Tickets
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

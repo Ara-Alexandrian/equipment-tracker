@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Check In {{ equipment.manufacturer }} {{ equipment.model }} - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Check In Equipment</h1>
+        <p class="lead">{{ equipment.manufacturer }} {{ equipment.model }} ({{ equipment.serial_number }})</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('dashboard.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Equipment
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Return Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="return_location" class="form-label">Return Location <span class="text-danger">*</span></label>
+                        <select class="form-select" id="return_location" name="return_location" required>
+                            <option value="" disabled selected>-- Select a location --</option>
+                            {% for loc in locations %}
+                                <option value="{{ loc }}" {% if equipment.location == loc %}selected{% endif %}>{{ loc }}</option>
+                            {% endfor %}
+                            <option value="other">Other (specify in notes)</option>
+                        </select>
+                        <div class="form-text">Select the location where the equipment is being returned</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Condition Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                  placeholder="Describe the condition of the equipment and note any issues"></textarea>
+                        <div class="form-text">If there are any issues with the equipment, please describe them here</div>
+                    </div>
+                    
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="condition_check" required>
+                        <label class="form-check-label" for="condition_check">
+                            I confirm that I am returning this equipment in good working condition
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-left"></i> Check In Equipment
+                        </button>
+                        <a href="{{ url_for('checkout.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Issue reporting card -->
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">Equipment Issues?</h5>
+            </div>
+            <div class="card-body">
+                <p>If you experienced any issues with this equipment, please consider creating a ticket after check-in:</p>
+                <a href="{{ url_for('ticket.create_ticket', equipment_id=equipment.id) }}" class="btn btn-warning">
+                    <i class="bi bi-ticket-detailed"></i> Create Ticket
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th style="width: 40%">Category</th>
+                            <td>{{ equipment.category }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ equipment.equipment_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Serial Number</th>
+                            <td>{{ equipment.serial_number }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Checkout status information -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Checkout Status</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Checked out by:</strong> {{ status.checked_out_by }}</p>
+                <p><strong>Checked out on:</strong> {{ status.checkout_time }}</p>
+                <p><strong>Current location:</strong> {{ status.location }}</p>
+                
+                {% if status.due_date %}
+                <p>
+                    <strong>Due date:</strong> {{ status.due_date }}
+                    {% if status.overdue %}
+                    <span class="badge bg-danger ms-2">Overdue</span>
+                    {% endif %}
+                </p>
+                {% endif %}
+                
+                {% if status.notes %}
+                <p><strong>Notes:</strong> {{ status.notes }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

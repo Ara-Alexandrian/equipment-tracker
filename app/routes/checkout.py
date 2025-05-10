@@ -2,7 +2,7 @@
 Checkout routes for equipment checkout system
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from app import checkout_manager, equipment_manager
+from app import checkout_manager, equipment_manager, csrf
 from app.models.forms import LoginForm, NotificationPreferencesForm
 from app.models.json_utils import DateTimeEncoder
 import functools
@@ -161,6 +161,270 @@ def index():
         history=history,
         checked_out=checked_out,
         overdue=overdue
+    )
+
+@bp.route('/quick-check-out/<string:equipment_id>', methods=('GET', 'POST'))
+@csrf.exempt
+def quick_check_out(equipment_id):
+    """Quick checkout without requiring login."""
+    # Get equipment details
+    equipment = equipment_manager.get_equipment_by_id(equipment_id)
+    
+    if not equipment:
+        flash('Equipment not found', 'error')
+        return redirect(url_for('dashboard.equipment_list'))
+    
+    # Get status
+    status = checkout_manager.get_equipment_status(equipment_id)
+    
+    # If equipment is already checked out, redirect to landing page
+    if status and status.get('checked_out'):
+        flash('This equipment is already checked out', 'warning')
+        return redirect(url_for('equipment.landing_page', equipment_id=equipment_id))
+    
+    # Handle form submission
+    if request.method == 'POST':
+        location = request.form.get('location')
+        expected_return_days = int(request.form.get('expected_return_days', 1))
+        notes = request.form.get('notes', '')
+        
+        # Get the user identification
+        user_name = request.form.get('user_name', '').strip()
+        user_initials = request.form.get('user_initials', '').strip().upper()
+        selected_user = request.form.get('selected_user', '').strip()
+        
+        # Determine username
+        if selected_user and selected_user != "other":
+            username = selected_user
+        elif user_initials:
+            username = user_initials
+        elif user_name:
+            username = user_name
+        else:
+            flash('Please provide your name or initials', 'danger')
+            locations = equipment_manager.get_unique_locations()
+            users = {username: info for username, info in checkout_manager.users.items() 
+                    if 'password' not in info}
+            return render_template(
+                'checkout/quick_check_out.html',
+                equipment=equipment,
+                status=status,
+                locations=locations,
+                users=users,
+                checkout_manager=checkout_manager
+            )
+        
+        if checkout_manager.checkout_equipment(
+            equipment_id, 
+            username,
+            location,
+            expected_return_days,
+            notes
+        ):
+            flash('Equipment checked out successfully', 'success')
+            return redirect(url_for('equipment.landing_page', equipment_id=equipment_id))
+        else:
+            flash('Failed to check out equipment', 'danger')
+    
+    # Get all locations for dropdown
+    locations = equipment_manager.get_unique_locations()
+    
+    # Get all users for dropdown
+    users = {username: info for username, info in checkout_manager.users.items() 
+            if 'password' not in info}
+    
+    return render_template(
+        'checkout/quick_check_out.html',
+        equipment=equipment,
+        status=status,
+        locations=locations,
+        users=users,
+        checkout_manager=checkout_manager
+    )
+
+@bp.route('/check-out/<string:equipment_id>', methods=('GET', 'POST'))
+@login_required
+def check_out(equipment_id):
+    """Dedicated checkout page with a pre-filled form."""
+    # Get equipment details
+    equipment = equipment_manager.get_equipment_by_id(equipment_id)
+    
+    if not equipment:
+        flash('Equipment not found', 'error')
+        return redirect(url_for('dashboard.equipment_list'))
+    
+    # Get status
+    status = checkout_manager.get_equipment_status(equipment_id)
+    
+    # If equipment is already checked out, redirect to detail page
+    if status and status.get('checked_out'):
+        flash('This equipment is already checked out', 'warning')
+        return redirect(url_for('checkout.equipment_detail', equipment_id=equipment_id))
+    
+    # Handle form submission
+    if request.method == 'POST':
+        location = request.form.get('location')
+        expected_return_days = int(request.form.get('expected_return_days', 1))
+        notes = request.form.get('notes', '')
+        
+        if checkout_manager.checkout_equipment(
+            equipment_id, 
+            session['user']['username'],
+            location,
+            expected_return_days,
+            notes
+        ):
+            flash('Equipment checked out successfully', 'success')
+            return redirect(url_for('checkout.equipment_detail', equipment_id=equipment_id))
+        else:
+            flash('Failed to check out equipment', 'danger')
+    
+    # Get user's preferred location from previous checkouts if available
+    preferred_location = None
+    user_history = checkout_manager.get_checkout_history(user=session['user']['username'])
+    if user_history:
+        # Find most recent checkout location
+        for entry in sorted(user_history, key=lambda x: x.get('timestamp', ''), reverse=True):
+            if entry.get('location'):
+                preferred_location = entry.get('location')
+                break
+    
+    # Get all locations for dropdown
+    locations = equipment_manager.get_unique_locations()
+    
+    return render_template(
+        'checkout/check_out.html',
+        equipment=equipment,
+        status=status,
+        preferred_location=preferred_location,
+        locations=locations
+    )
+
+@bp.route('/quick-check-in/<string:equipment_id>', methods=('GET', 'POST'))
+@csrf.exempt
+def quick_check_in(equipment_id):
+    """Quick check-in without requiring login."""
+    # Get equipment details
+    equipment = equipment_manager.get_equipment_by_id(equipment_id)
+    
+    if not equipment:
+        flash('Equipment not found', 'error')
+        return redirect(url_for('dashboard.equipment_list'))
+    
+    # Get status
+    status = checkout_manager.get_equipment_status(equipment_id)
+    
+    # If equipment is not checked out, redirect to landing page
+    if not status or not status.get('status') == "Checked Out":
+        flash('This equipment is not checked out', 'warning')
+        return redirect(url_for('equipment.landing_page', equipment_id=equipment_id))
+    
+    # Handle form submission
+    if request.method == 'POST':
+        return_location = request.form.get('return_location')
+        notes = request.form.get('notes', '')
+        
+        # Get the user identification
+        user_name = request.form.get('user_name', '').strip()
+        user_initials = request.form.get('user_initials', '').strip().upper()
+        selected_user = request.form.get('selected_user', '').strip()
+        
+        # Determine username
+        if selected_user and selected_user != "other":
+            username = selected_user
+        elif user_initials:
+            username = user_initials
+        elif user_name:
+            username = user_name
+        else:
+            flash('Please provide your name or initials', 'danger')
+            locations = equipment_manager.get_unique_locations()
+            users = {username: info for username, info in checkout_manager.users.items() 
+                    if 'password' not in info}
+            return render_template(
+                'checkout/quick_check_in.html',
+                equipment=equipment,
+                status=status,
+                locations=locations,
+                users=users,
+                checkout_manager=checkout_manager
+            )
+        
+        if checkout_manager.return_equipment(
+            equipment_id,
+            username,
+            return_location,
+            notes
+        ):
+            flash('Equipment checked in successfully', 'success')
+            return redirect(url_for('equipment.landing_page', equipment_id=equipment_id))
+        else:
+            flash('Failed to check in equipment', 'danger')
+    
+    # Get all locations for dropdown
+    locations = equipment_manager.get_unique_locations()
+    
+    # Get all users for dropdown
+    users = {username: info for username, info in checkout_manager.users.items() 
+            if 'password' not in info}
+    
+    return render_template(
+        'checkout/quick_check_in.html',
+        equipment=equipment,
+        status=status,
+        locations=locations,
+        users=users,
+        checkout_manager=checkout_manager
+    )
+
+@bp.route('/check-in/<string:equipment_id>', methods=('GET', 'POST'))
+@login_required
+def check_in(equipment_id):
+    """Dedicated check-in page with a pre-filled form."""
+    # Get equipment details
+    equipment = equipment_manager.get_equipment_by_id(equipment_id)
+    
+    if not equipment:
+        flash('Equipment not found', 'error')
+        return redirect(url_for('dashboard.equipment_list'))
+    
+    # Get status
+    status = checkout_manager.get_equipment_status(equipment_id)
+    
+    # If equipment is not checked out, redirect to detail page
+    if not status or not status.get('checked_out'):
+        flash('This equipment is not checked out', 'warning')
+        return redirect(url_for('checkout.equipment_detail', equipment_id=equipment_id))
+    
+    # If equipment is checked out by someone else, only admins can check it in
+    if status.get('checked_out_by') != session['user']['username'] and session['user'].get('role') not in ['admin', 'physicist']:
+        flash('You cannot check in equipment checked out by someone else', 'danger')
+        return redirect(url_for('checkout.equipment_detail', equipment_id=equipment_id))
+    
+    # Handle form submission
+    if request.method == 'POST':
+        return_location = request.form.get('return_location')
+        notes = request.form.get('notes', '')
+        
+        if checkout_manager.return_equipment(
+            equipment_id,
+            session['user']['username'],
+            return_location,
+            notes
+        ):
+            flash('Equipment checked in successfully', 'success')
+            return redirect(url_for('checkout.equipment_detail', equipment_id=equipment_id))
+        else:
+            flash('Failed to check in equipment', 'danger')
+    
+    # Get all locations for dropdown
+    locations = equipment_manager.get_unique_locations()
+    
+    return render_template(
+        'checkout/check_in.html',
+        equipment=equipment,
+        status=status,
+        locations=locations
     )
 
 @bp.route('/equipment/<string:equipment_id>', methods=('GET', 'POST'))

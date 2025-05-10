@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Ticket for {{ equipment.manufacturer }} {{ equipment.model }} - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-4">
+        <img src="{{ url_for('static', filename='img/Equipment Tracker.png') }}" alt="Equipment Tracker Logo" style="max-height: 100px;">
+        <h1 class="display-5 mt-3">Submit Equipment Issue/Ticket</h1>
+    </div>
+
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">{{ equipment.manufacturer }} {{ equipment.model }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-5">
+                    <!-- Equipment Details -->
+                    <h5>Equipment Details</h5>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%">Category</th>
+                                <td>{{ equipment.category }}</td>
+                            </tr>
+                            <tr>
+                                <th>Type</th>
+                                <td>{{ equipment.equipment_type }}</td>
+                            </tr>
+                            <tr>
+                                <th>Serial Number</th>
+                                <td>{{ equipment.serial_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Primary Location</th>
+                                <td>{{ equipment.location }}</td>
+                            </tr>
+                            <tr>
+                                <th>Equipment ID</th>
+                                <td><code>{{ equipment.id }}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Current Status -->
+                    <h5 class="mt-4">Current Status</h5>
+                    
+                    <!-- Equipment operational condition (traffic light system) -->
+                    <div class="mb-3">
+                        <label class="form-label">Operational Status:</label>
+                        {% if condition == 'normal' %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-circle-fill text-success me-2"></i>
+                                <strong>Normal</strong> - Fully Operational
+                            </div>
+                        {% elif condition == 'warning' %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                <strong>Warning</strong> - Needs Attention
+                            </div>
+                        {% elif condition == 'critical' %}
+                            <div class="alert alert-danger">
+                                <i class="bi bi-x-circle-fill text-danger me-2"></i>
+                                <strong>Critical</strong> - Out of Service
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Checkout status -->
+                    <div class="mb-3">
+                        <label class="form-label">Checkout Status:</label>
+                        {% if status and status.checked_out %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                <strong>Checked Out</strong> by
+                                {% set user_info = checkout_manager.get_user(status.checked_out_by) %}
+                                {% if user_info %}
+                                    <strong>{{ user_info.name }}</strong>
+                                    <span class="text-muted">({{ status.checked_out_by }})</span>
+                                {% else %}
+                                    {{ status.checked_out_by }}
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-box-arrow-in-left me-2"></i>
+                                <strong>Available</strong> - Ready for checkout
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-7">
+                    <form method="POST" class="needs-validation" novalidate>
+                        <h4 class="mb-3">Ticket Information</h4>
+                        
+                        <!-- User Selection -->
+                        <div class="mb-3">
+                            <label for="selected_user" class="form-label">Select Your Name</label>
+                            <select class="form-select mb-2" id="selected_user" name="selected_user">
+                                <option value="">-- Select from common users --</option>
+                                {% for username, user in users.items() %}
+                                <option value="{{ username }}">{{ user.name }} ({{ username }})</option>
+                                {% endfor %}
+                                <option value="other">Other / Enter manually</option>
+                            </select>
+                            
+                            <div id="manual_entry" class="border p-3 rounded mt-2" style="display: none;">
+                                <div class="mb-2">
+                                    <label for="creator_name" class="form-label">Your Name</label>
+                                    <input type="text" class="form-control" id="creator_name" name="creator_name" placeholder="Enter your full name">
+                                </div>
+                                <div class="mb-0">
+                                    <label for="creator_initials" class="form-label">Or Initials</label>
+                                    <input type="text" class="form-control" id="creator_initials" name="creator_initials" placeholder="Enter your initials" maxlength="5">
+                                    <div class="form-text">At least one of these is required if not selecting from the list above</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ticket Type -->
+                        <div class="mb-3">
+                            <label for="ticket_type" class="form-label">Ticket Type</label>
+                            <select class="form-select" id="ticket_type" name="ticket_type" required>
+                                {% for type_value, type_label in ticket_types %}
+                                <option value="{{ type_value }}">{{ type_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Priority -->
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                {% for priority_value, priority_label in priorities %}
+                                <option value="{{ priority_value }}">{{ priority_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required 
+                                  placeholder="Brief summary of the issue">
+                            <div class="invalid-feedback">Please provide a title for the ticket.</div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required
+                                     placeholder="Detailed description of the issue or request"></textarea>
+                            <div class="invalid-feedback">Please provide a description for the ticket.</div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-ticket-detailed me-2"></i>Submit Ticket
+                            </button>
+                            <a href="{{ url_for('equipment.landing_page', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Equipment
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        });
+        
+        // Toggle manual entry fields
+        const userSelect = document.getElementById('selected_user');
+        const manualEntry = document.getElementById('manual_entry');
+        
+        userSelect.addEventListener('change', function() {
+            if (this.value === 'other') {
+                manualEntry.style.display = 'block';
+            } else {
+                manualEntry.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

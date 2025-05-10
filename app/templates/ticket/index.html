@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket System - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Ticket Dashboard</h1>
+        <p class="lead">Track and manage equipment issues and maintenance requests</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('ticket.list_tickets') }}" class="btn btn-outline-primary">
+            <i class="bi bi-list-ul"></i> View All Tickets
+        </a>
+    </div>
+</div>
+
+<!-- Status Cards -->
+<div class="row mb-4">
+    <!-- Ticket Counts -->
+    <div class="col-md-9">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-info h-100">
+                    <div class="card-body">
+                        <h2 class="card-title">{{ open_count }}</h2>
+                        <p class="card-text">Open Tickets</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('ticket.list_tickets', status=ticket_status.OPEN) }}" class="text-white stretched-link">View Open <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-primary h-100">
+                    <div class="card-body">
+                        <h2 class="card-title">{{ in_progress_count }}</h2>
+                        <p class="card-text">In Progress</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('ticket.list_tickets', status=ticket_status.IN_PROGRESS) }}" class="text-white stretched-link">View Active <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-body">
+                        <h2 class="card-title">{{ resolved_count }}</h2>
+                        <p class="card-text">Resolved</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('ticket.list_tickets', status=ticket_status.RESOLVED) }}" class="text-white stretched-link">View Resolved <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-secondary h-100">
+                    <div class="card-body">
+                        <h2 class="card-title">{{ closed_count }}</h2>
+                        <p class="card-text">Closed</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('ticket.list_tickets', status=ticket_status.CLOSED) }}" class="text-white stretched-link">View Closed <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Equipment Condition Summary -->
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge rounded-pill bg-success me-2" style="width: 20px; height: 20px;">&nbsp;</span>
+                    <span>Normal: {{ normal_count }}</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge rounded-pill bg-warning me-2" style="width: 20px; height: 20px;">&nbsp;</span>
+                    <span>Warning: {{ warning_count }}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge rounded-pill bg-danger me-2" style="width: 20px; height: 20px;">&nbsp;</span>
+                    <span>Critical: {{ critical_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Tickets -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Tickets</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Equipment</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Created By</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in recent_tickets %}
+                            <tr>
+                                <td><a href="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}">{{ ticket.id[:8] }}</a></td>
+                                <td>{{ ticket.title }}</td>
+                                <td>
+                                    {% set equipment = equipment_manager.get_equipment_by_id(ticket.equipment_id) %}
+                                    {% if equipment %}
+                                        <a href="{{ url_for('ticket.equipment_tickets', equipment_id=ticket.equipment_id) }}">
+                                            {{ equipment.manufacturer }} {{ equipment.model }}
+                                        </a>
+                                    {% else %}
+                                        Unknown
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ticket.status == ticket_status.OPEN %}
+                                        <span class="badge bg-info">Open</span>
+                                    {% elif ticket.status == ticket_status.IN_PROGRESS %}
+                                        <span class="badge bg-primary">In Progress</span>
+                                    {% elif ticket.status == ticket_status.RESOLVED %}
+                                        <span class="badge bg-success">Resolved</span>
+                                    {% elif ticket.status == ticket_status.CLOSED %}
+                                        <span class="badge bg-secondary">Closed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ticket.priority == ticket_priority.LOW %}
+                                        <span class="badge bg-secondary">Low</span>
+                                    {% elif ticket.priority == ticket_priority.MEDIUM %}
+                                        <span class="badge bg-info">Medium</span>
+                                    {% elif ticket.priority == ticket_priority.HIGH %}
+                                        <span class="badge bg-warning">High</span>
+                                    {% elif ticket.priority == ticket_priority.CRITICAL %}
+                                        <span class="badge bg-danger">Critical</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set creator = checkout_manager.get_user(ticket.created_by) %}
+                                    {% if creator %}
+                                        <span data-bs-toggle="tooltip" title="{{ ticket.created_by }}">{{ creator.name }}</span>
+                                    {% else %}
+                                        {{ ticket.created_by }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ ticket.created_at.strftime('%Y-%m-%d') if ticket.created_at else 'Unknown' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-3">No tickets found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('ticket.list_tickets') }}" class="text-decoration-none">View all tickets <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Your Tickets -->
+    <div class="col-lg-4">
+        <!-- Assigned to You (for physicists/admins) -->
+        {% if assigned_tickets %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Assigned to You</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for ticket in assigned_tickets %}
+                    <a href="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ ticket.title }}</h6>
+                            <small>
+                                {% if ticket.status == ticket_status.OPEN %}
+                                    <span class="badge bg-info">Open</span>
+                                {% elif ticket.status == ticket_status.IN_PROGRESS %}
+                                    <span class="badge bg-primary">In Progress</span>
+                                {% elif ticket.status == ticket_status.RESOLVED %}
+                                    <span class="badge bg-success">Resolved</span>
+                                {% elif ticket.status == ticket_status.CLOSED %}
+                                    <span class="badge bg-secondary">Closed</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        <p class="mb-1 small text-truncate">{{ ticket.description[:100] }}{% if ticket.description|length > 100 %}...{% endif %}</p>
+                        <small>
+                            {% if ticket.priority == ticket_priority.LOW %}
+                                <span class="badge bg-secondary">Low</span>
+                            {% elif ticket.priority == ticket_priority.MEDIUM %}
+                                <span class="badge bg-info">Medium</span>
+                            {% elif ticket.priority == ticket_priority.HIGH %}
+                                <span class="badge bg-warning">High</span>
+                            {% elif ticket.priority == ticket_priority.CRITICAL %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% endif %}
+                            
+                            {% if ticket.equipment_condition == equipment_condition.NORMAL %}
+                                <span class="badge bg-success">Normal</span>
+                            {% elif ticket.equipment_condition == equipment_condition.WARNING %}
+                                <span class="badge bg-warning">Warning</span>
+                            {% elif ticket.equipment_condition == equipment_condition.CRITICAL %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% endif %}
+                        </small>
+                    </a>
+                    {% else %}
+                    <div class="list-group-item">
+                        <p class="text-center mb-0">No tickets assigned to you</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Created by You -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Created by You</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for ticket in created_tickets %}
+                    <a href="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ ticket.title }}</h6>
+                            <small>
+                                {% if ticket.status == ticket_status.OPEN %}
+                                    <span class="badge bg-info">Open</span>
+                                {% elif ticket.status == ticket_status.IN_PROGRESS %}
+                                    <span class="badge bg-primary">In Progress</span>
+                                {% elif ticket.status == ticket_status.RESOLVED %}
+                                    <span class="badge bg-success">Resolved</span>
+                                {% elif ticket.status == ticket_status.CLOSED %}
+                                    <span class="badge bg-secondary">Closed</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        <p class="mb-1 small text-truncate">{{ ticket.description[:100] }}{% if ticket.description|length > 100 %}...{% endif %}</p>
+                        <small>
+                            {% if ticket.priority == ticket_priority.LOW %}
+                                <span class="badge bg-secondary">Low</span>
+                            {% elif ticket.priority == ticket_priority.MEDIUM %}
+                                <span class="badge bg-info">Medium</span>
+                            {% elif ticket.priority == ticket_priority.HIGH %}
+                                <span class="badge bg-warning">High</span>
+                            {% elif ticket.priority == ticket_priority.CRITICAL %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% endif %}
+                            
+                            {% if ticket.equipment_condition == equipment_condition.NORMAL %}
+                                <span class="badge bg-success">Normal</span>
+                            {% elif ticket.equipment_condition == equipment_condition.WARNING %}
+                                <span class="badge bg-warning">Warning</span>
+                            {% elif ticket.equipment_condition == equipment_condition.CRITICAL %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% endif %}
+                        </small>
+                    </a>
+                    {% else %}
+                    <div class="list-group-item">
+                        <p class="text-center mb-0">No tickets created by you</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

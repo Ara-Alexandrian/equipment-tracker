@@ -1,4 +1,6 @@
 **/.claude/settings.local.json
+.claude/
+.claude.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
