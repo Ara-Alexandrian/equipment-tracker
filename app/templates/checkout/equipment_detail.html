@@ -42,7 +42,15 @@
                         {% if status.status == 'Checked Out' %}
                         <tr>
                             <th>Checked Out By</th>
-                            <td>{{ status.checked_out_by }}</td>
+                            <td>
+                                {% set user_info = checkout_manager.get_user(status.checked_out_by) %}
+                                {% if user_info %}
+                                    <strong>{{ user_info.name }}</strong>
+                                    <br><small class="text-muted">{{ status.checked_out_by }}</small>
+                                {% else %}
+                                    {{ status.checked_out_by }}
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <th>Checkout Time</th>
@@ -55,7 +63,16 @@
                         {% endif %}
                         <tr>
                             <th>Last Updated</th>
-                            <td>{{ status.last_updated }} by {{ status.updated_by }}</td>
+                            <td>
+                                {{ status.last_updated }} by 
+                                {% set updater = checkout_manager.get_user(status.updated_by) %}
+                                {% if updater %}
+                                    <strong>{{ updater.name }}</strong>
+                                    <small class="text-muted">({{ status.updated_by }})</small>
+                                {% else %}
+                                    {{ status.updated_by }}
+                                {% endif %}
+                            </td>
                         </tr>
                         {% if status.notes %}
                         <tr>
@@ -71,8 +88,11 @@
     
     <div class="col-md-8 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Actions</h5>
+                <a href="{{ url_for('qr.quick_checkout', equipment_id=equipment.id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-qr-code-scan"></i> Use QR Checkout (No Login)
+                </a>
             </div>
             <div class="card-body">
                 <ul class="nav nav-tabs" id="actionTabs" role="tablist">
@@ -240,7 +260,15 @@
                                     <span class="text-muted">No change</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ entry.user }}</td>
+                                <td>
+                                    {% set user_info = checkout_manager.get_user(entry.user) %}
+                                    {% if user_info %}
+                                        <strong>{{ user_info.name }}</strong>
+                                        <br><small class="text-muted">{{ entry.user }}</small>
+                                    {% else %}
+                                        {{ entry.user }}
+                                    {% endif %}
+                                </td>
                                 <td>{{ entry.notes }}</td>
                             </tr>
                             {% endfor %}

@@ -86,7 +86,7 @@
             </div>
             <div class="card-body">
                 <form id="reportForm">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <!-- CSRF protection is disabled for this app -->
                     <div class="mb-3">
                         <label for="reportType" class="form-label">Report Type</label>
                         <select class="form-select" id="reportType" name="report_type">
