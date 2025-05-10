@@ -363,25 +363,42 @@ class JsonCheckoutManager:
     
     def authenticate_user(self, username, password):
         """Authenticate a user with username and password.
-        
+
         Args:
             username: Username to authenticate
             password: Password to authenticate
-            
+
         Returns:
             User dictionary if authentication succeeds, None otherwise
         """
         if username in self.users:
             user = self.users[username]
-            # In a real application, use a secure password comparison
-            if user.get("password") == password:
+            stored_password = user.get("password", "")
+
+            # Check if the password is stored as a hash
+            if stored_password.startswith('scrypt:'):
+                try:
+                    from werkzeug.security import check_password_hash
+                    if check_password_hash(stored_password, password):
+                        # Return user without password
+                        user_info = user.copy()
+                        user_info.pop("password", None)
+                        # Add username to the user info
+                        user_info["username"] = username
+                        return user_info
+                except ImportError:
+                    # If werkzeug is not available, fall back to plain text comparison
+                    pass
+
+            # Fall back to plain text comparison for backward compatibility
+            if stored_password == password:
                 # Return user without password
                 user_info = user.copy()
                 user_info.pop("password", None)
                 # Add username to the user info
                 user_info["username"] = username
                 return user_info
-        
+
         return None
     
     def get_user(self, username):
@@ -404,7 +421,7 @@ class JsonCheckoutManager:
     
     def add_user(self, username, name, email, role, password, admin_user):
         """Add a new user.
-        
+
         Args:
             username: Username for the new user
             name: Full name of the new user
@@ -412,40 +429,54 @@ class JsonCheckoutManager:
             role: Role of the new user ('admin', 'physicist', or 'user')
             password: Password for the new user
             admin_user: Username of the admin performing this action
-            
+
         Returns:
             Boolean indicating success
         """
         # Check if admin_user is an admin
         if admin_user not in self.users or self.users[admin_user].get("role") != "admin":
             return False
-        
+
         # Check if username already exists
         if username in self.users:
             return False
-        
+
         # Check if role is valid
         if role not in ["admin", "physicist", "user"]:
             return False
-        
+
+        # Hash the password if it's not already hashed
+        hashed_password = password
+        if not password.startswith('scrypt:'):
+            try:
+                from werkzeug.security import generate_password_hash
+                hashed_password = generate_password_hash(password)
+            except ImportError:
+                # If werkzeug is not available, use the plain password
+                pass
+
         # Add new user
         self.users[username] = {
             "name": name,
             "email": email,
             "role": role,
-            "password": password,  # In a real application, hash this password
+            "password": hashed_password,
             "created_by": admin_user,
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
+            "notification_preferences": {
+                "email_enabled": True,
+                "calibration_due_days": 30
+            }
         }
-        
+
         # Save users
         self._save_users()
-        
+
         return True
     
     def update_user(self, username, name=None, email=None, role=None, password=None, admin_user=None):
         """Update an existing user.
-        
+
         Args:
             username: Username of the user to update
             name: New name (optional)
@@ -453,39 +484,55 @@ class JsonCheckoutManager:
             role: New role (optional)
             password: New password (optional)
             admin_user: Username of the admin performing this action
-            
+
         Returns:
             Boolean indicating success
         """
         # Check if admin_user is an admin (only needed for role changes)
         if role is not None and (admin_user not in self.users or self.users[admin_user].get("role") != "admin"):
             return False
-        
+
         # Check if username exists
         if username not in self.users:
             return False
-        
+
         # Update user
         user = self.users[username]
-        
+
         if name is not None:
             user["name"] = name
-        
+
         if email is not None:
             user["email"] = email
-        
+
         if role is not None and role in ["admin", "physicist", "user"]:
             user["role"] = role
-        
-        if password is not None:
-            user["password"] = password  # In a real application, hash this password
-        
+
+        if password is not None and password.strip():
+            # Hash the password if it's not already hashed
+            hashed_password = password
+            if not password.startswith('scrypt:'):
+                try:
+                    from werkzeug.security import generate_password_hash
+                    hashed_password = generate_password_hash(password)
+                except ImportError:
+                    # If werkzeug is not available, use the plain password
+                    pass
+            user["password"] = hashed_password
+
         user["updated_by"] = admin_user
         user["updated_at"] = datetime.now().isoformat()
-        
+
+        # Ensure notification preferences exist
+        if "notification_preferences" not in user:
+            user["notification_preferences"] = {
+                "email_enabled": True,
+                "calibration_due_days": 30
+            }
+
         # Save users
         self._save_users()
-        
+
         return True
     
     def delete_user(self, username, admin_user):
