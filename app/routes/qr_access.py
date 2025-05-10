@@ -53,8 +53,15 @@ def quick_checkout(equipment_id):
         else:
             flash('Please provide your name or initials', 'danger')
             locations = equipment_manager.get_unique_locations()
-            users = {username: info for username, info in checkout_manager.users.items() 
-                    if 'password' not in info}
+
+            # Get all users for dropdown - make a clean copy without passwords
+            users = {}
+            for username, info in checkout_manager.users.items():
+                user_info = info.copy()
+                if 'password' in user_info:
+                    user_info.pop('password')
+                users[username] = user_info
+
             return render_template(
                 'checkout/quick_check_out.html',
                 equipment=equipment,
@@ -79,10 +86,14 @@ def quick_checkout(equipment_id):
     # Get all locations for dropdown
     locations = equipment_manager.get_unique_locations()
     
-    # Get all users for dropdown
-    users = {username: info for username, info in checkout_manager.users.items() 
-            if 'password' not in info}
-    
+    # Get all users for dropdown - make a clean copy without passwords
+    users = {}
+    for username, info in checkout_manager.users.items():
+        user_info = info.copy()
+        if 'password' in user_info:
+            user_info.pop('password')
+        users[username] = user_info
+
     return render_template(
         'checkout/quick_check_out.html',
         equipment=equipment,
@@ -131,8 +142,15 @@ def quick_checkin(equipment_id):
         else:
             flash('Please provide your name or initials', 'danger')
             locations = equipment_manager.get_unique_locations()
-            users = {username: info for username, info in checkout_manager.users.items() 
-                    if 'password' not in info}
+
+            # Get all users for dropdown - make a clean copy without passwords
+            users = {}
+            for username, info in checkout_manager.users.items():
+                user_info = info.copy()
+                if 'password' in user_info:
+                    user_info.pop('password')
+                users[username] = user_info
+
             return render_template(
                 'checkout/quick_check_in.html',
                 equipment=equipment,
@@ -156,10 +174,14 @@ def quick_checkin(equipment_id):
     # Get all locations for dropdown
     locations = equipment_manager.get_unique_locations()
     
-    # Get all users for dropdown
-    users = {username: info for username, info in checkout_manager.users.items() 
-             if 'password' not in info}
-    
+    # Get all users for dropdown - make a clean copy without passwords
+    users = {}
+    for username, info in checkout_manager.users.items():
+        user_info = info.copy()
+        if 'password' in user_info:
+            user_info.pop('password')
+        users[username] = user_info
+
     return render_template(
         'checkout/quick_check_in.html',
         equipment=equipment,
@@ -206,20 +228,28 @@ def quick_ticket(equipment_id):
             created_by = creator_name
         else:
             flash('Please provide your name or initials', 'danger')
+            # Get all users for dropdown - make a clean copy without passwords
+            users = {}
+            for username, info in checkout_manager.users.items():
+                user_info = info.copy()
+                if 'password' in user_info:
+                    user_info.pop('password')
+                users[username] = user_info
+
             return render_template(
                 'ticket/quick_create.html',
                 equipment=equipment,
                 status=status,
                 condition=condition,
-                ticket_types=[(TicketType.ISSUE, 'Issue/Problem'), 
+                ticket_types=[(TicketType.ISSUE, 'Issue/Problem'),
                             (TicketType.REQUEST, 'Request'),
                             (TicketType.MAINTENANCE, 'Maintenance'),
                             (TicketType.CALIBRATION, 'Calibration')],
-                priorities=[(TicketPriority.LOW, 'Low'), 
+                priorities=[(TicketPriority.LOW, 'Low'),
                            (TicketPriority.MEDIUM, 'Medium'),
                            (TicketPriority.HIGH, 'High'),
                            (TicketPriority.CRITICAL, 'Critical')],
-                users=checkout_manager.users,
+                users=users,
                 checkout_manager=checkout_manager
             )
         
@@ -243,10 +273,14 @@ def quick_ticket(equipment_id):
             flash('Ticket created successfully', 'success')
             return redirect(url_for('equipment.landing_page', equipment_id=equipment_id))
     
-    # Get all users for dropdown
-    users = {username: info for username, info in checkout_manager.users.items() 
-            if 'password' not in info}
-    
+    # Get all users for dropdown - make a clean copy without passwords
+    users = {}
+    for username, info in checkout_manager.users.items():
+        user_info = info.copy()
+        if 'password' in user_info:
+            user_info.pop('password')
+        users[username] = user_info
+
     return render_template(
         'ticket/quick_create.html',
         equipment=equipment,
