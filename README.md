@@ -119,10 +119,13 @@ Default user accounts for testing:
 
 ### Theme Support
 
-The application supports both light and dark themes:
+The application supports multiple themes:
+- Light Mode: Standard clean interface
+- Dark Mode: Reduced eye strain for low-light environments
+- Dracula Mode: High contrast theme with distinct visual identity
 - Automatic detection of system preferences
 - Manual toggle in the navigation bar
-- Persistent theme selection using localStorage
+- Persistent theme selection using localStorage across sessions
 
 ## Development
 

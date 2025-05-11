@@ -20,6 +20,18 @@ Administrators and physicists can generate QR codes for equipment:
 2. Click on the "Generate QR Code" button
 3. Print the generated QR code and affix it to the physical equipment
 
+## QR Code Design
+
+The QR codes have been designed with the following professional elements:
+
+- **Logo Integration**: Incorporates the Mary Bird Perkins flame logo
+- **Header**: "Property of Mary Bird Perkins Cancer Center"
+- **Footer**: "Department of Medical Physics"
+- **Left Side**: Rotated text showing "MFR: [manufacturer]"
+- **Right Side**: Rotated text showing "Model: [model]" and "Serial: [serial]"
+- **Color Scheme**: All text matches the Mary Bird Perkins flame red color
+- **Error Correction**: High error correction level (Level H - up to 30% damage tolerance)
+
 ## QR Code Landing Page
 
 When a user scans a QR code, they see a landing page with:
