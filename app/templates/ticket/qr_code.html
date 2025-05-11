@@ -50,8 +50,8 @@
         <p class="lead">{{ equipment.manufacturer }} {{ equipment.model }} ({{ equipment.serial_number }})</p>
     </div>
     <div class="col-md-4 text-end">
-        <a href="{{ url_for('dashboard.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left"></i> Back to Equipment
+        <a href="{{ back_url|default(url_for('dashboard.equipment_detail', equipment_id=equipment.id)) }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back
         </a>
     </div>
 </div>
@@ -70,21 +70,25 @@
                         <div>S/N: {{ equipment.serial_number }}</div>
                     </div>
                     
-                    <img class="qr-code" src="data:image/png;base64,{{ qr_image }}" alt="QR Code">
+                    <img class="qr-code" src="{{ qr_code_url }}" alt="QR Code">
                     
                     <div class="qr-info">
                         <p>Scan for quick access</p>
-                        <small class="text-muted">QR Code URL: {{ qr_url }}</small>
+                        <small class="text-muted">When scanned, takes you to: {{ qr_url }}</small>
                     </div>
                 </div>
                 
                 <div class="text-center mt-4 no-print">
-                    <button onclick="window.print()" class="btn btn-primary">
+                    <a href="{{ qr_code_url }}" download="qr_{{ equipment_id }}.png" class="btn btn-primary">
+                        <i class="bi bi-download"></i> Download QR Code
+                    </a>
+
+                    <button onclick="window.print()" class="btn btn-outline-primary ms-2">
                         <i class="bi bi-printer"></i> Print QR Code
                     </button>
-                    
+
                     <a href="{{ qr_url }}" target="_blank" class="btn btn-outline-secondary ms-2">
-                        <i class="bi bi-link-45deg"></i> Open URL
+                        <i class="bi bi-link-45deg"></i> Test QR Target
                     </a>
                 </div>
             </div>

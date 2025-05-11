@@ -30,21 +30,29 @@
                         </div>
                         <div class="col-md-6">
                             <label for="edit_category" class="form-label">Category*</label>
-                            <select class="form-select" id="edit_category" name="category" required>
-                                <option value="Chamber" {% if equipment.category == 'Chamber' %}selected{% endif %}>Chamber</option>
-                                <option value="Electrometer" {% if equipment.category == 'Electrometer' %}selected{% endif %}>Electrometer</option>
-                                <option value="Survey Meter" {% if equipment.category == 'Survey Meter' %}selected{% endif %}>Survey Meter</option>
+                            <select class="form-select" id="edit_category" name="category" required onchange="updateEquipmentTypeOptions()">
+                                {% for category in standard_categories %}
+                                <option value="{{ category }}" {% if equipment.category == category %}selected{% endif %}>{{ category }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="edit_equipment_type" class="form-label">Equipment Type*</label>
-                            <input type="text" class="form-control" id="edit_equipment_type" name="equipment_type" value="{{ equipment.equipment_type }}" required>
+                            <select class="form-select" id="edit_equipment_type" name="equipment_type" required>
+                                {% for type in standard_equipment_types %}
+                                <option value="{{ type }}" {% if equipment.equipment_type == type %}selected{% endif %}>{{ type }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label for="edit_manufacturer" class="form-label">Manufacturer*</label>
-                            <input type="text" class="form-control" id="edit_manufacturer" name="manufacturer" value="{{ equipment.manufacturer }}" required>
+                            <select class="form-select" id="edit_manufacturer" name="manufacturer" required>
+                                {% for manufacturer in standard_manufacturers %}
+                                <option value="{{ manufacturer }}" {% if equipment.manufacturer == manufacturer %}selected{% endif %}>{{ manufacturer }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -60,7 +68,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="edit_location" class="form-label">Location*</label>
-                            <input type="text" class="form-control" id="edit_location" name="location" value="{{ equipment.location }}" required>
+                            <select class="form-select" id="edit_location" name="location" required>
+                                {% for location in standard_locations %}
+                                <option value="{{ location }}" {% if equipment.location == location %}selected{% endif %}>{{ location }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label for="edit_calibration_due_date" class="form-label">Calibration Due Date*</label>
@@ -104,6 +116,9 @@
                             <a href="{{ url_for('admin.generate_qr_direct', equipment_id=equipment.id) }}" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-arrow-repeat"></i> Regenerate QR Code
                             </a>
+                            <a href="{{ qr_img_path }}" download="qr_{{ equipment.id }}.png" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-download"></i> Download
+                            </a>
                             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
                                 <i class="bi bi-printer"></i> Print
                             </button>
@@ -142,4 +157,44 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Store equipment types by category
+    const equipmentTypesByCategory = {{ equipment_types_by_category|tojson|safe }};
+
+    // Function to update equipment type options based on selected category
+    function updateEquipmentTypeOptions() {
+        const categorySelect = document.getElementById('edit_category');
+        const typeSelect = document.getElementById('edit_equipment_type');
+        const selectedCategory = categorySelect.value;
+
+        // Clear current options
+        typeSelect.innerHTML = '';
+
+        // Add new options based on selected category
+        if (selectedCategory && equipmentTypesByCategory[selectedCategory]) {
+            equipmentTypesByCategory[selectedCategory].forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeSelect.appendChild(option);
+            });
+        }
+
+        // If there are no options, add a default one
+        if (typeSelect.options.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '-- Select Equipment Type --';
+            typeSelect.appendChild(option);
+        }
+    }
+
+    // Initialize equipment type options when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        updateEquipmentTypeOptions();
+    });
+</script>
 {% endblock %}

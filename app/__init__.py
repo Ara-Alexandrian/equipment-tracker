@@ -1,5 +1,5 @@
 """
-Equipment Tracker Flask Application
+GearVue Flask Application
 """
 from flask import Flask, session, json, request
 from flask_mail import Mail
@@ -8,6 +8,7 @@ from app.models.equipment import EquipmentDataManager
 from app.models.json_equipment import JsonEquipmentDataManager
 from app.models.json_checkout import JsonCheckoutManager
 from app.models.json_utils import DateTimeEncoder
+from app.models.standard_values import StandardValuesManager
 from app.utils.notifications.email_service import email_service
 import datetime
 import os
@@ -33,7 +34,7 @@ app.config.from_mapping(
     MAIL_USE_SSL=os.environ.get('MAIL_USE_SSL', 'False').lower() in ['true', '1', 't'],
     MAIL_USERNAME=os.environ.get('MAIL_USERNAME', None),
     MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD', None),
-    MAIL_DEFAULT_SENDER=os.environ.get('MAIL_DEFAULT_SENDER', 'equipment-tracker@marybird.com'),
+    MAIL_DEFAULT_SENDER=os.environ.get('MAIL_DEFAULT_SENDER', 'gearvue@marybird.com'),
     
     # Application URL for links in notifications
     APPLICATION_URL=os.environ.get('APPLICATION_URL', 'http://localhost:5000')
@@ -49,6 +50,7 @@ excel_equipment_manager = EquipmentDataManager(app.config['DATA_DIR'])
 # New JSON-based managers
 equipment_manager = JsonEquipmentDataManager(app.config['JSON_DATA_DIR'])
 checkout_manager = JsonCheckoutManager(app.config['JSON_DATA_DIR'])
+standard_values_manager = StandardValuesManager(app.config['JSON_DATA_DIR'])
 
 # Initialize Flask-Mail
 mail = Mail(app)
@@ -98,11 +100,20 @@ def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
 # Define main route 
 # Add special header for QR routes
 @app.after_request
-def clear_login_requirements(response):
-    """Explicitly disable login checks for QR routes."""
+def add_response_headers(response):
+    """Add response headers for security and caching."""
+    # Explicitly disable login checks for QR routes
     if request.path.startswith('/qr/') or request.path.startswith('/equipment/'):
         # Special header to indicate no login required
         response.headers['X-No-Login-Required'] = 'True'
+
+    # Add cache-busting headers to all responses
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    # Add a timestamp to force browser refresh
+    response.headers['Last-Modified'] = datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S GMT')
+
     return response
 
 @app.route('/')

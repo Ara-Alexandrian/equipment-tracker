@@ -261,6 +261,8 @@ def delete_equipment(equipment_id):
 @admin_required
 def edit_equipment_direct(equipment_id):
     """Direct equipment edit page with server-side form population."""
+    from app import standard_values_manager
+
     # Get equipment by ID
     equipment = equipment_manager.get_equipment_by_id(equipment_id)
 
@@ -292,9 +294,32 @@ def edit_equipment_direct(equipment_id):
         flash(f'Error: Could not retrieve equipment data for ID {equipment_id}', 'danger')
         return redirect(url_for('admin.equipment_management'))
 
+    # Get standard values for dropdown lists
+    standard_categories = standard_values_manager.get_categories()
+
+    # Get equipment types based on the current category
+    current_category = equipment.get('category', '')
+    if current_category:
+        standard_equipment_types = standard_values_manager.get_equipment_types(current_category)
+    else:
+        standard_equipment_types = standard_values_manager.get_equipment_types()
+
+    # Create a dictionary of equipment types by category for JavaScript
+    equipment_types_by_category = {}
+    for category in standard_categories:
+        equipment_types_by_category[category] = standard_values_manager.get_equipment_types(category)
+
+    standard_manufacturers = standard_values_manager.get_manufacturers()
+    standard_locations = standard_values_manager.get_locations()
+
     return render_template(
         'admin/equipment_direct_edit.html',
-        equipment=equipment
+        equipment=equipment,
+        standard_categories=standard_categories,
+        standard_equipment_types=standard_equipment_types,
+        standard_manufacturers=standard_manufacturers,
+        standard_locations=standard_locations,
+        equipment_types_by_category=equipment_types_by_category
     )
 
 @bp.route('/equipment/<string:equipment_id>/update', methods=['POST'])
