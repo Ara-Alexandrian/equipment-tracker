@@ -75,5 +75,16 @@
     "new_location": "Hammond",
     "user": "admin",
     "notes": "Annual calibration"
+  },
+  {
+    "id": "aa7df05e-dd98-4126-ad35-e63073e0ad91",
+    "equipment_id": "Chamber-CNMC-456789",
+    "timestamp": "2025-05-10T21:21:27.263980",
+    "previous_status": "Checked Out",
+    "new_status": "In Storage",
+    "previous_location": "Natchez",
+    "new_location": "",
+    "user": "aalexandrian",
+    "notes": ""
   }
 ]

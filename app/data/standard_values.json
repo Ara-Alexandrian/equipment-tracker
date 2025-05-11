@@ -2,7 +2,8 @@
   "categories": [
     "Chamber",
     "Electrometer",
-    "Survey Meter"
+    "Survey Meter",
+    "Water Tank"
   ],
   "equipment_types": {
     "Chamber": [
@@ -21,7 +22,8 @@
       "area monitor",
       "portable survey meter",
       "neutron detector"
-    ]
+    ],
+    "Water Tank": []
   },
   "manufacturers": [
     "CNMC",

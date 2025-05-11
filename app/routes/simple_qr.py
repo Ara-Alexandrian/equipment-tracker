@@ -1,57 +1,90 @@
 """
-QR code generator that integrates with the advanced QR code generator
+Direct QR code generator for equipment tracking
 """
 import os
 import sys
+import subprocess
 import time
 
-def generate_simple_qr(url, output_path, equipment_id="", manufacturer="", model="", serial=""):
-    """Generate a fancy QR code using the advanced generator"""
+def generate_qr_code(url, output_path, equipment_id="", manufacturer="", model="", serial=""):
+    """
+    Generate a QR code using the shell script without fallbacks
+
+    Args:
+        url: URL to encode in the QR code
+        output_path: Path where to save the QR code
+        equipment_id: Equipment ID
+        manufacturer: Manufacturer name
+        model: Model number
+        serial: Serial number
+
+    Returns:
+        Tuple of (success, result_path_or_error_message)
+    """
     try:
-        # Add qrcodes directory to the system path
+        # Get the root directory for the project
         root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         qrcodes_dir = os.path.join(root_dir, 'qrcodes')
-        sys.path.append(qrcodes_dir)
-        
-        # Import the create_qr_in_flame function
-        try:
-            from qr_generator import create_qr_in_flame
-            print(f"Successfully imported create_qr_in_flame from {qrcodes_dir}")
-        except ImportError as e:
-            print(f"Error importing qr_generator: {e}")
-            return False, f"Error importing qr_generator: {e}"
-        
-        # Find the logo file
-        logo_path = os.path.join(qrcodes_dir, 'Resources', 'Mary Bird Perkins Cancer Center.png')
-        
-        if not os.path.exists(logo_path):
-            print(f"Logo file not found at {logo_path}")
-            return False, f"Logo file not found at {logo_path}"
-        
-        # Create the QR code using the advanced generator
+
+        print(f"QR codes directory: {qrcodes_dir}")
         print(f"Generating QR code with parameters: URL={url}, MFR={manufacturer}, MODEL={model}, SN={serial}")
-        
+
         # Ensure output directory exists
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        
+
+        # Change to qrcodes directory
+        current_dir = os.getcwd()
+        os.chdir(qrcodes_dir)
+
+        # Make the script executable
         try:
-            # Generate the QR code
-            output_file = create_qr_in_flame(
-                logo_path=logo_path,
-                url=url,
-                output_path=output_path,
-                manufacturer=manufacturer,
-                model=model,
-                serial=serial
-            )
-            
-            print(f"QR code successfully generated at {output_file}")
-            return True, output_file
-            
+            subprocess.run(["chmod", "+x", "./generate_qr.sh"], check=True)
         except Exception as e:
-            print(f"Error in create_qr_in_flame: {e}")
-            return False, f"Error generating QR code: {e}"
-        
+            print(f"Warning: couldn't change script permissions: {e}")
+
+        # Run the shell script with arguments
+        cmd = [
+            "./generate_qr.sh",
+            url,
+            manufacturer,
+            model,
+            serial
+        ]
+
+        print(f"Running QR generator: {' '.join(cmd)}")
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+
+        # Extract the output path from the script's output
+        output_lines = result.stdout.splitlines()
+        generated_qr_path = None
+
+        for line in output_lines:
+            if "QR code has been generated successfully" in line:
+                parts = line.split(": ")
+                if len(parts) > 1:
+                    generated_qr_path = parts[1].strip()
+
+        if not generated_qr_path:
+            # Find the most recent file in Generated_QR
+            generated_dir = os.path.join(qrcodes_dir, "Generated_QR")
+            if os.path.exists(generated_dir):
+                files = [os.path.join(generated_dir, f) for f in os.listdir(generated_dir) if f.endswith('.png')]
+                if files:
+                    generated_qr_path = max(files, key=os.path.getctime)
+
+        # Return to original directory
+        os.chdir(current_dir)
+
+        if generated_qr_path and os.path.exists(os.path.join(qrcodes_dir, generated_qr_path)):
+            # Copy to the requested output path
+            import shutil
+            full_path = os.path.join(qrcodes_dir, generated_qr_path)
+            shutil.copy2(full_path, output_path)
+            print(f"QR code copied to {output_path}")
+            return True, output_path
+        else:
+            raise Exception("QR code generation failed: No output file found")
+
     except Exception as e:
         print(f"Error generating QR code: {e}")
         return False, str(e)

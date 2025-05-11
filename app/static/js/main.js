@@ -23,10 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up data tables if the library is loaded
     setupDataTables();
     
-    // Set up theme switcher
-    console.log('Setting up theme switcher...');
-    setupThemeSwitcher();
-    console.log('Theme switcher setup complete');
+    // Theme switcher is now handled by theme-unified.js
+    console.log('Theme switching is managed by theme-unified.js');
     
     // Add fade-out to alerts after 3 seconds
     setTimeout(function() {
@@ -121,201 +119,26 @@ async function fetchFromApi(endpoint, params = {}) {
     }
 }
 
-/**
- * Set up theme switcher functionality
- */
+// These functions have been moved to theme-unified.js
+// Keeping these dummy functions for backward compatibility with any code that might call them
 function setupThemeSwitcher() {
-    // Ensure the button exists in the DOM
-    const themeBtn = document.getElementById('theme-btn');
-    console.log('Theme button found:', themeBtn);
-    
-    if (!themeBtn) {
-        console.error('Theme button element not found');
-        return;
-    }
-    
-    // Check for saved theme preference or default to light theme
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    console.log('Current theme from localStorage:', currentTheme);
-    
-    // Set initial button icon based on current theme
-    if (currentTheme === 'dark') {
-        themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
-        console.log('Applying dark mode on page load');
-        applyDarkMode(); // Apply dark mode on page load
-    } else {
-        themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
-        console.log('Ensuring light mode is applied');
-        // Ensure light mode is properly applied
-        removeDarkMode();
-    }
-    
-    // Remove any existing click listeners to avoid duplicates
-    const newThemeBtn = themeBtn.cloneNode(true);
-    themeBtn.parentNode.replaceChild(newThemeBtn, themeBtn);
-    
-    // Toggle theme when button is clicked
-    newThemeBtn.addEventListener('click', function(e) {
-        console.log('Theme button clicked!');
-        e.preventDefault();
-        
-        const isDarkMode = document.documentElement.classList.contains('dark-mode');
-        console.log('Current dark mode state:', isDarkMode);
-        
-        if (isDarkMode) {
-            // Switch to light mode
-            console.log('Switching to light mode');
-            removeDarkMode();
-            localStorage.setItem('theme', 'light');
-            this.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
-        } else {
-            // Switch to dark mode
-            console.log('Switching to dark mode');
-            applyDarkMode();
-            localStorage.setItem('theme', 'dark');
-            this.innerHTML = '<i class="bi bi-sun-fill"></i>';
-        }
-        
-        // Add a highlight effect to show the button was clicked
-        this.classList.add('btn-primary');
-        setTimeout(() => {
-            this.classList.remove('btn-primary');
-        }, 300);
-        
-        console.log('Theme toggle complete');
-    });
-    
-    // Explicitly make sure the button is clickable by adding this style
-    newThemeBtn.style.cursor = 'pointer';
-    newThemeBtn.title = 'Toggle dark/light mode';
-    
-    console.log('Theme switcher initialized successfully');
+    console.log('Theme switcher is now managed by theme-unified.js');
 }
 
-/**
- * Toggle theme function - can be called directly from HTML
- */
 function toggleTheme(event) {
-    if (event) {
-        event.preventDefault();
+    if (event) event.preventDefault();
+    if (typeof cycleTheme === 'function') {
+        return cycleTheme(event);
     }
-    
-    console.log('toggleTheme called directly');
-    
-    const isDarkMode = document.documentElement.classList.contains('dark-mode');
-    const themeBtn = document.getElementById('theme-btn');
-    
-    if (isDarkMode) {
-        // Switch to light mode
-        removeDarkMode();
-        localStorage.setItem('theme', 'light');
-        if (themeBtn) {
-            themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
-        }
-    } else {
-        // Switch to dark mode
-        applyDarkMode();
-        localStorage.setItem('theme', 'dark');
-        if (themeBtn) {
-            themeBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
-        }
-    }
-    
-    // Add a highlight effect to show the button was clicked
-    if (themeBtn) {
-        themeBtn.classList.add('btn-primary');
-        setTimeout(() => {
-            themeBtn.classList.remove('btn-primary');
-        }, 300);
-    }
+    return true;
 }
 
-/**
- * Apply dark mode classes and styles to all elements
- */
 function applyDarkMode() {
-    document.documentElement.classList.add('dark-mode');
-    document.body.classList.add('dark-mode');
-    
-    // Apply dark mode to SVGs and their containers
-    const allSvgs = document.querySelectorAll('svg');
-    allSvgs.forEach(svg => {
-        if (svg.parentElement) {
-            svg.parentElement.classList.add('dark-mode');
-        }
-        svg.classList.add('dark-mode');
-    });
-    
-    // Apply to all other elements that might need dark mode classes
-    document.querySelectorAll('table, .navbar, .card, .footer, footer').forEach(el => {
-        el.classList.add('dark-mode');
-    });
-    
-    // Add direct styles for immediate effect
-    document.body.style.backgroundColor = '#121212';
-    document.body.style.color = '#e0e0e0';
-    document.documentElement.style.setProperty('--bs-body-bg', '#121212');
-    document.documentElement.style.setProperty('--bs-body-color', '#e0e0e0');
-    
-    // Enhance navigation appearance
-    document.querySelectorAll('.navbar').forEach(navbar => {
-        navbar.style.backgroundColor = '#1a1a1a';
-        navbar.style.boxShadow = '0 3px 8px rgba(0, 0, 0, 0.3)';
-    });
-    
-    // Enhance form controls
-    document.querySelectorAll('.form-control, .form-select').forEach(control => {
-        control.style.backgroundColor = '#2d2d2d';
-        control.style.borderColor = '#3d3d3d';
-        control.style.color = '#e0e0e0';
-    });
-    
-    // Update chart themes
-    updateChartsForTheme('dark');
+    console.log('Dark mode is now managed by theme-unified.js');
 }
 
-/**
- * Remove dark mode classes and restore light mode
- */
 function removeDarkMode() {
-    document.documentElement.classList.remove('dark-mode');
-    document.body.classList.remove('dark-mode');
-    
-    // Remove dark mode from SVGs and their containers
-    const allSvgs = document.querySelectorAll('svg');
-    allSvgs.forEach(svg => {
-        if (svg.parentElement) {
-            svg.parentElement.classList.remove('dark-mode');
-        }
-        svg.classList.remove('dark-mode');
-    });
-    
-    // Apply to all other elements that might need dark mode classes
-    document.querySelectorAll('table, .navbar, .card, .footer, footer').forEach(el => {
-        el.classList.remove('dark-mode');
-    });
-    
-    // Disable direct styles
-    document.body.style.backgroundColor = '';
-    document.body.style.color = '';
-    document.documentElement.style.setProperty('--bs-body-bg', '');
-    document.documentElement.style.setProperty('--bs-body-color', '');
-    
-    // Reset navigation styles
-    document.querySelectorAll('.navbar').forEach(navbar => {
-        navbar.style.backgroundColor = '';
-        navbar.style.boxShadow = '';
-    });
-    
-    // Reset form controls
-    document.querySelectorAll('.form-control, .form-select').forEach(control => {
-        control.style.backgroundColor = '';
-        control.style.borderColor = '';
-        control.style.color = '';
-    });
-    
-    // Update chart themes
-    updateChartsForTheme('light');
+    console.log('Light mode is now managed by theme-unified.js');
 }
 
 /**

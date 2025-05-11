@@ -11,28 +11,52 @@
       "email_format": "html"
     }
   },
-  "physicist": {
-    "name": "Clinical Physicist",
-    "email": "physicist@example.com",
+  "aalexandrian": {
+    "name": "Ara Alexandrian",
+    "email": "aalexandrian@marybird.com",
     "role": "physicist",
-    "password": "physicist123",
+    "password": "scrypt:32768:8:1$b58DNFIbzUSfMGEv$8ba80456ada47e9b0652d9b8f274c2d6b2a1d2db94ea57f34d427afc7eaf55c8596b0af7da11a9593dceb1d3b4b9c34a94b1aa1d08346bb2264d53bfbd60673b",
     "notification_preferences": {
-      "receive_due_soon": true,
-      "receive_overdue": true,
-      "days_before_due": 14,
-      "email_format": "html"
-    }
+      "email_enabled": true,
+      "calibration_due_days": 30
+    },
+    "updated_by": "aalexandrian",
+    "updated_at": "2025-05-11T10:29:24.812118"
   },
-  "user": {
-    "name": "Regular User",
-    "email": "user@example.com",
-    "role": "user",
-    "password": "user123",
+  "echorniak": {
+    "name": "Ericka Chorniak",
+    "email": "echorniak@marybird.com",
+    "role": "physicist",
+    "password": "scrypt:32768:8:1$4Eg0yOKiopnKi4Sd$03820bcecb7dfc5873006a29bc482f32e61791c10849ae38c9a243e349e533fbfb403b84a823e681a78668449f9cf0b6059bcef28f8055198d58d62f25a59dd5",
     "notification_preferences": {
-      "receive_due_soon": false,
-      "receive_overdue": false,
-      "days_before_due": 7,
-      "email_format": "text"
-    }
+      "email_enabled": true,
+      "calibration_due_days": 30
+    },
+    "updated_by": "admin",
+    "updated_at": "2025-05-11T10:29:57.654475"
+  },
+  "astam": {
+    "name": "Angela Stam",
+    "email": "astam@marybird.com",
+    "role": "physicist",
+    "password": "scrypt:32768:8:1$OdbEwXAb85JqDqPj$71901f6612a7fbb37fea62d410517dc939b4b48e3017a8f6083af71a34946beda8e8a673ab649a79f5fc738aff503f82c794a8a71a043bdce789264b87a23777",
+    "notification_preferences": {
+      "email_enabled": true,
+      "calibration_due_days": 30
+    },
+    "updated_by": "admin",
+    "updated_at": "2025-05-11T10:29:53.193723"
+  },
+  "amcguffey": {
+    "name": "Andrew McGuffey",
+    "email": "amcguffey@marybird.com",
+    "role": "physicist",
+    "password": "scrypt:32768:8:1$ifLP0b81ry3aXH4t$87c249f671f291492cab37acb1798e99f32151752f03fffab9a4d230600fe54737673c8903b14bc192c549dd22439ea7f0b3d3cd9fcde43c3b712784a98bfa42",
+    "notification_preferences": {
+      "email_enabled": true,
+      "calibration_due_days": 30
+    },
+    "updated_by": "admin",
+    "updated_at": "2025-05-11T10:29:44.717192"
   }
 }

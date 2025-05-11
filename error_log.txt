@@ -1,0 +1,319 @@
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.11:5000
+Press CTRL+C to quit
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/simple_qr.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/simple_qr.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/simple_qr.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/__init__.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/test_equipment_db.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/test_equipment_db.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/test_equipment_db.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 5 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+127.0.0.1 - - [11/May/2025 10:53:56] "GET /admin/equipment?v=direct HTTP/1.1" 302 -
+127.0.0.1 - - [11/May/2025 10:54:05] "GET /admin/equipment-direct HTTP/1.1" 302 -
+ * Detected change in '/config/github/equipment-tracker/app/routes/simple_qr.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/simple_qr.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/simple_qr.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+ * Detected change in '/config/github/equipment-tracker/app/routes/admin.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622
+ * Detected change in '/config/github/equipment-tracker/servers/scripts/release.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/scripts/release.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/scripts/release.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/fetch/src/mcp_server_fetch/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/src/mcp_server_git/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/tests/test_server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/tests/test_server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/tests/test_server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/git/tests/test_server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sentry/src/mcp_server_sentry/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/sqlite/src/mcp_server_sqlite/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/__init__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/__main__.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/src/mcp_server_time/server.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/test/time_server_test.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/test/time_server_test.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/test/time_server_test.py', reloading
+ * Detected change in '/config/github/equipment-tracker/servers/src/time/test/time_server_test.py', reloading
+Error loading equipment data: Object of type datetime is not JSON serializable
+Loaded 6 chambers, 4 electrometers, 5 survey meters
+WeasyPrint not available. PDF generation will be simulated.
+Starting Flask server at http://0.0.0.0:5000
+ * Restarting with watchdog (inotify)
+ * Debugger is active!
+ * Debugger PIN: 138-820-622

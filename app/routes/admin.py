@@ -116,14 +116,11 @@ def create_equipment():
     if not equipment_id:
         equipment_id = f"{category}-{manufacturer}-{serial_number}"
     
-    # Load existing equipment data
+    # Load existing equipment data using our custom utilities
+    from app.models.json_utils import load_json
+
     equipment_json = os.path.join(equipment_manager.data_dir, 'equipment.json')
-    
-    try:
-        with open(equipment_json, 'r') as f:
-            equipment_data = json.load(f)
-    except:
-        equipment_data = []
+    equipment_data = load_json(equipment_json) or []
     
     # Check if equipment with this ID already exists
     for item in equipment_data:
@@ -147,14 +144,17 @@ def create_equipment():
     # Add to the list
     equipment_data.append(new_equipment)
     
-    # Save the updated data
+    # Save the updated data using our custom utilities
+    from app.models.json_utils import save_json
+
     try:
-        with open(equipment_json, 'w') as f:
-            json.dump(equipment_data, f, indent=2)
-        flash(f'Equipment {equipment_id} added successfully', 'success')
-        
-        # Force reload of equipment data
-        equipment_manager.load_data()
+        success = save_json(equipment_data, equipment_json, indent=2)
+        if success:
+            flash(f'Equipment {equipment_id} added successfully', 'success')
+            # Force reload of equipment data
+            equipment_manager.load_data()
+        else:
+            flash(f'Error saving equipment data', 'danger')
     except Exception as e:
         flash(f'Error saving equipment data: {str(e)}', 'danger')
     
@@ -175,12 +175,12 @@ def edit_equipment(equipment_id):
     notes = request.form.get('notes', '')
     
     # Load existing equipment data
+    from app.models.json_utils import load_json
+
     equipment_json = os.path.join(equipment_manager.data_dir, 'equipment.json')
-    
-    try:
-        with open(equipment_json, 'r') as f:
-            equipment_data = json.load(f)
-    except:
+    equipment_data = load_json(equipment_json)
+
+    if not equipment_data:
         flash('Error loading equipment data', 'danger')
         return redirect(url_for('admin.equipment_management'))
     
@@ -207,12 +207,14 @@ def edit_equipment(equipment_id):
     
     # Save the updated data
     try:
-        with open(equipment_json, 'w') as f:
-            json.dump(equipment_data, f, indent=2)
-        flash(f'Equipment {equipment_id} updated successfully', 'success')
-        
-        # Force reload of equipment data
-        equipment_manager.load_data()
+        from app.models.json_utils import save_json
+        success = save_json(equipment_data, equipment_json, indent=2)
+        if success:
+            flash(f'Equipment {equipment_id} updated successfully', 'success')
+            # Force reload of equipment data
+            equipment_manager.load_data()
+        else:
+            flash(f'Error saving equipment data', 'danger')
     except Exception as e:
         flash(f'Error saving equipment data: {str(e)}', 'danger')
     
@@ -223,12 +225,12 @@ def edit_equipment(equipment_id):
 def delete_equipment(equipment_id):
     """Delete an equipment item."""
     # Load existing equipment data
+    from app.models.json_utils import load_json
+
     equipment_json = os.path.join(equipment_manager.data_dir, 'equipment.json')
-    
-    try:
-        with open(equipment_json, 'r') as f:
-            equipment_data = json.load(f)
-    except:
+    equipment_data = load_json(equipment_json)
+
+    if not equipment_data:
         flash('Error loading equipment data', 'danger')
         return redirect(url_for('admin.equipment_management'))
     
@@ -247,7 +249,8 @@ def delete_equipment(equipment_id):
     # Save the updated data
     try:
         with open(equipment_json, 'w') as f:
-            json.dump(equipment_data, f, indent=2)
+            from app.models.json_utils import save_json
+        save_json(equipment_data, equipment_json, indent=2)
         flash(f'Equipment {equipment_id} deleted successfully', 'success')
         
         # Force reload of equipment data
@@ -275,19 +278,17 @@ def edit_equipment_direct(equipment_id):
     print(f"DEBUG: Equipment data: {equipment}")
 
     # Get the equipment directly from JSON file as a fallback method
-    json_file = os.path.join(equipment_manager.data_dir, 'equipment.json')
-    try:
-        with open(json_file, 'r') as f:
-            all_equipment = json.load(f)
+    from app.models.json_utils import load_json
 
-        # Find the equipment item by ID
-        for item in all_equipment:
-            if item.get('id') == equipment_id:
-                equipment = item
-                print(f"DEBUG: Found equipment in direct JSON: {equipment}")
-                break
-    except Exception as e:
-        print(f"DEBUG: Error reading JSON file: {e}")
+    json_file = os.path.join(equipment_manager.data_dir, 'equipment.json')
+    all_equipment = load_json(json_file) or []
+
+    # Find the equipment item by ID
+    for item in all_equipment:
+        if item.get('id') == equipment_id:
+            equipment = item
+            print(f"DEBUG: Found equipment in direct JSON: {equipment}")
+            break
 
     # If we still don't have valid equipment data, show an error
     if not equipment:
@@ -337,12 +338,12 @@ def update_equipment_direct(equipment_id):
     notes = request.form.get('notes', '')
     
     # Load existing equipment data
+    from app.models.json_utils import load_json
+
     equipment_json = os.path.join(equipment_manager.data_dir, 'equipment.json')
-    
-    try:
-        with open(equipment_json, 'r') as f:
-            equipment_data = json.load(f)
-    except:
+    equipment_data = load_json(equipment_json)
+
+    if not equipment_data:
         flash('Error loading equipment data', 'danger')
         return redirect(url_for('admin.equipment_management'))
     
@@ -369,12 +370,14 @@ def update_equipment_direct(equipment_id):
     
     # Save the updated data
     try:
-        with open(equipment_json, 'w') as f:
-            json.dump(equipment_data, f, indent=2)
-        flash(f'Equipment {equipment_id} updated successfully', 'success')
-        
-        # Force reload of equipment data
-        equipment_manager.load_data()
+        from app.models.json_utils import save_json
+        success = save_json(equipment_data, equipment_json, indent=2)
+        if success:
+            flash(f'Equipment {equipment_id} updated successfully', 'success')
+            # Force reload of equipment data
+            equipment_manager.load_data()
+        else:
+            flash(f'Error saving equipment data', 'danger')
     except Exception as e:
         flash(f'Error saving equipment data: {str(e)}', 'danger')
     
@@ -399,71 +402,44 @@ def generate_qr_direct(equipment_id):
     qr_dir = os.path.join(static_dir, 'qrcodes')
     os.makedirs(qr_dir, exist_ok=True)
 
-    # Create a unique filename for this QR code
-    filename = f"qr_{equipment_id}_{uuid.uuid4().hex[:8]}.png"
+    # Use consistent filename pattern for equipment QR codes
+    # First, remove any existing QR codes for this equipment to avoid clutter
+    import glob
+    existing_qr_pattern = os.path.join(qr_dir, f"qr_{equipment_id}_*.png")
+    for old_qr in glob.glob(existing_qr_pattern):
+        try:
+            os.remove(old_qr)
+            print(f"Removed old QR code: {old_qr}")
+        except Exception as e:
+            print(f"Could not remove old QR code: {e}")
+
+    # Create a predictable, consistent filename for each equipment
+    # Always use the same formula so we can find it again later
+    filename = f"qr_{equipment_id}.png"  # Simple, consistent, no randomness
     output_path = os.path.join(qr_dir, filename)
 
     try:
-        # Try to use the advanced QR code generator first
-        try:
-            # Import the advanced generator from qrcodes directory
-            sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'qrcodes'))
-            from qr_generator import create_qr_in_flame
+        # Use the direct QR code generator for more reliability
+        from app.routes.direct_qr import generate_direct_qr
 
-            # Get the logo path from Resources directory
-            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        success, result = generate_direct_qr(
+            url=qr_url,
+            output_path=output_path,
+            equipment_id=equipment_id,
+            manufacturer=equipment.get('manufacturer', ''),
+            model=equipment.get('model', ''),
+            serial=equipment.get('serial_number', '')
+        )
 
-            # Try multiple potential logo paths
-            potential_paths = [
-                os.path.join(root_dir, 'qrcodes', 'Resources', 'Mary Bird Perkins Cancer Center.png'),
-                os.path.join(root_dir, 'Resources', 'Mary Bird Perkins Cancer Center.png'),
-                os.path.join(root_dir, 'Resources', 'mbp.png')
-            ]
-
-            # Find the first existing logo file
-            logo_path = None
-            for path in potential_paths:
-                if os.path.exists(path):
-                    logo_path = path
-                    break
-
-            # If no logo file exists, fall back to the simple generator
-            if not logo_path:
-                raise FileNotFoundError(f"Logo file not found in any of the expected locations")
-
-            print(f"Using logo at: {logo_path}")
-
-            # Generate the fancy QR code with the flame logo
-            create_qr_in_flame(
-                logo_path=logo_path,
-                url=qr_url,
-                output_path=output_path,
-                manufacturer=equipment.get('manufacturer', ''),
-                model=equipment.get('model', ''),
-                serial=equipment.get('serial_number', '')
-            )
-
-            print(f"Advanced QR code generated at {output_path}")
-
-        except Exception as advanced_error:
-            print(f"Error with advanced QR generator: {str(advanced_error)}")
-            # Fall back to the simple generator
-            from app.routes.simple_qr import generate_simple_qr
-
-            success, result = generate_simple_qr(
-                url=qr_url,
-                output_path=output_path,
-                equipment_id=equipment_id,
-                manufacturer=equipment.get('manufacturer', ''),
-                model=equipment.get('model', ''),
-                serial=equipment.get('serial_number', '')
-            )
-
-            if not success:
-                raise Exception(f"Simple QR code generator failed: {result}")
+        if not success:
+            raise Exception(f"QR code generation failed: {result}")
 
         # Generate URL for the QR code
         qr_code_url = url_for('static', filename=f'qrcodes/{filename}')
+
+        # Add cache buster to avoid browser caching
+        import random
+        qr_code_url = f"{qr_code_url}?v={random.randint(1000, 9999)}"
 
         # Create a QR display template
         return render_template(
@@ -517,85 +493,49 @@ def generate_qr_code():
         os.makedirs(qr_dir, exist_ok=True)
         print(f"QR code output directory: {qr_dir}")
 
-        # Create a unique filename for this QR code
-        filename = f"qr_{equipment_id}_{uuid.uuid4().hex[:8]}.png"
+        # Use consistent filename pattern for equipment QR codes
+        # First, remove any existing QR codes for this equipment to avoid clutter
+        import glob
+        existing_qr_pattern = os.path.join(qr_dir, f"qr_{equipment_id}_*.png")
+        for old_qr in glob.glob(existing_qr_pattern):
+            try:
+                os.remove(old_qr)
+                print(f"Removed old QR code: {old_qr}")
+            except Exception as e:
+                print(f"Could not remove old QR code: {e}")
+
+        # Create a predictable, consistent filename for each equipment
+        # Always use the same formula so we can find it again later
+        filename = f"qr_{equipment_id}.png"  # Simple, consistent, no randomness
         output_path = os.path.join(qr_dir, filename)
         print(f"QR code output path: {output_path}")
 
-        # Try to use the advanced QR code generator first
+        # Use the direct QR code generator for more reliability
         try:
-            # Import the advanced generator from qrcodes directory
-            sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'qrcodes'))
-            from qr_generator import create_qr_in_flame
-            
-            # Get the logo path
-            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-            logo_path = os.path.join(root_dir, 'qrcodes', 'Resources', 'Mary Bird Perkins Cancer Center.png')
-            
-            # If logo file doesn't exist, fall back to the simple generator
-            if not os.path.exists(logo_path):
-                raise FileNotFoundError(f"Logo file not found at {logo_path}")
-            
-            # Generate the fancy QR code with the flame logo
-            create_qr_in_flame(
-                logo_path=logo_path,
+            print("Using direct QR code generator...")
+            from app.routes.direct_qr import generate_direct_qr
+
+            success, result = generate_direct_qr(
                 url=url,
                 output_path=output_path,
+                equipment_id=equipment_id,
                 manufacturer=manufacturer,
                 model=model,
                 serial=serial
             )
-            
-            print(f"Advanced QR code generated at {output_path}")
-            
-        except Exception as advanced_error:
-            print(f"Error with advanced QR generator: {str(advanced_error)}")
-            # Fall back to simple QR generator
-            try:
-                print("Using simple QR code generator...")
-                from app.routes.simple_qr import generate_simple_qr
-                
-                success, result = generate_simple_qr(
-                    url=url,
-                    output_path=output_path,
-                    equipment_id=equipment_id,
-                    manufacturer=manufacturer,
-                    model=model,
-                    serial=serial
-                )
-                
-                if not success:
-                    print(f"Simple QR code generator failed: {result}")
-                    raise Exception(f"Simple QR code generator failed: {result}")
-                    
-                print(f"Simple QR code generated at {output_path}")
-                
-            except Exception as e:
-                print(f"Error with simple QR generator: {str(e)}")
-                # Fallback to extremely basic QR code
-                try:
-                    print("Falling back to extremely basic QR code generation...")
-                    import qrcode
-                    
-                    # Generate extremely basic QR code
-                    qr = qrcode.QRCode(
-                        version=1,
-                        error_correction=qrcode.constants.ERROR_CORRECT_H,
-                        box_size=10,
-                        border=4,
-                    )
-                    qr.add_data(url)
-                    qr.make(fit=True)
-                    
-                    img = qr.make_image(fill_color="black", back_color="white")
-                    img.save(output_path)
-                    print(f"Extremely basic QR code generated at {output_path}")
-                except Exception as qr_error:
-                    print(f"Fallback QR code generation failed: {str(qr_error)}")
-                    return jsonify({
-                        "status": "error",
-                        "message": f"All QR code generation methods failed: {str(qr_error)}"
-                    }), 500
+
+            if not success:
+                print(f"Direct QR code generator failed: {result}")
+                raise Exception(f"Direct QR code generator failed: {result}")
+
+            print(f"QR code generated at {output_path}")
+
+        except Exception as e:
+            print(f"Error generating QR code: {str(e)}")
+            return jsonify({
+                "status": "error",
+                "message": f"QR code generation failed: {str(e)}"
+            }), 500
 
         # Check if file was created
         if not os.path.exists(output_path):
@@ -607,12 +547,16 @@ def generate_qr_code():
 
         # Generate URL for the QR code
         qr_code_url = url_for('static', filename=f'qrcodes/{filename}')
-        print(f"QR code URL: {qr_code_url}")
+
+        # Add cache buster to avoid browser caching
+        import random
+        qr_code_url_with_cache_buster = f"{qr_code_url}?v={random.randint(1000, 9999)}"
+        print(f"QR code URL: {qr_code_url_with_cache_buster}")
 
         return jsonify({
             "status": "success",
             "message": "QR code generated successfully",
-            "qr_code_url": qr_code_url,
+            "qr_code_url": qr_code_url_with_cache_buster,
             "equipment_id": equipment_id,
             "qr_url": url
         })

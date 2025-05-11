@@ -1,8 +1,8 @@
-# Equipment Tracker QR Code System
+# GearVue QR Code System
 
 ## Overview
 
-The Equipment Tracker QR code system provides a completely frictionless way for users to check out, check in, and report issues with equipment without requiring login. This guide explains how to use and implement the QR code system.
+The GearVue QR code system provides a completely frictionless way for users to check out, check in, and report issues with equipment without requiring login. This guide explains how to use and implement the QR code system.
 
 > **Zero-Friction Access**: Users can scan QR codes and immediately take action without any login barriers.
 

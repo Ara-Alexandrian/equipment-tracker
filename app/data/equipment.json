@@ -152,5 +152,16 @@
     "location": "Covington",
     "calibration_due_date": "10/2025",
     "notes": "Annual calibration required"
+  },
+  {
+    "id": "Test-123",
+    "category": "Chamber",
+    "equipment_type": "ionization chamber",
+    "manufacturer": "CNMC",
+    "model": "TN123",
+    "serial_number": "123123",
+    "location": "Essen (BR)",
+    "calibration_due_date": "08/2025",
+    "notes": "Testing for claude"
   }
 ]

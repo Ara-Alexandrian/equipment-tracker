@@ -1,4 +1,4 @@
-# Medical Physics Equipment Tracker
+# GearVue - Medical Physics Equipment Management System
 
 A comprehensive web-based application for tracking medical physics equipment, their calibration status, location, and checkout history.
 
@@ -19,8 +19,8 @@ A comprehensive web-based application for tracking medical physics equipment, th
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/equipment-tracker.git
-   cd equipment-tracker
+   git clone https://github.com/yourusername/gearvue.git
+   cd gearvue
    ```
 
 2. Build and start the containers:
@@ -34,8 +34,8 @@ A comprehensive web-based application for tracking medical physics equipment, th
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/equipment-tracker.git
-   cd equipment-tracker
+   git clone https://github.com/yourusername/gearvue.git
+   cd gearvue
    ```
 
 2. Create a virtual environment:
@@ -103,7 +103,7 @@ export MAIL_PORT=587
 export MAIL_USERNAME=your-username
 export MAIL_PASSWORD=your-password
 export MAIL_USE_TLS=True
-export MAIL_DEFAULT_SENDER=equipment-tracker@marybird.com
+export MAIL_DEFAULT_SENDER=gearvue@marybird.com
 ```
 
 For Docker deployment, these variables can be set in the docker-compose.yml file.
@@ -129,7 +129,7 @@ The application supports both light and dark themes:
 ### Project Structure
 
 ```
-equipment-tracker/
+gearvue/
 ├── app/                    # Application code
 │   ├── data/               # JSON data files
 │   ├── models/             # Data managers

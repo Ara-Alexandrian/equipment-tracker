@@ -1,0 +1,274 @@
+/* 
+ * Dracula Mode Styles for Equipment Tracker
+ * This file contains all Dracula theme specific styles
+ * Based on the popular Dracula theme colors: https://draculatheme.com/
+ */
+
+/* Base Dracula mode body and background */
+:root.dracula-mode,
+html.dracula-mode,
+body.dracula-mode,
+.dracula-mode {
+  --bs-body-bg: #282a36 !important;
+  --bs-body-color: #f8f8f2 !important;
+  --bs-card-bg: #44475a !important;
+  --bs-card-border-color: #6272a4 !important;
+  --bs-navbar-active-color: #ff79c6 !important;
+  --bs-table-color: #f8f8f2 !important;
+  --bs-table-border-color: #6272a4 !important;
+  --bs-table-striped-bg: rgba(68, 71, 90, 0.5) !important;
+  
+  background-color: #282a36 !important;
+  color: #f8f8f2 !important;
+}
+
+/* Strengthen selector for body in dracula mode */
+html[class*="dracula-mode"],
+body[class*="dracula-mode"] {
+  background-color: #282a36 !important;
+  color: #f8f8f2 !important;
+}
+
+/* Direct element targeting for key components when dracula mode is active */
+html.dracula-mode body, 
+body.dracula-mode {
+  background-color: #282a36 !important;
+  color: #f8f8f2 !important;
+}
+
+/* Ensure the entire page gets the dracula background even if classes are missing */
+html.dracula-mode {
+  background-color: #282a36 !important;
+}
+
+/* Navbar adjustments */
+body.dracula-mode .navbar,
+body.dracula-mode .navbar-dark {
+  background-color: #44475a !important;
+  border-bottom: 1px solid #6272a4 !important;
+}
+
+body.dracula-mode .navbar-dark .navbar-nav .nav-link {
+  color: #f8f8f2 !important;
+}
+
+body.dracula-mode .navbar-dark .navbar-nav .nav-link:hover,
+body.dracula-mode .navbar-dark .navbar-nav .nav-link:focus,
+body.dracula-mode .navbar-dark .navbar-nav .nav-link.active {
+  color: #ff79c6 !important;
+}
+
+/* Card adjustments */
+body.dracula-mode .card:not(.bg-primary):not(.bg-success):not(.bg-info):not(.bg-warning):not(.bg-danger) {
+  background-color: #44475a !important;
+  border-color: #6272a4 !important;
+  color: #f8f8f2 !important;
+}
+
+body.dracula-mode .card-header {
+  background-color: #44475a !important;
+  border-color: #6272a4 !important;
+  color: #8be9fd !important;
+}
+
+/* Accent colors for cards */
+body.dracula-mode .card.bg-primary {
+  background-color: #bd93f9 !important;
+  border-color: #6272a4 !important;
+}
+
+body.dracula-mode .card.bg-success {
+  background-color: #50fa7b !important;
+  border-color: #6272a4 !important;
+  color: #282a36 !important;
+}
+
+body.dracula-mode .card.bg-info {
+  background-color: #8be9fd !important;
+  border-color: #6272a4 !important;
+  color: #282a36 !important;
+}
+
+body.dracula-mode .card.bg-warning {
+  background-color: #ffb86c !important;
+  border-color: #6272a4 !important;
+  color: #282a36 !important;
+}
+
+body.dracula-mode .card.bg-danger {
+  background-color: #ff5555 !important;
+  border-color: #6272a4 !important;
+}
+
+/* Table adjustments */
+body.dracula-mode .table {
+  color: #f8f8f2 !important;
+  border-color: #6272a4 !important;
+}
+
+body.dracula-mode .table th,
+body.dracula-mode .table td {
+  border-color: #6272a4 !important;
+}
+
+body.dracula-mode .table thead th {
+  background-color: #44475a !important;
+  color: #ff79c6 !important;
+}
+
+body.dracula-mode .table-hover tbody tr:hover {
+  background-color: rgba(189, 147, 249, 0.1) !important;
+  color: #f8f8f2 !important;
+}
+
+/* Form controls */
+body.dracula-mode .form-control,
+body.dracula-mode .form-select {
+  background-color: #44475a !important;
+  border-color: #6272a4 !important;
+  color: #f8f8f2 !important;
+}
+
+body.dracula-mode .form-control:focus,
+body.dracula-mode .form-select:focus {
+  box-shadow: 0 0 0 0.25rem rgba(189, 147, 249, 0.25) !important;
+  border-color: #bd93f9 !important;
+}
+
+/* Dropdowns */
+body.dracula-mode .dropdown-menu {
+  background-color: #44475a !important;
+  border-color: #6272a4 !important;
+}
+
+body.dracula-mode .dropdown-item {
+  color: #f8f8f2 !important;
+}
+
+body.dracula-mode .dropdown-item:hover {
+  background-color: #6272a4 !important;
+  color: #ffffff !important;
+}
+
+body.dracula-mode .dropdown-item.active {
+  background-color: #bd93f9 !important;
+  color: #f8f8f2 !important;
+}
+
+/* Footer */
+body.dracula-mode footer,
+body.dracula-mode .footer {
+  background-color: #44475a !important;
+  border-top: 1px solid #6272a4 !important;
+}
+
+/* Text colors */
+body.dracula-mode .text-muted {
+  color: #f1fa8c !important;
+}
+
+/* Links */
+body.dracula-mode a:not(.btn) {
+  color: #8be9fd !important;
+}
+
+body.dracula-mode a:not(.btn):hover {
+  color: #ff79c6 !important;
+  text-decoration: underline;
+}
+
+/* Buttons */
+body.dracula-mode .btn-outline-light {
+  color: #f8f8f2 !important;
+  border-color: #f8f8f2 !important;
+}
+
+body.dracula-mode .btn-outline-light:hover {
+  background-color: #f8f8f2 !important;
+  color: #282a36 !important;
+}
+
+body.dracula-mode .btn-outline-primary {
+  color: #bd93f9 !important;
+  border-color: #bd93f9 !important;
+}
+
+body.dracula-mode .btn-outline-primary:hover {
+  background-color: #bd93f9 !important;
+  color: #282a36 !important;
+}
+
+body.dracula-mode .btn-primary {
+  background-color: #bd93f9 !important;
+  border-color: #bd93f9 !important;
+  color: #282a36 !important;
+}
+
+/* Alert styles */
+body.dracula-mode .alert {
+  background-color: #44475a !important;
+  border-color: #6272a4 !important;
+  color: #f8f8f2 !important;
+}
+
+body.dracula-mode .alert-success {
+  background-color: rgba(80, 250, 123, 0.2) !important;
+  border-color: #50fa7b !important;
+  color: #50fa7b !important;
+}
+
+body.dracula-mode .alert-danger {
+  background-color: rgba(255, 85, 85, 0.2) !important;
+  border-color: #ff5555 !important;
+  color: #ff5555 !important;
+}
+
+body.dracula-mode .alert-warning {
+  background-color: rgba(255, 184, 108, 0.2) !important;
+  border-color: #ffb86c !important;
+  color: #ffb86c !important;
+}
+
+body.dracula-mode .alert-info {
+  background-color: rgba(139, 233, 253, 0.2) !important;
+  border-color: #8be9fd !important;
+  color: #8be9fd !important;
+}
+
+/* Badges */
+body.dracula-mode .badge.bg-success {
+  background-color: #50fa7b !important;
+  color: #282a36 !important;
+}
+
+body.dracula-mode .badge.bg-danger {
+  background-color: #ff5555 !important;
+}
+
+body.dracula-mode .badge.bg-warning {
+  background-color: #ffb86c !important;
+  color: #282a36 !important;
+}
+
+body.dracula-mode .badge.bg-info {
+  background-color: #8be9fd !important;
+  color: #282a36 !important;
+}
+
+body.dracula-mode .badge.bg-primary {
+  background-color: #bd93f9 !important;
+  color: #282a36 !important;
+}
+
+/* Code blocks */
+body.dracula-mode pre, 
+body.dracula-mode code {
+  background-color: #44475a !important;
+  color: #f1fa8c !important;
+  border-color: #6272a4 !important;
+}
+
+/* Dracula theme toggle button enhancement */
+body.dracula-mode #theme-btn {
+  box-shadow: 0 0 5px rgba(255, 121, 198, 0.7) !important;
+}

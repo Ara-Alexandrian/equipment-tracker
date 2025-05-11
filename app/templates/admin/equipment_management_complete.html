@@ -1,0 +1,736 @@
+{% extends 'base.html' %}
+
+{% block title %}Equipment Management - Admin - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Equipment Management <span class="badge bg-warning">FIXED VERSION</span></h1>
+        <p class="lead">Add, edit, or remove equipment items in the system. <strong>Version 2.0 - May 11, 2025</strong></p>
+        <div class="alert alert-info">
+            <p><strong>Debug Notes:</strong> Complete rewrite with proper theme switching and edit form prefilling.</p>
+        </div>
+    </div>
+    <div class="col-md-4 text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
+            <i class="bi bi-plus-circle"></i> Add New Equipment
+        </button>
+        <a href="{{ url_for('checkout.admin') }}" class="btn btn-outline-secondary ms-2">
+            <i class="bi bi-arrow-left"></i> Back to Admin
+        </a>
+    </div>
+</div>
+
+<!-- Equipment Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Equipment</h5>
+                <h2 class="display-4">{{ stats.total_equipment }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Chambers</h5>
+                <h2 class="display-4">{{ stats.chambers_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Electrometers</h5>
+                <h2 class="display-4">{{ stats.electrometers_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Survey Meters</h5>
+                <h2 class="display-4">{{ stats.survey_meters_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter and Search Row -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Filter Equipment</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('admin.equipment_management') }}" method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="manufacturer" class="form-label">Manufacturer</label>
+                        <select class="form-select" id="manufacturer" name="manufacturer">
+                            <option value="">All Manufacturers</option>
+                            {% for manufacturer in manufacturers %}
+                            <option value="{{ manufacturer }}" {% if selected_manufacturer == manufacturer %}selected{% endif %}>{{ manufacturer }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="location" class="form-label">Location</label>
+                        <select class="form-select" id="location" name="location">
+                            <option value="">All Locations</option>
+                            {% for location in locations %}
+                            <option value="{{ location }}" {% if selected_location == location %}selected{% endif %}>{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-filter"></i> Apply Filters
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Equipment Table -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Equipment List</h5>
+                <span class="badge bg-secondary">{{ equipment|length }} items</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="equipmentTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Manufacturer</th>
+                                <th>Model</th>
+                                <th>Serial Number</th>
+                                <th>Location</th>
+                                <th>Calibration Due</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in equipment %}
+                            <tr>
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.category }}</td>
+                                <td>{{ item.equipment_type }}</td>
+                                <td>{{ item.manufacturer }}</td>
+                                <td>{{ item.model }}</td>
+                                <td>{{ item.serial_number }}</td>
+                                <td>{{ item.location }}</td>
+                                <td>{{ item.calibration_due_date }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
+                                            data-eq-id="{{ item.id }}" 
+                                            data-eq-category="{{ item.category }}" 
+                                            data-eq-type="{{ item.equipment_type }}" 
+                                            data-eq-manufacturer="{{ item.manufacturer }}" 
+                                            data-eq-model="{{ item.model }}" 
+                                            data-eq-serial="{{ item.serial_number }}" 
+                                            data-eq-location="{{ item.location }}" 
+                                            data-eq-calibration="{{ item.calibration_due_date }}" 
+                                            data-eq-notes="{{ item.notes|default('') }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-info qr-btn"
+                                            data-eq-id="{{ item.id }}"
+                                            data-eq-manufacturer="{{ item.manufacturer }}"
+                                            data-eq-model="{{ item.model }}"
+                                            data-eq-serial="{{ item.serial_number }}">
+                                            <i class="bi bi-qr-code"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+                                            data-eq-id="{{ item.id }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="9" class="text-center">No equipment found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Equipment Modal -->
+<div class="modal fade" id="addEquipmentModal" tabindex="-1" aria-labelledby="addEquipmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addEquipmentModalLabel">Add New Equipment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('admin.create_equipment') }}" method="POST">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="equipment_id" class="form-label">Equipment ID (Optional)</label>
+                            <input type="text" class="form-control" id="equipment_id" name="equipment_id" placeholder="Auto-generated if left blank">
+                            <div class="form-text">If left blank, will be generated as Category-Manufacturer-SerialNumber</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="add_category" class="form-label">Category*</label>
+                            <select class="form-select" id="add_category" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="Chamber">Chamber</option>
+                                <option value="Electrometer">Electrometer</option>
+                                <option value="Survey Meter">Survey Meter</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="equipment_type" class="form-label">Equipment Type*</label>
+                            <input type="text" class="form-control" id="equipment_type" name="equipment_type" required placeholder="Example: ionization chamber">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="manufacturer" class="form-label">Manufacturer*</label>
+                            <input type="text" class="form-control" id="manufacturer" name="manufacturer" required placeholder="Example: CNMC">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="model" class="form-label">Model*</label>
+                            <input type="text" class="form-control" id="model" name="model" required placeholder="Example: TN30013">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="serial_number" class="form-label">Serial Number*</label>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number" required placeholder="Example: 123456">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Location*</label>
+                            <input type="text" class="form-control" id="location" name="location" required placeholder="Example: Essen (BR)">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="calibration_due_date" class="form-label">Calibration Due Date*</label>
+                            <input type="text" class="form-control" id="calibration_due_date" name="calibration_due_date" required placeholder="Example: 08/2025">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Additional information about this equipment"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add Equipment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Equipment Modal -->
+<div class="modal fade" id="editEquipmentModal" tabindex="-1" aria-labelledby="editEquipmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editEquipmentModalLabel">Edit Equipment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editEquipmentForm" action="" method="POST">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_id" class="form-label">Equipment ID</label>
+                            <input type="text" class="form-control" id="edit_id" name="equipment_id" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_category" class="form-label">Category*</label>
+                            <select class="form-select" id="edit_category" name="category" required>
+                                <option value="Chamber">Chamber</option>
+                                <option value="Electrometer">Electrometer</option>
+                                <option value="Survey Meter">Survey Meter</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_equipment_type" class="form-label">Equipment Type*</label>
+                            <input type="text" class="form-control" id="edit_equipment_type" name="equipment_type" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_manufacturer" class="form-label">Manufacturer*</label>
+                            <input type="text" class="form-control" id="edit_manufacturer" name="manufacturer" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_model" class="form-label">Model*</label>
+                            <input type="text" class="form-control" id="edit_model" name="model" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_serial_number" class="form-label">Serial Number*</label>
+                            <input type="text" class="form-control" id="edit_serial_number" name="serial_number" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_location" class="form-label">Location*</label>
+                            <input type="text" class="form-control" id="edit_location" name="location" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_calibration_due_date" class="form-label">Calibration Due Date*</label>
+                            <input type="text" class="form-control" id="edit_calibration_due_date" name="calibration_due_date" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="edit_notes" name="notes" rows="3"></textarea>
+                    </div>
+                    
+                    <!-- Debug info will appear here if needed -->
+                    <div id="edit-form-debug" class="mt-3"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Equipment Modal -->
+<div class="modal fade" id="deleteEquipmentModal" tabindex="-1" aria-labelledby="deleteEquipmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteEquipmentModalLabel">Delete Equipment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the equipment item <strong id="delete_equipment_id"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteEquipmentForm" action="" method="POST">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">Generated QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCodeLoading" class="mb-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Generating QR code...</p>
+                </div>
+                <div id="qrCodeError" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Error generating QR code. Please ensure all required fields are filled.
+                </div>
+                <div id="qrCodeDisplay" style="display: none;">
+                    <img id="qrCodeImage" src="" alt="Generated QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+                    <div class="mt-2">
+                        <p class="mb-2"><strong id="qrCodeEquipmentId">Equipment ID: </strong></p>
+                        <p class="mb-2">Scan this QR code for quick access to equipment details, checkout, and maintenance.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="qrCodeDownloadBtn" href="#" class="btn btn-primary" download="qr_code.png" style="display: none;">
+                    <i class="bi bi-download"></i> Download QR Code
+                </a>
+                <button id="qrCodePrintBtn" type="button" class="btn btn-outline-primary" style="display: none;">
+                    <i class="bi bi-printer"></i> Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Debug Message Container -->
+<div id="debug-container" style="position: fixed; bottom: 10px; left: 10px; z-index: 9999; display: none;"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Global variables for equipment management
+let equipmentData = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // ============================================================
+    // DEBUG UTILITIES
+    // ============================================================
+    
+    // Debug function to display messages
+    function showDebug(message, isError = false, duration = 5000) {
+        console.log(message);
+        
+        const container = document.getElementById('debug-container');
+        container.style.display = 'block';
+        container.style.backgroundColor = isError ? '#f8d7da' : '#d1e7dd';
+        container.style.color = isError ? '#721c24' : '#155724';
+        container.style.padding = '10px';
+        container.style.borderRadius = '5px';
+        container.style.border = isError ? '1px solid #f5c6cb' : '1px solid #c3e6cb';
+        container.style.maxWidth = '80%';
+        
+        if (typeof message === 'object') {
+            container.innerHTML = '<pre>' + JSON.stringify(message, null, 2) + '</pre>';
+        } else {
+            container.innerHTML = message;
+        }
+        
+        setTimeout(() => {
+            container.style.display = 'none';
+        }, duration);
+    }
+    
+    // ============================================================
+    // EDIT FORM FUNCTIONALITY
+    // ============================================================
+    
+    // Setup edit buttons
+    const editButtons = document.querySelectorAll('.edit-btn');
+    editButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const equipId = this.getAttribute('data-eq-id');
+            
+            // Store all the equipment data in a consistent format
+            equipmentData = {
+                id: this.getAttribute('data-eq-id'),
+                category: this.getAttribute('data-eq-category'),
+                equipment_type: this.getAttribute('data-eq-type'),
+                manufacturer: this.getAttribute('data-eq-manufacturer'),
+                model: this.getAttribute('data-eq-model'),
+                serial_number: this.getAttribute('data-eq-serial'),
+                location: this.getAttribute('data-eq-location'),
+                calibration_due_date: this.getAttribute('data-eq-calibration'),
+                notes: this.getAttribute('data-eq-notes') || ''
+            };
+            
+            console.log('Equipment data for editing:', equipmentData);
+            
+            // Populate the edit form
+            populateEditForm(equipmentData);
+            
+            // Show the modal
+            const editModal = new bootstrap.Modal(document.getElementById('editEquipmentModal'));
+            editModal.show();
+        });
+    });
+    
+    // Function to populate edit form
+    function populateEditForm(data) {
+        // Set form action
+        document.getElementById('editEquipmentForm').action = `/admin/equipment/edit/${data.id}`;
+        
+        // First, clear all fields to avoid any stale data
+        document.getElementById('edit_id').value = '';
+        document.getElementById('edit_equipment_type').value = '';
+        document.getElementById('edit_manufacturer').value = '';
+        document.getElementById('edit_model').value = '';
+        document.getElementById('edit_serial_number').value = '';
+        document.getElementById('edit_location').value = '';
+        document.getElementById('edit_calibration_due_date').value = '';
+        document.getElementById('edit_notes').value = '';
+        
+        // Now set each field with vanilla JS
+        document.getElementById('edit_id').value = data.id;
+        document.getElementById('edit_category').value = data.category;
+        document.getElementById('edit_equipment_type').value = data.equipment_type;
+        document.getElementById('edit_manufacturer').value = data.manufacturer;
+        document.getElementById('edit_model').value = data.model;
+        document.getElementById('edit_serial_number').value = data.serial_number;
+        document.getElementById('edit_location').value = data.location;
+        document.getElementById('edit_calibration_due_date').value = data.calibration_due_date;
+        document.getElementById('edit_notes').value = data.notes;
+        
+        // Also set with jQuery for redundancy
+        $('#edit_id').val(data.id);
+        $('#edit_category').val(data.category);
+        $('#edit_equipment_type').val(data.equipment_type);
+        $('#edit_manufacturer').val(data.manufacturer);
+        $('#edit_model').val(data.model);
+        $('#edit_serial_number').val(data.serial_number);
+        $('#edit_location').val(data.location);
+        $('#edit_calibration_due_date').val(data.calibration_due_date);
+        $('#edit_notes').val(data.notes);
+        
+        // Ensure category dropdown is set correctly
+        const categorySelect = document.getElementById('edit_category');
+        for (let i = 0; i < categorySelect.options.length; i++) {
+            if (categorySelect.options[i].value === data.category) {
+                categorySelect.selectedIndex = i;
+                break;
+            }
+        }
+        
+        // Add a debug view to show what was populated
+        const debugDiv = document.getElementById('edit-form-debug');
+        if (debugDiv) {
+            debugDiv.innerHTML = `
+                <div class="alert alert-info">
+                    <h5>Form populated with:</h5>
+                    <ul>
+                        <li><strong>ID:</strong> ${data.id}</li>
+                        <li><strong>Category:</strong> ${data.category}</li>
+                        <li><strong>Type:</strong> ${data.equipment_type}</li>
+                        <li><strong>Manufacturer:</strong> ${data.manufacturer}</li>
+                        <li><strong>Model:</strong> ${data.model}</li>
+                        <li><strong>Serial:</strong> ${data.serial_number}</li>
+                        <li><strong>Location:</strong> ${data.location}</li>
+                        <li><strong>Calibration:</strong> ${data.calibration_due_date}</li>
+                    </ul>
+                </div>
+            `;
+        }
+    }
+    
+    // Add event listener for when the edit modal is shown
+    $('#editEquipmentModal').on('shown.bs.modal', function() {
+        // Verify all values were set correctly
+        const currentValues = {
+            id: $('#edit_id').val(),
+            category: $('#edit_category').val(),
+            equipment_type: $('#edit_equipment_type').val(),
+            manufacturer: $('#edit_manufacturer').val(),
+            model: $('#edit_model').val(),
+            serial_number: $('#edit_serial_number').val(),
+            location: $('#edit_location').val(),
+            calibration_due_date: $('#edit_calibration_due_date').val()
+        };
+        
+        console.log('Form values after modal shown:', currentValues);
+        
+        // If any values are missing, repopulate from the stored data
+        if (!currentValues.id || !currentValues.manufacturer || !currentValues.equipment_type) {
+            console.warn('Some values were not set correctly - repopulating form');
+            populateEditForm(equipmentData);
+        }
+    });
+    
+    // ============================================================
+    // DELETE FUNCTIONALITY
+    // ============================================================
+    
+    // Setup delete buttons
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const equipId = this.getAttribute('data-eq-id');
+            
+            // Set delete confirmation text and form action
+            document.getElementById('delete_equipment_id').textContent = equipId;
+            document.getElementById('deleteEquipmentForm').action = `/admin/equipment/delete/${equipId}`;
+            
+            // Show the modal
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteEquipmentModal'));
+            deleteModal.show();
+        });
+    });
+    
+    // ============================================================
+    // QR CODE FUNCTIONALITY
+    // ============================================================
+    
+    // Setup QR code buttons
+    const qrButtons = document.querySelectorAll('.qr-btn');
+    qrButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const qrData = {
+                id: this.getAttribute('data-eq-id'),
+                manufacturer: this.getAttribute('data-eq-manufacturer'),
+                model: this.getAttribute('data-eq-model'),
+                serial: this.getAttribute('data-eq-serial')
+            };
+            
+            generateQRCode(qrData);
+        });
+    });
+    
+    // Function to generate QR code
+    function generateQRCode(data) {
+        // Show the QR modal
+        const qrModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+        qrModal.show();
+        
+        // Show loading state
+        document.getElementById('qrCodeLoading').style.display = 'block';
+        document.getElementById('qrCodeError').style.display = 'none';
+        document.getElementById('qrCodeDisplay').style.display = 'none';
+        document.getElementById('qrCodeDownloadBtn').style.display = 'none';
+        document.getElementById('qrCodePrintBtn').style.display = 'none';
+        
+        // Validate data
+        if (!data.id || !data.manufacturer || !data.serial) {
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = "Missing required QR code data";
+            document.getElementById('qrCodeError').style.display = 'block';
+            return;
+        }
+        
+        // Prepare request data
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${data.id}`;
+        
+        const requestData = {
+            url: qrUrl,
+            equipment_id: data.id,
+            manufacturer: data.manufacturer,
+            model: data.model,
+            serial: data.serial
+        };
+        
+        // Send AJAX request
+        fetch('/admin/equipment/generate-qr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            return response.json();
+        })
+        .then(responseData => {
+            // Hide loading
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            
+            if (responseData.status === 'success') {
+                // Show QR code
+                document.getElementById('qrCodeDisplay').style.display = 'block';
+                document.getElementById('qrCodeImage').src = responseData.qr_code_url;
+                document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${data.id}`;
+                
+                // Setup download button
+                const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+                downloadBtn.href = responseData.qr_code_url;
+                downloadBtn.download = `qr_code_${data.id}.png`;
+                downloadBtn.style.display = 'inline-block';
+                
+                // Show print button
+                document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+            } else {
+                // Show error
+                document.getElementById('qrCodeError').textContent = responseData.message || 'Failed to generate QR code';
+                document.getElementById('qrCodeError').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            // Show error
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = `Error: ${error.message}`;
+            document.getElementById('qrCodeError').style.display = 'block';
+            console.error('QR code generation error:', error);
+        });
+    }
+    
+    // Print QR code
+    document.getElementById('qrCodePrintBtn').addEventListener('click', printQRCode);
+    
+    function printQRCode() {
+        const printWindow = window.open('', '_blank');
+        const qrImage = document.getElementById('qrCodeImage').src;
+        const equipmentId = document.getElementById('qrCodeEquipmentId').textContent;
+        
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>QR Code - ${equipmentId}</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        padding: 20px;
+                    }
+                    img {
+                        max-width: 300px;
+                        height: auto;
+                    }
+                    .container {
+                        display: inline-block;
+                        border: 1px solid #ccc;
+                        padding: 20px;
+                        margin: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <img src="${qrImage}" alt="QR Code">
+                    <div>
+                        <p><strong>${equipmentId}</strong></p>
+                        <p>Mary Bird Perkins Cancer Center</p>
+                    </div>
+                </div>
+                <script>
+                    window.onload = function() {
+                        setTimeout(() => {
+                            window.print();
+                            setTimeout(() => {
+                                window.close();
+                            }, 100);
+                        }, 500);
+                    };
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+    
+    // Initialize DataTable if available
+    if (typeof $.fn.DataTable !== 'undefined') {
+        $('#equipmentTable').DataTable({
+            pageLength: 25,
+            responsive: true
+        });
+    }
+    
+    // We don't need the theme switcher fix anymore since we've implemented it globally
+    // in theme-unified.js which is included in base.html
+});
+</script>
+{% endblock %}

@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <div class="text-center mb-4">
-        <img src="{{ url_for('static', filename='img/Equipment Tracker.png') }}" alt="Equipment Tracker Logo" style="max-height: 100px;">
+        <img src="{{ url_for('static', filename='img/gearvue-text-transparent.png') }}" alt="GearVue Logo" style="max-height: 100px;">
         <h1 class="display-5 mt-3">Equipment Check Out</h1>
     </div>
 
@@ -73,15 +73,18 @@
                         <!-- Location Field -->
                         <div class="mb-3">
                             <label for="location" class="form-label">Current/New Location</label>
-                            <input type="text" class="form-control" id="location" name="location" required 
-                                   list="location_list" placeholder="Where will this equipment be used?">
+                            <select class="form-select" id="location" name="location" required>
+                                <option value="">-- Select location --</option>
+                                <option value="Essen (BR)">Essen (BR)</option>
+                                <option value="Picardy (BRG)">Picardy (BRG)</option>
+                                <option value="Gonzales">Gonzales</option>
+                                <option value="Covington">Covington</option>
+                                <option value="Perkins Rowe QC">Perkins Rowe QC</option>
+                                <option value="Hammond">Hammond</option>
+                                <option value="Natchez">Natchez</option>
+                                <option value="Houma">Houma</option>
+                            </select>
                             <div class="invalid-feedback">Please specify where the equipment will be used.</div>
-                            
-                            <datalist id="location_list">
-                                {% for location in locations %}
-                                <option value="{{ location }}">
-                                {% endfor %}
-                            </datalist>
                         </div>
                         
                         <!-- Expected Return -->

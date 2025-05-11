@@ -1,0 +1,53 @@
+[
+  {
+    "id": "1e9e5f6e-42ce-4e95-b11f-e203c1ff21b0",
+    "equipment_id": "Chamber-CNMC-456789",
+    "title": "Leaking chamber",
+    "description": "I will discuss with angela about how to send it in to correct it",
+    "created_by": "aalexandrian",
+    "assigned_to": "echorniak",
+    "ticket_type": "maintenance",
+    "priority": "medium",
+    "status": "open",
+    "equipment_condition": "critical",
+    "created_at": "2025-05-11T11:33:22.597617",
+    "updated_at": "2025-05-11T12:35:57.474668",
+    "resolved_at": null,
+    "closed_at": null,
+    "comments": []
+  },
+  {
+    "id": "3572c6b0-5020-4c2e-a3e7-2c1541f266fd",
+    "equipment_id": "Chamber-CNMC-123456",
+    "title": "Leaking chamber",
+    "description": "Needs to be sent in",
+    "created_by": "aalexandrian",
+    "assigned_to": "astam",
+    "ticket_type": "maintenance",
+    "priority": "high",
+    "status": "open",
+    "equipment_condition": "normal",
+    "created_at": "2025-05-11T11:34:01.039001",
+    "updated_at": "2025-05-11T12:35:37.107755",
+    "resolved_at": null,
+    "closed_at": null,
+    "comments": []
+  },
+  {
+    "id": "02a84739-5fce-47af-a68e-8d086cec3bdb",
+    "equipment_id": "Chamber-IBA-555123",
+    "title": "Calibration is late",
+    "description": "Its a month overdue",
+    "created_by": "aalexandrian",
+    "assigned_to": null,
+    "ticket_type": "calibration",
+    "priority": "medium",
+    "status": "open",
+    "equipment_condition": "normal",
+    "created_at": "2025-05-11T13:00:03.898709",
+    "updated_at": "2025-05-11T13:00:03.898709",
+    "resolved_at": null,
+    "closed_at": null,
+    "comments": []
+  }
+]

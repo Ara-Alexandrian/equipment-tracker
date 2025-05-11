@@ -3,7 +3,11 @@ Dashboard routes for the Equipment Tracker
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models.equipment import EquipmentDataManager
-from app import equipment_manager
+from app import equipment_manager, checkout_manager
+from app.models.ticket import TicketManager
+
+# Initialize ticket manager
+ticket_manager = TicketManager()
 from datetime import datetime
 
 bp = Blueprint('dashboard', __name__)
@@ -50,7 +54,9 @@ def equipment_list():
         locations=locations,
         selected_category=category,
         selected_location=location,
-        search_query=search_query
+        search_query=search_query,
+        checkout_manager=checkout_manager,
+        ticket_manager=ticket_manager
     )
 
 @bp.route('/equipment/<string:equipment_id>')
@@ -63,9 +69,15 @@ def equipment_detail(equipment_id):
         flash('Equipment not found', 'error')
         return redirect(url_for('dashboard.equipment_list'))
     
+    # Get checkout status
+    status = checkout_manager.get_equipment_status(equipment_id)
+    
     return render_template(
         'dashboard/equipment_detail.html',
-        equipment=equipment
+        equipment=equipment,
+        status=status,
+        checkout_manager=checkout_manager,
+        ticket_manager=ticket_manager
     )
 
 @bp.route('/calibration')

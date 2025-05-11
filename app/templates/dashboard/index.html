@@ -1,16 +1,41 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Equipment Tracker{% endblock %}
+{% block title %}Dashboard - GearVue{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
         <h1>Equipment Dashboard</h1>
-        <p class="lead">Welcome to the Equipment Tracker Dashboard. Manage your equipment inventory and track calibrations.</p>
+        <p class="lead">Welcome to the GearVue Dashboard. Manage your equipment inventory and track calibrations.</p>
+
+        <!-- Quick Action Buttons -->
+        <div class="mt-4">
+            <a href="{{ url_for('ticket.index') }}" class="btn btn-primary me-2">
+                <i class="bi bi-ticket-perforated-fill"></i> Ticket Dashboard
+            </a>
+            <a href="{{ url_for('dashboard.equipment_list') }}" class="btn btn-success me-2">
+                <i class="bi bi-grid-3x3-gap-fill"></i> Equipment List
+            </a>
+            <a href="{{ url_for('checkout.index') }}" class="btn btn-info me-2">
+                <i class="bi bi-box-arrow-right"></i> Checkout
+            </a>
+            {% if user and user.role in ['admin', 'physicist'] %}
+            <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-warning me-2">
+                <i class="bi bi-qr-code"></i> Add Equipment
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- QR code info for administrators -->
+        {% if user and user.role in ['admin', 'physicist'] %}
+        <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle"></i> <strong>New Feature:</strong> You can now generate QR codes when adding or editing equipment! <a href="{{ url_for('admin.equipment_management') }}">Try it now</a>
+        </div>
+        {% endif %}
     </div>
     <div class="col-md-4 text-center">
         <div class="mb-3">
-            <img src="{{ url_for('static', filename='img/Equipment Tracker.png') }}" alt="Equipment Tracker Logo" class="img-fluid dashboard-logo" style="max-height: 150px; border-radius: 50%; background-color: white; padding: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2);">
+            <img src="{{ url_for('static', filename='img/gearvue-text-transparent.png') }}" alt="GearVue Logo" class="img-fluid dashboard-logo" style="max-height: 150px; border-radius: 50%; padding: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2);">
         </div>
         <div class="mt-3">
             <h5 class="text-muted">Mary Bird Perkins Cancer Center</h5>
@@ -21,42 +46,72 @@
 
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-white bg-primary h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Total Equipment</h5>
-                <h2 class="display-4">{{ stats.total_equipment }}</h2>
-                <p class="card-text">Total pieces of equipment</p>
+        <a href="{{ url_for('dashboard.equipment_list') }}" class="text-decoration-none">
+            <div class="card text-white bg-primary h-100 dashboard-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Equipment</h5>
+                    <h2 class="display-4">{{ stats.total_equipment }}</h2>
+                    <p class="card-text">Total pieces of equipment</p>
+                </div>
+                <div class="card-footer text-white text-center">
+                    <small><i class="bi bi-search"></i> View All Equipment</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-success h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Chambers</h5>
-                <h2 class="display-4">{{ stats.chambers_count }}</h2>
-                <p class="card-text">Ionization chambers and related equipment</p>
+        <a href="{{ url_for('dashboard.equipment_list', category='Chamber') }}" class="text-decoration-none">
+            <div class="card text-white bg-success h-100 dashboard-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Chambers</h5>
+                    <h2 class="display-4">{{ stats.chambers_count }}</h2>
+                    <p class="card-text">Ionization chambers and related equipment</p>
+                </div>
+                <div class="card-footer text-white text-center">
+                    <small><i class="bi bi-filter"></i> Filter by Chambers</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-info h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Electrometers</h5>
-                <h2 class="display-4">{{ stats.electrometers_count }}</h2>
-                <p class="card-text">Electrometer devices</p>
+        <a href="{{ url_for('dashboard.equipment_list', category='Electrometer') }}" class="text-decoration-none">
+            <div class="card text-white bg-info h-100 dashboard-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Electrometers</h5>
+                    <h2 class="display-4">{{ stats.electrometers_count }}</h2>
+                    <p class="card-text">Electrometer devices</p>
+                </div>
+                <div class="card-footer text-white text-center">
+                    <small><i class="bi bi-filter"></i> Filter by Electrometers</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-warning h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Survey Meters</h5>
-                <h2 class="display-4">{{ stats.survey_meters_count }}</h2>
-                <p class="card-text">Survey and neutron meters</p>
+        <a href="{{ url_for('dashboard.equipment_list', category='Survey Meter') }}" class="text-decoration-none">
+            <div class="card text-white bg-warning h-100 dashboard-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Survey Meters</h5>
+                    <h2 class="display-4">{{ stats.survey_meters_count }}</h2>
+                    <p class="card-text">Survey and neutron meters</p>
+                </div>
+                <div class="card-footer text-white text-center">
+                    <small><i class="bi bi-filter"></i> Filter by Survey Meters</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
+
+<style>
+    .dashboard-card {
+        transition: all 0.3s ease;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+</style>
 
 <div class="row">
     <div class="col-md-12">

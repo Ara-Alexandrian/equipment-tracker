@@ -1,79 +1,65 @@
 #!/bin/bash
-# Start script for Equipment Tracker
+# Unified start script for Equipment Tracker application
 
-# Get directory where this script is located
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$SCRIPT_DIR"
+# Default values
+HOST="192.168.1.11"
+PORT="8889"
+DEBUG=0
+CLEAR_CACHE=0
 
-# Detect IP address
-IP_ADDRESS=$(hostname -I | awk '{print $1}')
-if [ -z "$IP_ADDRESS" ]; then
-    IP_ADDRESS="localhost"
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --debug)
+      DEBUG=1
+      shift
+      ;;
+    --port=*)
+      PORT="${1#*=}"
+      shift
+      ;;
+    --host=*)
+      HOST="${1#*=}"
+      shift
+      ;;
+    --ticket)
+      PORT="8899"
+      DEBUG=1
+      shift
+      ;;
+    --clear-cache)
+      CLEAR_CACHE=1
+      shift
+      ;;
+    *)
+      echo "Unknown parameter: $1"
+      echo "Usage: $0 [--debug] [--port=PORT] [--host=HOST] [--ticket] [--clear-cache]"
+      exit 1
+      ;;
+  esac
+done
+
+# Check if we need to add version timestamps to static files for cache busting
+if [ $CLEAR_CACHE -eq 1 ]; then
+  # Add a timestamp to each JS and CSS file reference in templates
+  TIMESTAMP=$(date +%s)
+  echo "Adding cache-busting timestamp ($TIMESTAMP) to static files..."
+
+  # Create a backup of the equipment_management.html file
+  cp app/templates/admin/equipment_management.html app/templates/admin/equipment_management.html.bak
+
+  # Add debug message to the equipment_management.html file to verify it's being used
+  echo "Adding debug markers to equipment_management.html..."
+  sed -i "s/<h1>Equipment Management<\/h1>/<h1>Equipment Management (Updated: $TIMESTAMP)<\/h1>/" app/templates/admin/equipment_management.html
 fi
 
-# Set up environment - first try conda, then venv
-if command -v conda &> /dev/null; then
-    # Activate conda environment if it exists
-    if conda env list | grep -q "equipment-tracker"; then
-        echo "Activating conda environment 'equipment-tracker'..."
-        source "$(conda info --base)/etc/profile.d/conda.sh"
-        conda activate equipment-tracker
-    else
-        echo "Conda environment 'equipment-tracker' not found."
-        
-        # Check if virtual environment exists, create if not
-        if [ ! -d "venv" ]; then
-            echo "Creating virtual environment..."
-            python3 -m venv venv
-            
-            # Activate virtual environment
-            source venv/bin/activate
-            
-            # Install requirements
-            echo "Installing requirements..."
-            pip install -r requirements.txt
-        else
-            # Activate virtual environment
-            source venv/bin/activate
-        fi
-    fi
+# Build the command
+if [ $DEBUG -eq 1 ]; then
+  CMD="python run.py --host $HOST --port $PORT --debug"
 else
-    # No conda, use venv
-    if [ ! -d "venv" ]; then
-        echo "Creating virtual environment..."
-        python3 -m venv venv
-        
-        # Activate virtual environment
-        source venv/bin/activate
-        
-        # Install requirements
-        echo "Installing requirements..."
-        pip install -r requirements.txt
-    else
-        # Activate virtual environment
-        source venv/bin/activate
-    fi
+  CMD="python run.py --host $HOST --port $PORT"
 fi
 
-# Check if Resources directory exists and has files
-if [ ! -d "Resources" ] || [ ! "$(ls -A Resources 2>/dev/null)" ]; then
-    echo "Warning: Resources directory is empty or does not exist."
-    echo "Please ensure you have the required Excel files in the Resources directory."
-fi
-
-# Create output and logs directories if they don't exist
-mkdir -p output
-mkdir -p logs
-
-# Set default host and port
-HOST=${1:-0.0.0.0}
-PORT=${2:-5000}
-
-# Start the application
-echo "Starting Equipment Tracker..."
-echo "Access the application at:"
-echo "  - Local:    http://localhost:$PORT"
-echo "  - Network:  http://$IP_ADDRESS:$PORT"
-echo "Press Ctrl+C to stop the server"
-
-python run.py --host "$HOST" --port "$PORT"
+# Run the application
+echo "Starting Equipment Tracker on $HOST:$PORT (Debug: $DEBUG)"
+$CMD

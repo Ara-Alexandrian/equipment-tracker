@@ -1,0 +1,16 @@
+{
+  "Chamber-CNMC-123456": "normal",
+  "Chamber-CNMC-456789": "critical",
+  "Chamber-PTW-987654": "normal",
+  "Chamber-IBA-555123": "normal",
+  "Chamber-PTW-333222": "normal",
+  "Electrometer-Standard-112233": "normal",
+  "Electrometer-CNMC-445566": "normal",
+  "Electrometer-PTW-778899": "normal",
+  "Electrometer-Keithley-665544": "normal",
+  "Survey-Meter-Ludlum-221100": "normal",
+  "Survey-Meter-Ludlum-332211": "normal",
+  "Survey-Meter-Fluke-443322": "normal",
+  "Survey-Meter-Fluke-554433": "normal",
+  "Survey-Meter-Mirion-665544": "normal"
+}
