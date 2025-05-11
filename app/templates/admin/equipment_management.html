@@ -5,8 +5,13 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1>Equipment Management</h1>
-        <p class="lead">Add, edit, or remove equipment items in the system.</p>
+        <h1>Equipment Management <span class="badge bg-warning">NEW VERSION</span></h1>
+        <p class="lead">Add, edit, or remove equipment items in the system. <strong>jQuery-Enhanced: May 11, 2025 v2</strong></p>
+        <div class="alert alert-info">
+            <p><strong>Important:</strong> This page uses JavaScript for form interaction, which may not always work consistently.</p>
+            <p><strong>If you're having issues with the edit form:</strong> Use our <a href="{{ url_for('admin.equipment_management_direct') }}" class="alert-link font-weight-bold">direct edit version</a> which uses reliable server-side rendering instead of JavaScript.</p>
+            <p>The direct version also makes it easier to generate and print QR codes for equipment.</p>
+        </div>
     </div>
     <div class="col-md-4 text-end">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
@@ -138,23 +143,20 @@
                                 <td>{{ item.calibration_due_date }}</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
+                                        <a href="{{ url_for('admin.edit_equipment_direct', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-info qr-btn"
                                             data-id="{{ item.id }}"
-                                            data-category="{{ item.category }}"
-                                            data-type="{{ item.equipment_type }}"
                                             data-manufacturer="{{ item.manufacturer }}"
                                             data-model="{{ item.model }}"
                                             data-serial="{{ item.serial_number }}"
-                                            data-location="{{ item.location }}"
-                                            data-calibration="{{ item.calibration_due_date }}"
-                                            data-notes="{{ item.notes|default('') }}"
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#editEquipmentModal">
-                                            <i class="bi bi-pencil"></i>
+                                            onclick="generateQRCodeDirect(this)">
+                                            <i class="bi bi-qr-code"></i>
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn" 
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
                                             data-id="{{ item.id }}"
-                                            data-bs-toggle="modal" 
+                                            data-bs-toggle="modal"
                                             data-bs-target="#deleteEquipmentModal">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -203,31 +205,31 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="equipment_type" class="form-label">Equipment Type*</label>
-                            <input type="text" class="form-control" id="equipment_type" name="equipment_type" required placeholder="e.g., ionization chamber">
+                            <input type="text" class="form-control" id="equipment_type" name="equipment_type" required placeholder="Example: ionization chamber">
                         </div>
                         <div class="col-md-6">
                             <label for="manufacturer" class="form-label">Manufacturer*</label>
-                            <input type="text" class="form-control" id="manufacturer" name="manufacturer" required placeholder="e.g., CNMC">
+                            <input type="text" class="form-control" id="manufacturer" name="manufacturer" required placeholder="Example: CNMC">
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="model" class="form-label">Model*</label>
-                            <input type="text" class="form-control" id="model" name="model" required placeholder="e.g., TN30013">
+                            <input type="text" class="form-control" id="model" name="model" required placeholder="Example: TN30013">
                         </div>
                         <div class="col-md-6">
                             <label for="serial_number" class="form-label">Serial Number*</label>
-                            <input type="text" class="form-control" id="serial_number" name="serial_number" required placeholder="e.g., 123456">
+                            <input type="text" class="form-control" id="serial_number" name="serial_number" required placeholder="Example: 123456">
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="location" class="form-label">Location*</label>
-                            <input type="text" class="form-control" id="location" name="location" required placeholder="e.g., Essen (BR)">
+                            <input type="text" class="form-control" id="location" name="location" required placeholder="Example: Essen (BR)">
                         </div>
                         <div class="col-md-6">
                             <label for="calibration_due_date" class="form-label">Calibration Due Date*</label>
-                            <input type="text" class="form-control" id="calibration_due_date" name="calibration_due_date" required placeholder="e.g., 08/2025">
+                            <input type="text" class="form-control" id="calibration_due_date" name="calibration_due_date" required placeholder="Example: 08/2025">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -237,6 +239,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-info me-2" id="generateAddQRBtn" onclick="generateQRCode('add')">
+                        <i class="bi bi-qr-code"></i> Generate QR Code
+                    </button>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Add Equipment
                     </button>
@@ -307,6 +312,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-info me-2" id="generateQRBtn" data-id="" onclick="generateQRCode('edit')">
+                        <i class="bi bi-qr-code"></i> Generate QR Code
+                    </button>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-save"></i> Save Changes
                     </button>
@@ -339,55 +347,363 @@
         </div>
     </div>
 </div>
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">Generated QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCodeLoading" class="mb-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Generating QR code...</p>
+                </div>
+                <div id="qrCodeError" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Error generating QR code. Please ensure all required fields are filled.
+                </div>
+                <div id="qrCodeDisplay" style="display: none;">
+                    <img id="qrCodeImage" src="" alt="Generated QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+                    <div class="mt-2">
+                        <p class="mb-2"><strong id="qrCodeEquipmentId">Equipment ID: </strong></p>
+                        <p class="mb-2">Scan this QR code for quick access to equipment details, checkout, and maintenance.</p>
+                        <p class="mb-2 text-muted" id="qrCodeUrlDisplay" style="font-size: 0.8rem;"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="qrCodeDownloadBtn" href="#" class="btn btn-primary" download="qr_code.png" style="display: none;">
+                    <i class="bi bi-download"></i> Download QR Code
+                </a>
+                <a id="qrCodePrintBtn" href="#" class="btn btn-outline-primary" onclick="printQRCode()" style="display: none;">
+                    <i class="bi bi-printer"></i> Print
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Debug Message Container -->
+<div id="debug-container" style="position: fixed; bottom: 10px; left: 10px; z-index: 9999; display: none;"></div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
+    // Debug utility function
+    function showDebug(message, isError = false) {
+        console.log(message);
+        
+        const container = document.getElementById('debug-container');
+        container.style.display = 'block';
+        container.style.backgroundColor = isError ? '#f8d7da' : '#d1e7dd';
+        container.style.color = isError ? '#721c24' : '#155724';
+        container.style.padding = '10px';
+        container.style.borderRadius = '5px';
+        container.style.border = isError ? '1px solid #f5c6cb' : '1px solid #c3e6cb';
+        container.style.maxWidth = '80%';
+        container.innerHTML = message;
+        
+        setTimeout(() => {
+            container.style.display = 'none';
+        }, 5000);
+    }
+
+    // Global variable to store equipment data for the edit modal
+    let currentEditData = null;
+
+    // Direct edit function for equipment (receives parameters directly)
+    function directEditEquipment(id, category, type, manufacturer, model, serial, location, calibration, notes) {
+        console.log("Direct edit called with:", { id, category, type, manufacturer, model, serial, location, calibration, notes });
+        showDebug(`Editing equipment: ${id} - ${manufacturer} ${model}`);
+
+        // Store the data in a global variable to ensure it's available even if the form fields lose focus
+        currentEditData = {
+            id: id,
+            category: category,
+            type: type,
+            manufacturer: manufacturer,
+            model: model,
+            serial: serial,
+            location: location,
+            calibration: calibration,
+            notes: notes
+        };
+
+        // Set form action
+        document.getElementById('editEquipmentForm').action = `/admin/equipment/edit/${id}`;
+
+        // Use multiple techniques to ensure form fields are set correctly
+
+        // 1. Set values using standard DOM methods
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_category').value = category;
+        document.getElementById('edit_equipment_type').value = type;
+        document.getElementById('edit_manufacturer').value = manufacturer;
+        document.getElementById('edit_model').value = model;
+        document.getElementById('edit_serial_number').value = serial;
+        document.getElementById('edit_location').value = location;
+        document.getElementById('edit_calibration_due_date').value = calibration;
+        document.getElementById('edit_notes').value = notes;
+
+        // 2. Also set using jQuery for redundancy
+        $('#edit_id').val(id);
+        $('#edit_category').val(category);
+        $('#edit_equipment_type').val(type);
+        $('#edit_manufacturer').val(manufacturer);
+        $('#edit_model').val(model);
+        $('#edit_serial_number').val(serial);
+        $('#edit_location').val(location);
+        $('#edit_calibration_due_date').val(calibration);
+        $('#edit_notes').val(notes);
+
+        // 3. Force select elements to update
+        const categorySelect = document.getElementById('edit_category');
+        for (let i = 0; i < categorySelect.options.length; i++) {
+            if (categorySelect.options[i].value === category) {
+                categorySelect.selectedIndex = i;
+                break;
+            }
+        }
+
+        // Set QR button data
+        document.getElementById('generateQRBtn').setAttribute('data-id', id);
+
+        // Show confirmation of form population
+        const formValues = {
+            id: document.getElementById('edit_id').value,
+            category: document.getElementById('edit_category').value,
+            type: document.getElementById('edit_equipment_type').value,
+            manufacturer: document.getElementById('edit_manufacturer').value,
+            model: document.getElementById('edit_model').value,
+            serial: document.getElementById('edit_serial_number').value,
+            location: document.getElementById('edit_location').value,
+            calibration: document.getElementById('edit_calibration_due_date').value
+        };
+
+        console.log("Form values after setting:", formValues);
+
+        // Create debug info on the modal
+        setTimeout(() => {
+            // Find existing debug info and remove it
+            const existingInfo = document.querySelector('#editEquipmentModal .alert');
+            if (existingInfo) {
+                existingInfo.remove();
+            }
+
+            // Add new info
+            const modalBody = document.querySelector('#editEquipmentModal .modal-body');
+            if (modalBody) {
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'alert alert-info mt-3';
+                infoDiv.innerHTML = `
+                    <p><strong>Form Populated:</strong></p>
+                    <p>ID: ${id}</p>
+                    <p>Type: ${type}</p>
+                    <p>Manufacturer: ${manufacturer}</p>
+                `;
+                modalBody.appendChild(infoDiv);
+            }
+        }, 300);
+    }
+
+    // Old function for compatibility (might be needed by other buttons)
+    function editEquipment(button) {
+        // Get all data attributes from the button
+        const data = {
+            id: button.getAttribute('data-id'),
+            category: button.getAttribute('data-category'),
+            type: button.getAttribute('data-type'),
+            manufacturer: button.getAttribute('data-manufacturer'),
+            model: button.getAttribute('data-model'),
+            serial: button.getAttribute('data-serial'),
+            location: button.getAttribute('data-location'),
+            calibration: button.getAttribute('data-calibration'),
+            notes: button.getAttribute('data-notes') || ''
+        };
+
+        // Store the data globally
+        currentEditData = data;
+
+        console.log("Edit equipment data:", data);
+        showDebug(`Editing equipment via old method: ${data.id} - ${data.manufacturer} ${data.model}`);
+
+        // Call the direct method instead
+        directEditEquipment(
+            data.id, data.category, data.type, data.manufacturer,
+            data.model, data.serial, data.location, data.calibration, data.notes
+        );
+    }
+
+    // Add jQuery-based modal event listener for better compatibility with Bootstrap
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle Edit Equipment Modal
-        const editButtons = document.querySelectorAll('.edit-btn');
-        editButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const category = this.getAttribute('data-category');
-                const type = this.getAttribute('data-type');
-                const manufacturer = this.getAttribute('data-manufacturer');
-                const model = this.getAttribute('data-model');
-                const serial = this.getAttribute('data-serial');
-                const location = this.getAttribute('data-location');
-                const calibration = this.getAttribute('data-calibration');
-                const notes = this.getAttribute('data-notes');
-                
-                // Set form action URL
-                document.getElementById('editEquipmentForm').action = `/admin/equipment/edit/${id}`;
-                
-                // Populate form fields
-                document.getElementById('edit_id').value = id;
-                document.getElementById('edit_category').value = category;
-                document.getElementById('edit_equipment_type').value = type;
-                document.getElementById('edit_manufacturer').value = manufacturer;
-                document.getElementById('edit_model').value = model;
-                document.getElementById('edit_serial_number').value = serial;
-                document.getElementById('edit_location').value = location;
-                document.getElementById('edit_calibration_due_date').value = calibration;
-                document.getElementById('edit_notes').value = notes;
+        // Use jQuery for Bootstrap modal events
+        $(function() {
+            $('#editEquipmentModal').on('show.bs.modal', function() {
+                console.log("jQuery modal show event triggered (before modal is shown)");
+
+                // Apply the values again just before the modal is shown
+                if (currentEditData) {
+                    console.log("Pre-populating form fields before modal is shown:", currentEditData);
+
+                    // Set form action
+                    $('#editEquipmentForm').attr('action', `/admin/equipment/edit/${currentEditData.id}`);
+
+                    // Set all form fields using jQuery
+                    $('#edit_id').val(currentEditData.id);
+                    $('#edit_category').val(currentEditData.category);
+                    $('#edit_equipment_type').val(currentEditData.type);
+                    $('#edit_manufacturer').val(currentEditData.manufacturer);
+                    $('#edit_model').val(currentEditData.model);
+                    $('#edit_serial_number').val(currentEditData.serial);
+                    $('#edit_location').val(currentEditData.location);
+                    $('#edit_calibration_due_date').val(currentEditData.calibration);
+                    $('#edit_notes').val(currentEditData.notes);
+
+                    // Set QR button data
+                    $('#generateQRBtn').attr('data-id', currentEditData.id);
+
+                    // Force select elements to update
+                    const categorySelect = document.getElementById('edit_category');
+                    for (let i = 0; i < categorySelect.options.length; i++) {
+                        if (categorySelect.options[i].value === currentEditData.category) {
+                            categorySelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            $('#editEquipmentModal').on('shown.bs.modal', function() {
+                console.log("jQuery modal shown event triggered (after modal is shown)");
+
+                // Verify the form values after the modal is fully shown
+                const formValues = {
+                    id: $('#edit_id').val(),
+                    category: $('#edit_category').val(),
+                    type: $('#edit_equipment_type').val(),
+                    manufacturer: $('#edit_manufacturer').val(),
+                    model: $('#edit_model').val(),
+                    serial: $('#edit_serial_number').val(),
+                    location: $('#edit_location').val(),
+                    calibration: $('#edit_calibration_due_date').val(),
+                    notes: $('#edit_notes').val()
+                };
+
+                console.log("Modal shown - current form values:", formValues);
+
+                // If values are missing or incorrect, try to repopulate from the stored data
+                if (currentEditData && (
+                    !formValues.id ||
+                    formValues.category !== currentEditData.category ||
+                    formValues.type !== currentEditData.type ||
+                    formValues.manufacturer !== currentEditData.manufacturer ||
+                    formValues.model !== currentEditData.model ||
+                    formValues.serial !== currentEditData.serial ||
+                    formValues.location !== currentEditData.location ||
+                    formValues.calibration !== currentEditData.calibration
+                )) {
+                    console.log("Values missing or incorrect, repopulating from stored data:", currentEditData);
+
+                    // Repopulate the form again with stored data
+                    $('#edit_id').val(currentEditData.id);
+                    $('#edit_category').val(currentEditData.category);
+                    $('#edit_equipment_type').val(currentEditData.type);
+                    $('#edit_manufacturer').val(currentEditData.manufacturer);
+                    $('#edit_model').val(currentEditData.model);
+                    $('#edit_serial_number').val(currentEditData.serial);
+                    $('#edit_location').val(currentEditData.location);
+                    $('#edit_calibration_due_date').val(currentEditData.calibration);
+                    $('#edit_notes').val(currentEditData.notes);
+
+                    // Set QR button data
+                    $('#generateQRBtn').attr('data-id', currentEditData.id);
+
+                    // Use setTimeout to ensure this runs after any browser form resets
+                    setTimeout(() => {
+                        // One more attempt at setting the values
+                        document.getElementById('edit_id').value = currentEditData.id;
+                        document.getElementById('edit_category').value = currentEditData.category;
+                        document.getElementById('edit_equipment_type').value = currentEditData.type;
+                        document.getElementById('edit_manufacturer').value = currentEditData.manufacturer;
+                        document.getElementById('edit_model').value = currentEditData.model;
+                        document.getElementById('edit_serial_number').value = currentEditData.serial;
+                        document.getElementById('edit_location').value = currentEditData.location;
+                        document.getElementById('edit_calibration_due_date').value = currentEditData.calibration;
+                        document.getElementById('edit_notes').value = currentEditData.notes;
+
+                        // Force select elements to update again
+                        const categorySelect = document.getElementById('edit_category');
+                        for (let i = 0; i < categorySelect.options.length; i++) {
+                            if (categorySelect.options[i].value === currentEditData.category) {
+                                categorySelect.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }, 50);
+                }
+
+                // Display debug info in the modal
+                setTimeout(() => {
+                    // Check for existing debug info
+                    const existingDebug = $('.modal-debug-info');
+                    if (existingDebug.length > 0) {
+                        existingDebug.remove();
+                    }
+
+                    // Create new debug info
+                    const updatedValues = {
+                        id: $('#edit_id').val(),
+                        category: $('#edit_category').val(),
+                        manufacturer: $('#edit_manufacturer').val(),
+                        model: $('#edit_model').val(),
+                        type: $('#edit_equipment_type').val(),
+                        serial: $('#edit_serial_number').val(),
+                        location: $('#edit_location').val(),
+                        calibration: $('#edit_calibration_due_date').val()
+                    };
+
+                    const debugHtml = `
+                        <div class="alert alert-info mt-3 modal-debug-info">
+                            <p><strong>Form Values After Modal Shown:</strong></p>
+                            <p>ID: ${updatedValues.id}</p>
+                            <p>Category: ${updatedValues.category}</p>
+                            <p>Type: ${updatedValues.type}</p>
+                            <p>Manufacturer: ${updatedValues.manufacturer}</p>
+                            <p>Model: ${updatedValues.model}</p>
+                            <p>Serial: ${updatedValues.serial}</p>
+                            <p>Location: ${updatedValues.location}</p>
+                            <p>Calibration: ${updatedValues.calibration}</p>
+                        </div>
+                    `;
+
+                    $('#editEquipmentModal .modal-body').append(debugHtml);
+                }, 200);
             });
         });
-        
+    });
+
+    // Handle delete equipment modal
+    document.addEventListener('DOMContentLoaded', function() {
         // Handle Delete Equipment Modal
         const deleteButtons = document.querySelectorAll('.delete-btn');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
-                
+
                 // Set ID in confirmation message
                 document.getElementById('delete_equipment_id').textContent = id;
-                
+
                 // Set form action URL
                 document.getElementById('deleteEquipmentForm').action = `/admin/equipment/delete/${id}`;
             });
         });
-        
+
         // Initialize DataTable if available
         if (typeof $.fn.DataTable !== 'undefined') {
             $('#equipmentTable').DataTable({
@@ -396,5 +712,182 @@
             });
         }
     });
+
+    // Function to generate QR code directly from the equipment list
+    function generateQRCodeDirect(buttonElement) {
+        // Get equipment ID from the button
+        const equipmentId = buttonElement.getAttribute('data-id');
+
+        // Redirect to the server-side QR generation page instead of using AJAX
+        window.location.href = `/admin/equipment/${equipmentId}/qr`;
+    }
+
+    function generateQRCode(mode) {
+        console.log(`generateQRCode called with mode: ${mode}`);
+        
+        // Show the QR code modal
+        const qrModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+        qrModal.show();
+
+        // Show loading state
+        document.getElementById('qrCodeLoading').style.display = 'block';
+        document.getElementById('qrCodeError').style.display = 'none';
+        document.getElementById('qrCodeDisplay').style.display = 'none';
+        document.getElementById('qrCodeDownloadBtn').style.display = 'none';
+        document.getElementById('qrCodePrintBtn').style.display = 'none';
+
+        // Get equipment data based on the mode (add or edit)
+        let equipmentId, manufacturer, model, serialNumber;
+
+        if (mode === 'add') {
+            // Get values from add form
+            equipmentId = document.getElementById('equipment_id').value.trim();
+            manufacturer = document.getElementById('manufacturer').value.trim();
+            model = document.getElementById('model').value.trim();
+            serialNumber = document.getElementById('serial_number').value.trim();
+
+            // If equipment ID is not provided, generate it from other fields
+            if (!equipmentId && manufacturer && serialNumber) {
+                const category = document.getElementById('add_category').value.trim();
+                equipmentId = `${category}-${manufacturer}-${serialNumber}`;
+            }
+            
+            console.log("Add form QR data:", { equipmentId, manufacturer, model, serialNumber });
+            
+        } else if (mode === 'edit') {
+            // Get values from edit form
+            equipmentId = document.getElementById('edit_id').value.trim();
+            manufacturer = document.getElementById('edit_manufacturer').value.trim();
+            model = document.getElementById('edit_model').value.trim();
+            serialNumber = document.getElementById('edit_serial_number').value.trim();
+            
+            console.log("Edit form QR data:", { equipmentId, manufacturer, model, serialNumber });
+        }
+
+        // Validate required fields
+        if (!equipmentId || !manufacturer || !serialNumber) {
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = "Missing required fields (equipment ID, manufacturer, or serial number)";
+            document.getElementById('qrCodeError').style.display = 'block';
+            console.error("Missing required fields:", { equipmentId, manufacturer, serialNumber });
+            return;
+        }
+
+        // Construct the URL for the QR code - direct to the equipment detail page
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+        console.log("QR URL:", qrUrl);
+
+        // Make AJAX request to generate the QR code
+        const requestData = {
+            url: qrUrl,
+            equipment_id: equipmentId,
+            manufacturer: manufacturer,
+            model: model,
+            serial: serialNumber
+        };
+
+        console.log("Sending request to generate QR code:", requestData);
+
+        fetch('/admin/equipment/generate-qr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => {
+            console.log("Response status:", response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("QR code response:", data);
+            
+            // Hide loading, show QR code
+            document.getElementById('qrCodeLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                document.getElementById('qrCodeDisplay').style.display = 'block';
+                document.getElementById('qrCodeImage').src = data.qr_code_url;
+                document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${equipmentId}`;
+                document.getElementById('qrCodeUrlDisplay').textContent = `When scanned, takes you to: ${data.qr_url || qrUrl}`;
+
+                // Set download link
+                const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+                downloadBtn.href = data.qr_code_url;
+                downloadBtn.download = `qr_code_${equipmentId}.png`;
+                downloadBtn.style.display = 'inline-block';
+
+                // Show print button
+                document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('qrCodeError').textContent = data.message || 'Failed to generate QR code';
+                document.getElementById('qrCodeError').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            // Show error
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = `Error: ${error.message}`;
+            document.getElementById('qrCodeError').style.display = 'block';
+            console.error('Error generating QR code:', error);
+        });
+    }
+
+    // Function to print the QR code
+    function printQRCode() {
+        const printWindow = window.open('', '_blank');
+        const qrImage = document.getElementById('qrCodeImage').src;
+        const equipmentId = document.getElementById('qrCodeEquipmentId').textContent;
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>QR Code - ${equipmentId}</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        padding: 20px;
+                    }
+                    img {
+                        max-width: 300px;
+                        height: auto;
+                    }
+                    .container {
+                        display: inline-block;
+                        border: 1px solid #ccc;
+                        padding: 20px;
+                        margin: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <img src="${qrImage}" alt="QR Code">
+                    <div>
+                        <p><strong>${equipmentId}</strong></p>
+                        <p>Mary Bird Perkins Cancer Center</p>
+                    </div>
+                </div>
+                <script>
+                    window.onload = function() {
+                        setTimeout(() => {
+                            window.print();
+                            setTimeout(() => {
+                                window.close();
+                            }, 100);
+                        }, 500);
+                    };
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
 </script>
 {% endblock %}
