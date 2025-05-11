@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Settings - Equipment Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>System Settings</h1>
+        <p class="lead">Manage standard values and system settings</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('checkout.admin') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Admin
+        </a>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+{% if message %}
+<div class="alert alert-{{ message_type }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<!-- Standard Values Management -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Standard Values Management</h5>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="standardValuesTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories" type="button" role="tab">Categories</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="equipment-types-tab" data-bs-toggle="tab" data-bs-target="#equipment-types" type="button" role="tab">Equipment Types</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="manufacturers-tab" data-bs-toggle="tab" data-bs-target="#manufacturers" type="button" role="tab">Manufacturers</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="locations-tab" data-bs-toggle="tab" data-bs-target="#locations" type="button" role="tab">Locations</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content p-3" id="standardValuesTabContent">
+            <!-- Categories Tab -->
+            <div class="tab-pane fade show active" id="categories" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Current Categories</h5>
+                        <div class="list-group mb-3">
+                            {% for category in categories %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ category }}
+                                <form action="{{ url_for('admin.remove_standard_value') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this category?');">
+                                    <input type="hidden" name="value_type" value="category">
+                                    <input type="hidden" name="value" value="{{ category }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="list-group-item">No categories defined</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Add New Category</h5>
+                        <form action="{{ url_for('admin.add_standard_value') }}" method="POST">
+                            <input type="hidden" name="value_type" value="category">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="value" placeholder="Category Name" required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Equipment Types Tab -->
+            <div class="tab-pane fade" id="equipment-types" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Current Equipment Types</h5>
+                        <div class="mb-3">
+                            <label for="category_filter" class="form-label">Filter by Category</label>
+                            <select class="form-select" id="category_filter" onchange="filterEquipmentTypes()">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="list-group mb-3">
+                            {% for category, types in equipment_types.items() %}
+                            <div class="equipment-type-group" data-category="{{ category }}">
+                                <h6 class="mt-3">{{ category }}</h6>
+                                {% for type in types %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ type }}
+                                    <form action="{{ url_for('admin.remove_standard_value') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this equipment type?');">
+                                        <input type="hidden" name="value_type" value="equipment_type">
+                                        <input type="hidden" name="value" value="{{ type }}">
+                                        <input type="hidden" name="category" value="{{ category }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <div class="list-group-item">No equipment types defined for {{ category }}</div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="list-group-item">No equipment types defined</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Add New Equipment Type</h5>
+                        <form action="{{ url_for('admin.add_standard_value') }}" method="POST">
+                            <input type="hidden" name="value_type" value="equipment_type">
+                            <div class="mb-3">
+                                <label for="category_select" class="form-label">Category*</label>
+                                <select class="form-select" id="category_select" name="category" required>
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="value" placeholder="Equipment Type" required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manufacturers Tab -->
+            <div class="tab-pane fade" id="manufacturers" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Current Manufacturers</h5>
+                        <div class="list-group mb-3">
+                            {% for manufacturer in manufacturers %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ manufacturer }}
+                                <form action="{{ url_for('admin.remove_standard_value') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this manufacturer?');">
+                                    <input type="hidden" name="value_type" value="manufacturer">
+                                    <input type="hidden" name="value" value="{{ manufacturer }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="list-group-item">No manufacturers defined</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Add New Manufacturer</h5>
+                        <form action="{{ url_for('admin.add_standard_value') }}" method="POST">
+                            <input type="hidden" name="value_type" value="manufacturer">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="value" placeholder="Manufacturer Name" required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Locations Tab -->
+            <div class="tab-pane fade" id="locations" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Current Locations</h5>
+                        <div class="list-group mb-3">
+                            {% for location in locations %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ location }}
+                                <form action="{{ url_for('admin.remove_standard_value') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this location?');">
+                                    <input type="hidden" name="value_type" value="location">
+                                    <input type="hidden" name="value" value="{{ location }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="list-group-item">No locations defined</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Add New Location</h5>
+                        <form action="{{ url_for('admin.add_standard_value') }}" method="POST">
+                            <input type="hidden" name="value_type" value="location">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="value" placeholder="Location Name" required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Information -->
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">System Information</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Version Information</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Application Version</th>
+                        <td>1.0.0</td>
+                    </tr>
+                    <tr>
+                        <th>Database Version</th>
+                        <td>JSON (File-based)</td>
+                    </tr>
+                    <tr>
+                        <th>Last Updated</th>
+                        <td>{{ now.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5>Data Statistics</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Total Equipment Items</th>
+                        <td>{{ equipment_count }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Checkouts</th>
+                        <td>{{ checkout_count }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Users</th>
+                        <td>{{ user_count }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function filterEquipmentTypes() {
+        const filter = document.getElementById('category_filter').value;
+        const groups = document.querySelectorAll('.equipment-type-group');
+        
+        groups.forEach(group => {
+            const category = group.getAttribute('data-category');
+            if (!filter || category === filter) {
+                group.style.display = 'block';
+            } else {
+                group.style.display = 'none';
+            }
+        });
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        filterEquipmentTypes();
+    });
+</script>
+{% endblock %}

@@ -625,6 +625,121 @@ def generate_qr_code():
             "message": f"Error generating QR code: {str(e)}"
         }), 500
 
+@bp.route('/settings')
+@admin_required
+def settings():
+    """Admin settings page for managing standard values."""
+    from app import standard_values_manager, equipment_manager, checkout_manager
+
+    # Get message from flash session
+    message = request.args.get('message')
+    message_type = request.args.get('type', 'info')
+
+    # Get standard values
+    categories = standard_values_manager.get_categories()
+
+    # Create a dictionary of equipment types by category
+    equipment_types = {}
+    for category in categories:
+        equipment_types[category] = standard_values_manager.get_equipment_types(category)
+
+    manufacturers = standard_values_manager.get_manufacturers()
+    locations = standard_values_manager.get_locations()
+
+    # Get system statistics
+    equipment_count = len(equipment_manager.get_all_equipment())
+
+    # Get checkout count
+    try:
+        checkout_count = len(checkout_manager.get_all_checkouts())
+    except:
+        checkout_count = 0
+
+    # Get user count
+    try:
+        user_count = len(checkout_manager.users)
+    except:
+        user_count = 0
+
+    return render_template(
+        'admin/settings.html',
+        categories=categories,
+        equipment_types=equipment_types,
+        manufacturers=manufacturers,
+        locations=locations,
+        equipment_count=equipment_count,
+        checkout_count=checkout_count,
+        user_count=user_count,
+        message=message,
+        message_type=message_type
+    )
+
+@bp.route('/settings/add', methods=['POST'])
+@admin_required
+def add_standard_value():
+    """Add a new standard value."""
+    from app import standard_values_manager
+
+    # Get form data
+    value_type = request.form.get('value_type')
+    value = request.form.get('value')
+    category = request.form.get('category', '')
+
+    if not value_type or not value:
+        return redirect(url_for('admin.settings', message='Missing required fields', type='danger'))
+
+    result = False
+
+    # Add the value based on type
+    if value_type == 'category':
+        result = standard_values_manager.add_category(value)
+    elif value_type == 'equipment_type':
+        if not category:
+            return redirect(url_for('admin.settings', message='Category is required for equipment types', type='danger'))
+        result = standard_values_manager.add_equipment_type(value, category)
+    elif value_type == 'manufacturer':
+        result = standard_values_manager.add_manufacturer(value)
+    elif value_type == 'location':
+        result = standard_values_manager.add_location(value)
+
+    if result:
+        return redirect(url_for('admin.settings', message=f'{value_type.title()} "{value}" added successfully', type='success'))
+    else:
+        return redirect(url_for('admin.settings', message=f'Failed to add {value_type} "{value}"', type='danger'))
+
+@bp.route('/settings/remove', methods=['POST'])
+@admin_required
+def remove_standard_value():
+    """Remove a standard value."""
+    from app import standard_values_manager
+
+    # Get form data
+    value_type = request.form.get('value_type')
+    value = request.form.get('value')
+    category = request.form.get('category', '')
+
+    if not value_type or not value:
+        return redirect(url_for('admin.settings', message='Missing required fields', type='danger'))
+
+    result = False
+
+    # Remove the value based on type
+    if value_type == 'category':
+        result = standard_values_manager.remove_category(value)
+    elif value_type == 'equipment_type':
+        if not category:
+            return redirect(url_for('admin.settings', message='Category is required for equipment types', type='danger'))
+        result = standard_values_manager.remove_equipment_type(value, category)
+    elif value_type == 'manufacturer':
+        result = standard_values_manager.remove_manufacturer(value)
+    elif value_type == 'location':
+        result = standard_values_manager.remove_location(value)
+
+    if result:
+        return redirect(url_for('admin.settings', message=f'{value_type.title()} "{value}" removed successfully', type='success'))
+    else:
+        return redirect(url_for('admin.settings', message=f'Failed to remove {value_type} "{value}"', type='danger'))
+
 @bp.route('/reports')
 @physicist_required
 def reports():
@@ -639,7 +754,7 @@ def generate_report():
     report_type = request.form.get('report_type', 'inventory')
     report_format = request.form.get('report_format', 'pdf')
     date_range = request.form.get('date_range', 'all')
-    
+
     # Forward to the reports blueprint which has the actual implementation
     try:
         from app.routes.reports import generate_report as reports_generate_report
