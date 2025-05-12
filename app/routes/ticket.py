@@ -258,12 +258,79 @@ def view_ticket(ticket_id):
     
     # Get equipment details
     equipment = equipment_manager.get_equipment_by_id(ticket.equipment_id)
+
+    # If equipment not found, create a placeholder to avoid template errors
+    if not equipment:
+        print(f"Warning: Equipment with ID {ticket.equipment_id} not found for ticket {ticket_id}")
+        equipment = {
+            "id": ticket.equipment_id,
+            "manufacturer": "Unknown",
+            "model": "Unknown",
+            "category": "Unknown",
+            "equipment_type": "Unknown",
+            "serial_number": "Unknown",
+            "location": "Unknown"
+        }
     
-    # Process comment form
+    # Process form actions
     if request.method == 'POST':
         action = request.form.get('action')
-        
-        if action == 'add_comment':
+
+        if action == 'resolve_ticket':
+            current_username = session['user']['username']
+
+            # Check if the current user has permission to resolve this ticket
+            # Permission granted if:
+            # 1. User is the assignee, or
+            # 2. User is admin/physicist, or
+            # 3. Ticket is not assigned to anyone
+            can_resolve = (
+                (ticket.assigned_to and ticket.assigned_to == current_username) or
+                session['user'].get('role') in ['admin', 'physicist'] or
+                not ticket.assigned_to  # If not assigned, anyone can resolve
+            )
+
+            if not can_resolve:
+                flash('You do not have permission to resolve this ticket. Only the assigned user or admin/physicist can resolve it.', 'danger')
+                return redirect(url_for('ticket.view_ticket', ticket_id=ticket_id))
+
+            # Get user display name for the comment
+            user_display_name = session.get('user', {}).get('name', current_username)
+
+            # Create the resolution comment
+            if ticket.assigned_to and ticket.assigned_to == current_username:
+                resolution_comment = f"Ticket resolved by assignee {user_display_name}"
+            elif not ticket.assigned_to:
+                resolution_comment = f"Ticket resolved by {user_display_name} (ticket was unassigned)"
+            else:
+                resolution_comment = f"Ticket resolved by {user_display_name} (admin override)"
+
+            # First add an auto-comment about resolution
+            ticket_manager.add_comment(
+                ticket_id=ticket_id,
+                comment=resolution_comment,
+                user=current_username
+            )
+
+            # Then update the status to resolved
+            ticket_manager.update_ticket(
+                ticket_id=ticket_id,
+                status=TicketStatus.RESOLVED
+            )
+
+            # If equipment condition was not normal and user is physicist/admin,
+            # optionally restore it to normal
+            if (ticket.equipment_condition != EquipmentCondition.NORMAL and
+                    session['user'].get('role') in ['admin', 'physicist']):
+                ticket_manager.update_equipment_condition(
+                    ticket.equipment_id,
+                    EquipmentCondition.NORMAL
+                )
+
+            flash('Ticket has been marked as resolved', 'success')
+            return redirect(url_for('ticket.view_ticket', ticket_id=ticket_id))
+
+        elif action == 'add_comment':
             comment = request.form.get('comment')
             
             if comment:
@@ -324,17 +391,23 @@ def view_ticket(ticket_id):
             else:
                 users[username] = info
     
+    # Explicitly pass current user to template to avoid session access issues
+    current_user = None
+    if 'user' in session:
+        current_user = session['user']
+
     return render_template(
         'ticket/view.html',
         ticket=ticket,
         equipment=equipment,
         users=users,
+        user=current_user,  # Explicit user data
         checkout_manager=checkout_manager,
         ticket_status=TicketStatus,
         ticket_priority=TicketPriority,
         ticket_type=TicketType,
         equipment_condition=EquipmentCondition,
-        statuses=[(TicketStatus.OPEN, 'Open'), 
+        statuses=[(TicketStatus.OPEN, 'Open'),
                  (TicketStatus.IN_PROGRESS, 'In Progress'),
                  (TicketStatus.RESOLVED, 'Resolved'),
                  (TicketStatus.CLOSED, 'Closed')],
@@ -354,31 +427,71 @@ def list_tickets():
     equipment_id = request.args.get('equipment_id')
     assigned_to = request.args.get('assigned_to')
     created_by = request.args.get('created_by')
-    
+
     # Get all tickets
     all_tickets = ticket_manager.get_all_tickets()
-    
+
     # Apply filters
     filtered_tickets = all_tickets
-    
-    if status:
-        filtered_tickets = [t for t in filtered_tickets if t.status == status]
-    
-    if priority:
-        filtered_tickets = [t for t in filtered_tickets if t.priority == priority]
-    
-    if ticket_type:
-        filtered_tickets = [t for t in filtered_tickets if t.ticket_type == ticket_type]
-    
-    if equipment_id:
-        filtered_tickets = [t for t in filtered_tickets if t.equipment_id == equipment_id]
-    
-    if assigned_to:
-        filtered_tickets = [t for t in filtered_tickets if t.assigned_to == assigned_to]
-    
-    if created_by:
-        filtered_tickets = [t for t in filtered_tickets if t.created_by == created_by]
-    
+
+    # Add debug logging
+    print(f"Filtering tickets - Initial count: {len(filtered_tickets)}")
+    print(f"Filter params: status={status}, priority={priority}, type={ticket_type}, equipment_id={equipment_id}, assigned_to={assigned_to}, created_by={created_by}")
+
+    if status and status.strip():
+        filtered_tickets = [t for t in filtered_tickets if t.status.lower() == status.lower()]
+        print(f"After status filter: {len(filtered_tickets)} tickets remain")
+
+    if priority and priority.strip():
+        filtered_tickets = [t for t in filtered_tickets if t.priority.lower() == priority.lower()]
+        print(f"After priority filter: {len(filtered_tickets)} tickets remain")
+
+    if ticket_type and ticket_type.strip():
+        filtered_tickets = [t for t in filtered_tickets if t.ticket_type.lower() == ticket_type.lower()]
+        print(f"After type filter: {len(filtered_tickets)} tickets remain")
+
+    if equipment_id and equipment_id.strip():
+        filtered_tickets = [t for t in filtered_tickets if t.equipment_id == equipment_id.strip()]
+        print(f"After equipment_id filter: {len(filtered_tickets)} tickets remain")
+
+    if assigned_to and assigned_to.strip():
+        filtered_tickets = [t for t in filtered_tickets if t.assigned_to == assigned_to.strip()]
+        print(f"After assigned_to filter: {len(filtered_tickets)} tickets remain")
+
+    if created_by and created_by.strip():
+        filtered_tickets = [t for t in filtered_tickets if t.created_by == created_by.strip()]
+        print(f"After created_by filter: {len(filtered_tickets)} tickets remain")
+
+    # Get equipment and user lists for dropdowns
+    equipment_list = []
+    for e in equipment_manager.get_all_equipment():
+        # Equipment is returned as a dictionary, not an object
+        equip_id = e.get('id')
+        manufacturer = e.get('manufacturer', '')
+        model = e.get('model', '')
+        serial = e.get('serial_number', '')
+        display_name = f"{manufacturer} {model} ({serial})"
+        equipment_list.append((equip_id, display_name))
+
+    equipment_list.sort(key=lambda x: x[1])  # Sort by display name
+
+    # Get all users for dropdowns
+    all_users = checkout_manager.users
+    creator_list = []
+    assignee_list = []
+
+    for username, info in all_users.items():
+        display_name = info.get('name', username)
+        creator_list.append((username, f"{display_name} ({username})"))
+
+        # Only physicists and admins can be assignees
+        if info.get('role') in ['admin', 'physicist']:
+            assignee_list.append((username, f"{display_name} ({username})"))
+
+    # Sort user lists alphabetically
+    creator_list.sort(key=lambda x: x[1])
+    assignee_list.sort(key=lambda x: x[1])
+
     return render_template(
         'ticket/list.html',
         tickets=filtered_tickets,
@@ -394,15 +507,18 @@ def list_tickets():
         ticket_priority=TicketPriority,
         ticket_type=TicketType,
         equipment_condition=EquipmentCondition,
-        statuses=[(TicketStatus.OPEN, 'Open'), 
+        equipment_list=equipment_list,
+        creator_list=creator_list,
+        assignee_list=assignee_list,
+        statuses=[(TicketStatus.OPEN, 'Open'),
                  (TicketStatus.IN_PROGRESS, 'In Progress'),
                  (TicketStatus.RESOLVED, 'Resolved'),
                  (TicketStatus.CLOSED, 'Closed')],
-        priorities=[(TicketPriority.LOW, 'Low'), 
+        priorities=[(TicketPriority.LOW, 'Low'),
                    (TicketPriority.MEDIUM, 'Medium'),
                    (TicketPriority.HIGH, 'High'),
                    (TicketPriority.CRITICAL, 'Critical')],
-        types=[(TicketType.ISSUE, 'Issue/Problem'), 
+        types=[(TicketType.ISSUE, 'Issue/Problem'),
               (TicketType.REQUEST, 'Request'),
               (TicketType.MAINTENANCE, 'Maintenance'),
               (TicketType.CALIBRATION, 'Calibration')]

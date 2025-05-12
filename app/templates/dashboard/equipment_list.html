@@ -137,7 +137,7 @@
 
 <div class="row">
     <div class="col-md-2 col-sm-12 mb-4">
-        <div class="card small-card">
+        <div class="card small-card mb-3">
             <div class="card-header py-2">
                 <h6 class="mb-0">Filters</h6>
             </div>
@@ -153,8 +153,53 @@
             </div>
         </div>
     </div>
+
     <div class="col-md-10 col-sm-12">
         <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h5 class="mb-0">Equipment List</h5>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#equipLegendCollapse" aria-expanded="false" aria-controls="equipLegendCollapse">
+                    <i class="bi bi-info-circle"></i> <span class="legend-toggle-text">Show Legend</span>
+                </button>
+            </div>
+            
+            <!-- Inline Legend Collapse (Won't displace table) -->
+            <div class="collapse" id="equipLegendCollapse">
+                <div class="p-2 border-bottom" style="font-size: 0.8rem;">
+                    <h6 class="mb-2 border-bottom pb-1 text-muted" style="font-size: 0.9rem;">Equipment Reference Guide</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <span class="badge bg-success me-1"><i class="bi bi-check-circle"></i>Ready</span>
+                                    <span class="small text-nowrap">Available for use</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="badge bg-info me-1"><i class="bi bi-arrow-bar-right"></i>Out</span> 
+                                    <span class="small text-nowrap">Currently checked out</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <span class="badge bg-success me-1"><i class="bi bi-circle-fill"></i>OK</span>
+                                    <span class="small text-nowrap">Normal</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-warning me-1"><i class="bi bi-exclamation-triangle-fill"></i>Attn</span>
+                                    <span class="small text-nowrap">Needs attention</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-danger me-1"><i class="bi bi-x-circle-fill"></i>OOS</span>
+                                    <span class="small text-nowrap">Out of service</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="card-body">
                 <div class="table-responsive equipment-table-container">
                     <table class="table table-hover equipment-table">
@@ -182,7 +227,7 @@
                                 <td>{{ item.location }}</td>
                                 <td>
                                     {% set status = checkout_manager.get_equipment_status(item.id) %}
-                                    {% if status and status.checked_out %}
+                                    {% if status and status.status == "Checked Out" %}
                                         <span class="badge bg-info"><i class="bi bi-arrow-bar-right"></i>Out</span>
                                         {% if status.location and status.location != item.location %}
                                             <span class="d-block text-truncate" style="max-width: 100px;" title="{{ status.location }}">{{ status.location }}</span>
@@ -213,13 +258,13 @@
                                         <!-- Bottom row buttons -->
                                         <div class="d-flex flex-wrap" style="gap: 4px;">
                                             <!-- Check in/out button based on status -->
-                                            {% if status and status.checked_out %}
-                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}" class="btn btn-xs btn-success" style="width: 60px;">
-                                                    <i class="bi bi-box-arrow-in-left"></i> In
+                                            {% if status and status.status == "Checked Out" %}
+                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}" class="btn btn-xs btn-success" style="width: 85px;">
+                                                    <i class="bi bi-box-arrow-in-left"></i> Check In
                                                 </a>
                                             {% else %}
-                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}" class="btn btn-xs btn-primary" style="width: 60px;">
-                                                    <i class="bi bi-box-arrow-right"></i> Out
+                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}" class="btn btn-xs btn-primary" style="width: 85px;">
+                                                    <i class="bi bi-box-arrow-right"></i> Check Out
                                                 </a>
                                             {% endif %}
 
@@ -231,10 +276,13 @@
 
                                         <!-- Third row: QR code button -->
                                         <div class="mt-1">
-                                            <button type="button" class="btn btn-xs btn-outline-info"
-                                                  onclick="generateQRCodeForEquipment('{{ item.id }}', '{{ item.manufacturer }}', '{{ item.model }}', '{{ item.serial_number }}')"
+                                            <button type="button" class="btn btn-xs btn-outline-info qr-dashboard-btn"
+                                                  data-id="{{ item.id }}"
+                                                  data-manufacturer="{{ item.manufacturer }}"
+                                                  data-model="{{ item.model }}"
+                                                  data-serial="{{ item.serial_number }}"
                                                   style="width: 125px;">
-                                                <i class="bi bi-qr-code"></i> QR Code
+                                                <i class="bi bi-qr-code"></i> Show QR
                                             </button>
                                         </div>
                                     </div>
@@ -295,31 +343,163 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Load the debug script -->
+<script src="{{ url_for('static', filename='js/qr-debug.js') }}"></script>
+
 <script>
+    // Equipment legend toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const legendToggleBtn = document.querySelector('[data-bs-target="#equipLegendCollapse"]');
+        if (legendToggleBtn) {
+            const legendToggleText = legendToggleBtn.querySelector('.legend-toggle-text');
+            const legendToggleIcon = legendToggleBtn.querySelector('i');
+
+            legendToggleBtn.addEventListener('click', function() {
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+                if (isExpanded) {
+                    // Collapsing
+                    legendToggleText.textContent = 'Show Legend';
+                    legendToggleIcon.classList.remove('bi-x-circle');
+                    legendToggleIcon.classList.add('bi-info-circle');
+                } else {
+                    // Expanding
+                    legendToggleText.textContent = 'Hide Legend';
+                    legendToggleIcon.classList.remove('bi-info-circle');
+                    legendToggleIcon.classList.add('bi-x-circle');
+                }
+
+                // Save preference to localStorage
+                localStorage.setItem('equipLegendVisible', !isExpanded);
+            });
+
+            // Check if user preference for legend visibility exists
+            const legendVisible = localStorage.getItem('equipLegendVisible');
+            if (legendVisible === 'true') {
+                // User previously showed the legend, expand it
+                const legendCollapse = document.getElementById('equipLegendCollapse');
+                if (legendCollapse) {
+                    legendCollapse.classList.add('show');
+                    legendToggleText.textContent = 'Hide Legend';
+                    legendToggleIcon.classList.remove('bi-info-circle');
+                    legendToggleIcon.classList.add('bi-x-circle');
+                    legendToggleBtn.setAttribute('aria-expanded', 'true');
+                }
+            }
+        }
+    });
+
+    // Initialize event listeners for QR code buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const qrButtons = document.querySelectorAll('.qr-dashboard-btn');
+        console.log('Found dashboard QR buttons:', qrButtons.length);
+
+        qrButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                console.log('Dashboard QR button clicked via event listener');
+                const id = this.getAttribute('data-id');
+                const manufacturer = this.getAttribute('data-manufacturer');
+                const model = this.getAttribute('data-model');
+                const serial = this.getAttribute('data-serial');
+
+                console.log('Dashboard QR button data:', { id, manufacturer, model, serial });
+
+                // Call the QR code generator function
+                generateQRCodeForEquipment(id, manufacturer, model, serial);
+            });
+        });
+    });
+
     // Function to generate QR codes for equipment in the list
     function generateQRCodeForEquipment(equipmentId, manufacturer, model, serialNumber) {
+        console.log("Handling QR code for", equipmentId);
+
         // Show the QR code modal
-        const qrModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
-        qrModal.show();
-        
+        const qrModalElement = document.getElementById('qrCodeModal');
+        console.log('QR Modal element found:', !!qrModalElement);
+
+        // Check if Bootstrap is available
+        if (typeof bootstrap !== 'undefined') {
+            try {
+                const qrModal = new bootstrap.Modal(qrModalElement);
+                qrModal.show();
+                console.log('Modal shown with bootstrap');
+            } catch (e) {
+                console.error('Error showing modal with bootstrap:', e);
+                // Fallback modal display
+                qrModalElement.classList.add('show');
+                qrModalElement.style.display = 'block';
+            }
+        } else {
+            console.error('Bootstrap not available, using fallback');
+            // Fallback for when bootstrap isn't available
+            qrModalElement.classList.add('show');
+            qrModalElement.style.display = 'block';
+        }
+
         // Show loading state
         document.getElementById('qrCodeLoading').style.display = 'block';
         document.getElementById('qrCodeError').style.display = 'none';
         document.getElementById('qrCodeDisplay').style.display = 'none';
         document.getElementById('qrCodeDownloadBtn').style.display = 'none';
         document.getElementById('qrCodePrintBtn').style.display = 'none';
-        
+
         // Validate required fields
         if (!equipmentId || !manufacturer || !serialNumber) {
             document.getElementById('qrCodeLoading').style.display = 'none';
             document.getElementById('qrCodeError').style.display = 'block';
             return;
         }
-        
+
+        // First check if QR code already exists
+        fetch(`/admin/equipment/check-qr/${equipmentId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success' && data.exists) {
+                // QR code already exists, just display it
+                displayExistingQRCode(data);
+            } else {
+                // QR code doesn't exist, generate a new one
+                generateNewQRCode(equipmentId, manufacturer, model, serialNumber);
+            }
+        })
+        .catch(error => {
+            // If check fails for any reason, try to generate a new one
+            console.error('Error checking QR code:', error);
+            generateNewQRCode(equipmentId, manufacturer, model, serialNumber);
+        });
+    }
+
+    // Function to display an existing QR code
+    function displayExistingQRCode(data) {
+        // Hide loading, show QR code
+        document.getElementById('qrCodeLoading').style.display = 'none';
+
+        document.getElementById('qrCodeDisplay').style.display = 'block';
+        document.getElementById('qrCodeImage').src = data.qr_code_url;
+        document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${data.equipment_id}`;
+
+        // Set download link
+        const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+        downloadBtn.href = data.qr_code_url;
+        downloadBtn.download = `qr_code_${data.equipment_id}.png`;
+        downloadBtn.style.display = 'inline-block';
+
+        // Show print button
+        document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+    }
+
+    // Function to generate a new QR code
+    function generateNewQRCode(equipmentId, manufacturer, model, serialNumber) {
         // Construct the URL for the QR code - direct to the equipment detail page
         const baseUrl = window.location.origin;
         const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
-        
+
         // Make AJAX request to generate the QR code
         const requestData = {
             url: qrUrl,
@@ -328,7 +508,7 @@
             model: model,
             serial: serialNumber
         };
-        
+
         fetch('/admin/equipment/generate-qr', {
             method: 'POST',
             headers: {
@@ -345,18 +525,18 @@
         .then(data => {
             // Hide loading, show QR code
             document.getElementById('qrCodeLoading').style.display = 'none';
-            
+
             if (data.status === 'success') {
                 document.getElementById('qrCodeDisplay').style.display = 'block';
                 document.getElementById('qrCodeImage').src = data.qr_code_url;
                 document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${equipmentId}`;
-                
+
                 // Set download link
                 const downloadBtn = document.getElementById('qrCodeDownloadBtn');
                 downloadBtn.href = data.qr_code_url;
                 downloadBtn.download = `qr_code_${equipmentId}.png`;
                 downloadBtn.style.display = 'inline-block';
-                
+
                 // Show print button
                 document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
             } else {

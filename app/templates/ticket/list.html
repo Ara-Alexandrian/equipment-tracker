@@ -15,6 +15,7 @@
     </div>
 </div>
 
+
 <!-- Filter Form -->
 <div class="card mb-4">
     <div class="card-header">
@@ -27,7 +28,7 @@
                 <select class="form-select" id="status" name="status">
                     <option value="">All Statuses</option>
                     {% for status_value, status_label in statuses %}
-                    <option value="{{ status_value }}" {% if filter_status == status_value %}selected{% endif %}>
+                    <option value="{{ status_value }}" {% if filter_status and filter_status.lower() == status_value.lower() %}selected{% endif %}>
                         {{ status_label }}
                     </option>
                     {% endfor %}
@@ -39,7 +40,7 @@
                 <select class="form-select" id="priority" name="priority">
                     <option value="">All Priorities</option>
                     {% for priority_value, priority_label in priorities %}
-                    <option value="{{ priority_value }}" {% if filter_priority == priority_value %}selected{% endif %}>
+                    <option value="{{ priority_value }}" {% if filter_priority and filter_priority.lower() == priority_value.lower() %}selected{% endif %}>
                         {{ priority_label }}
                     </option>
                     {% endfor %}
@@ -51,7 +52,7 @@
                 <select class="form-select" id="type" name="type">
                     <option value="">All Types</option>
                     {% for type_value, type_label in types %}
-                    <option value="{{ type_value }}" {% if filter_type == type_value %}selected{% endif %}>
+                    <option value="{{ type_value }}" {% if filter_type and filter_type.lower() == type_value.lower() %}selected{% endif %}>
                         {{ type_label }}
                     </option>
                     {% endfor %}
@@ -60,20 +61,38 @@
             
             <div class="col-md-4">
                 <label for="assigned_to" class="form-label">Assigned To</label>
-                <input type="text" class="form-control" id="assigned_to" name="assigned_to" 
-                       value="{{ filter_assigned_to }}" placeholder="Username">
+                <select class="form-select" id="assigned_to" name="assigned_to">
+                    <option value="">All Assignees</option>
+                    {% for username, display_name in assignee_list %}
+                    <option value="{{ username }}" {% if filter_assigned_to and filter_assigned_to == username %}selected{% endif %}>
+                        {{ display_name }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
-            
+
             <div class="col-md-4">
                 <label for="created_by" class="form-label">Created By</label>
-                <input type="text" class="form-control" id="created_by" name="created_by"
-                       value="{{ filter_created_by }}" placeholder="Username">
+                <select class="form-select" id="created_by" name="created_by">
+                    <option value="">All Creators</option>
+                    {% for username, display_name in creator_list %}
+                    <option value="{{ username }}" {% if filter_created_by and filter_created_by == username %}selected{% endif %}>
+                        {{ display_name }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
-            
+
             <div class="col-md-4">
-                <label for="equipment_id" class="form-label">Equipment ID</label>
-                <input type="text" class="form-control" id="equipment_id" name="equipment_id"
-                       value="{{ filter_equipment_id }}" placeholder="Equipment ID">
+                <label for="equipment_id" class="form-label">Equipment</label>
+                <select class="form-select" id="equipment_id" name="equipment_id">
+                    <option value="">All Equipment</option>
+                    {% for equip_id, equip_name in equipment_list %}
+                    <option value="{{ equip_id }}" {% if filter_equipment_id and filter_equipment_id == equip_id %}selected{% endif %}>
+                        {{ equip_name }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
             
             <div class="col-12 text-end">
@@ -85,6 +104,83 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Compact Legend -->
+<div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#legendCollapse" aria-expanded="false" aria-controls="legendCollapse">
+        <i class="bi bi-info-circle"></i> <span class="legend-toggle-text">Show Legend</span>
+    </button>
+</div>
+
+<div class="collapse mb-3" id="legendCollapse">
+    <div class="card card-body py-3 px-3">
+        <h6 class="mb-3 border-bottom pb-2">Ticket Status Reference</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-info mt-1 me-2">Open</span>
+                    <div class="small">New ticket that hasn't been assigned or worked on yet. Initial state for all tickets.</div>
+                </div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-primary mt-1 me-2">In Progress</span>
+                    <div class="small">Ticket is assigned and actively being worked on. Used when troubleshooting or repairs have started.</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-success mt-1 me-2">Resolved</span>
+                    <div class="small">Issue has been fixed but the ticket remains in the system for tracking. Equipment should be operational.</div>
+                </div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-secondary mt-1 me-2">Closed</span>
+                    <div class="small">Ticket is completed and archived. No further actions needed. Used for final ticket state.</div>
+                </div>
+            </div>
+        </div>
+
+        <h6 class="mb-3 mt-3 border-bottom pb-2">Priority & Types</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="fw-bold mb-2 small">Priority Levels:</div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-danger mt-1 me-2">Critical</span>
+                    <div class="small">Urgent issue affecting key operations. Needs immediate attention.</div>
+                </div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-warning mt-1 me-2">High</span>
+                    <div class="small">Important issue that should be resolved quickly but isn't stopping operations.</div>
+                </div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-info mt-1 me-2">Medium</span>
+                    <div class="small">Standard priority for most requests. Should be addressed in normal timeframe.</div>
+                </div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-secondary mt-1 me-2">Low</span>
+                    <div class="small">Non-urgent item that can be handled when time permits.</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="fw-bold mb-2 small">Ticket Types:</div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-light text-dark mt-1 me-2">Issue/Problem</span>
+                    <div class="small">Equipment has a problem that needs troubleshooting or repair.</div>
+                </div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-light text-dark mt-1 me-2">Maintenance</span>
+                    <div class="small">Scheduled or preventative maintenance needed for equipment.</div>
+                </div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-light text-dark mt-1 me-2">Calibration</span>
+                    <div class="small">Equipment needs calibration or recertification to maintain accuracy.</div>
+                </div>
+                <div class="d-flex align-items-start mb-2">
+                    <span class="badge bg-light text-dark mt-1 me-2">Request</span>
+                    <div class="small">Request for new equipment, features, or service items.</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -219,33 +315,34 @@
 
 {% block scripts %}
 <script>
-    // Sort tickets table
+    // Sort tickets table and handle legend toggle
     document.addEventListener('DOMContentLoaded', function() {
+        // Sort functionality
         const sortLinks = document.querySelectorAll('.sort-tickets');
-        
+
         sortLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
-                
+
                 const sortBy = this.getAttribute('data-sort');
                 const sortOrder = this.getAttribute('data-order');
-                
+
                 const table = document.getElementById('tickets-table');
                 const tbody = table.querySelector('tbody');
                 const rows = Array.from(tbody.querySelectorAll('tr'));
-                
+
                 rows.sort((a, b) => {
                     let aValue, bValue;
-                    
+
                     if (sortBy === 'created_at') {
                         // For dates, get the text of the 7th cell (0-indexed)
                         aValue = a.cells[6].textContent;
                         bValue = b.cells[6].textContent;
-                        
+
                         // Convert to dates for comparison
                         const aDate = new Date(aValue);
                         const bDate = new Date(bValue);
-                        
+
                         // Compare dates
                         if (sortOrder === 'asc') {
                             return aDate - bDate;
@@ -260,13 +357,13 @@
                             'Medium': 2,
                             'Low': 1
                         };
-                        
+
                         const aText = a.cells[4].textContent.trim();
                         const bText = b.cells[4].textContent.trim();
-                        
+
                         aValue = priorityMap[aText] || 0;
                         bValue = priorityMap[bText] || 0;
-                        
+
                         // Compare priorities
                         if (sortOrder === 'asc') {
                             return aValue - bValue;
@@ -275,15 +372,54 @@
                         }
                     }
                 });
-                
+
                 // Remove existing rows
                 while (tbody.firstChild) {
                     tbody.removeChild(tbody.firstChild);
                 }
-                
+
                 // Append sorted rows
                 rows.forEach(row => tbody.appendChild(row));
             });
+        });
+
+        // Legend toggle functionality
+        const legendToggleBtn = document.querySelector('[data-bs-target="#legendCollapse"]');
+        const legendToggleText = document.querySelector('.legend-toggle-text');
+        const legendToggleIcon = legendToggleBtn.querySelector('i');
+
+        legendToggleBtn.addEventListener('click', function() {
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+            if (isExpanded) {
+                // Collapsing
+                legendToggleText.textContent = 'Show Legend';
+                legendToggleIcon.classList.remove('bi-x-circle');
+                legendToggleIcon.classList.add('bi-info-circle');
+            } else {
+                // Expanding
+                legendToggleText.textContent = 'Hide Legend';
+                legendToggleIcon.classList.remove('bi-info-circle');
+                legendToggleIcon.classList.add('bi-x-circle');
+            }
+        });
+
+        // Check if user preference for legend visibility exists in localStorage
+        const legendVisible = localStorage.getItem('ticketLegendVisible');
+        if (legendVisible === 'true') {
+            // User previously showed the legend, so expand it
+            const legendCollapse = document.getElementById('legendCollapse');
+            legendCollapse.classList.add('show');
+            legendToggleText.textContent = 'Hide Legend';
+            legendToggleIcon.classList.remove('bi-info-circle');
+            legendToggleIcon.classList.add('bi-x-circle');
+            legendToggleBtn.setAttribute('aria-expanded', 'true');
+        }
+
+        // Save state to localStorage when toggled
+        legendToggleBtn.addEventListener('click', function() {
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            localStorage.setItem('ticketLegendVisible', isExpanded);
         });
     });
 </script>
