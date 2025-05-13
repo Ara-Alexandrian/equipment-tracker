@@ -1,0 +1,448 @@
+/* Layout Controls for Equipment Pages
+ * Provides user controls for adjusting table layout and font size
+ * Optimized for various display resolutions
+ */
+
+/* CSS Variables for consistent sizing */
+:root {
+    --small-screen-width: 1200px;
+    --default-screen-width: 1550px;  /* Optimized for 1600x1200 displays */
+    --large-screen-width: 1800px;
+    --xl-screen-width: 2100px;
+
+    --button-spacing: 0.5rem;
+    --button-min-width: 110px;
+    --button-height: 38px;
+
+    --table-font-size-small: 0.85rem;
+    --table-font-size-default: 0.9rem;
+    --table-font-size-large: 1rem;
+}
+
+/* Base container width classes - resolution optimized */
+.container-width-small {
+    max-width: var(--small-screen-width) !important;
+}
+
+.container-width-standard {
+    max-width: var(--default-screen-width) !important;  /* Optimized for 1600x1200 */
+}
+
+.container-width-wide {
+    max-width: var(--large-screen-width) !important;
+}
+
+.container-width-full {
+    max-width: var(--xl-screen-width) !important;
+}
+
+/* Table-specific font size controls - only affect tables */
+.table-font-normal .equipment-table,
+.table-font-normal #equipmentTable {
+    font-size: var(--table-font-size-default) !important;
+}
+
+.table-font-larger .equipment-table,
+.table-font-larger #equipmentTable {
+    font-size: var(--table-font-size-large) !important;
+}
+
+.table-font-largest .equipment-table,
+.table-font-largest #equipmentTable {
+    font-size: calc(var(--table-font-size-large) + 0.1rem) !important;
+}
+
+/* Resolution-specific font adjustments */
+@media (max-width: 1400px) {
+    .table-font-normal .equipment-table,
+    .table-font-normal #equipmentTable {
+        font-size: var(--table-font-size-small) !important;
+    }
+
+    .equipment-table {
+        font-size: var(--table-font-size-small) !important;
+    }
+}
+
+/* Enhanced action button styling - prevents collisions */
+.action-button {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    min-width: var(--button-min-width) !important;
+    text-overflow: initial !important;
+    margin-bottom: var(--button-spacing) !important;
+    margin-right: var(--button-spacing) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    height: var(--button-height) !important;
+    padding: 0.375rem 0.75rem !important;
+    touch-action: manipulation !important;
+}
+
+/* Button icon alignment */
+.action-button i {
+    margin-right: 0.25rem;
+}
+
+/* Extra small buttons */
+.btn-xs {
+    min-width: var(--button-min-width) !important;
+    white-space: nowrap !important;
+    height: calc(var(--button-height) - 5px) !important;
+    font-size: 0.85rem !important;
+}
+
+/* Button group styling */
+.action-buttons .btn {
+    margin-right: var(--button-spacing);
+    margin-bottom: var(--button-spacing);
+    white-space: nowrap;
+    min-width: var(--button-min-width) !important;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* Button container for proper spacing */
+.action-button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--button-spacing);
+    justify-content: flex-end;
+}
+
+/* Alternative button layout for smaller screens */
+@media (max-width: 1400px) {
+    .action-button-container {
+        justify-content: center;
+    }
+}
+
+/* Optimize column widths for different resolutions */
+.col-actions {
+    min-width: 280px !important;
+    width: auto !important;
+}
+
+/* Better padding for table cells */
+.equipment-table td,
+.equipment-table th,
+#equipmentTable td,
+#equipmentTable th {
+    padding: 6px 8px !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+}
+
+/* Table header alignment and styling */
+.equipment-table th,
+#equipmentTable th {
+    text-align: center !important;
+    font-weight: 600 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: var(--bs-table-bg, #fff) !important;
+}
+
+/* Ensure proper column sizing with sensible defaults */
+.col-id { min-width: 80px !important; width: 5% !important; }
+.col-category { min-width: 100px !important; width: 8% !important; }
+.col-type { min-width: 120px !important; width: 10% !important; }
+.col-manufacturer { min-width: 150px !important; width: 12% !important; }
+.col-model { min-width: 150px !important; width: 12% !important; }
+.col-serial { min-width: 120px !important; width: 10% !important; }
+.col-location { min-width: 120px !important; width: 10% !important; }
+.col-status { min-width: 100px !important; width: 8% !important; }
+.col-condition { min-width: 100px !important; width: 8% !important; }
+
+/* Table improvements */
+.equipment-table {
+    width: 100% !important;
+    margin: 0 auto !important;
+}
+
+/* Responsive column widths based on container size */
+/* Optimal for 1200-1599px displays - like laptops, smaller monitors */
+@media (min-width: 1200px) and (max-width: 1599px) {
+    /* Action column width for this range */
+    .col-actions,
+    .equipment-table td:last-child,
+    #equipmentTable td:last-child {
+        min-width: 260px !important;
+    }
+
+    /* Slightly compact column spacing */
+    .col-manufacturer, .col-model { min-width: 130px !important; }
+    .col-serial, .col-location { min-width: 110px !important; }
+
+    /* Slightly reduced button spacing for compact layout */
+    .action-button {
+        min-width: 105px !important;
+        margin-bottom: 0.35rem !important;
+        margin-right: 0.35rem !important;
+    }
+
+    /* Compact padding for table cells */
+    .equipment-table td,
+    .equipment-table th,
+    #equipmentTable td,
+    #equipmentTable th {
+        padding: 4px 6px !important;
+    }
+}
+
+/* Optimal for 1600-1799px displays - PRIORITY TARGET RESOLUTION */
+@media (min-width: 1600px) and (max-width: 1799px) {
+    /* Action column width for this range */
+    .col-actions,
+    .equipment-table td:last-child,
+    #equipmentTable td:last-child {
+        min-width: 285px !important;
+    }
+
+    /* Standard column spacing for target resolution */
+    .col-manufacturer, .col-model { min-width: 150px !important; }
+    .col-serial, .col-location { min-width: 130px !important; }
+
+    /* Standard button sizes */
+    .action-button {
+        min-width: 110px !important;
+        margin-bottom: 0.5rem !important;
+        margin-right: 0.5rem !important;
+    }
+}
+
+/* Optimal for 1800px+ displays - like wide monitors, ultrawides */
+@media (min-width: 1800px) {
+    /* Wider action column for large screens */
+    .col-actions,
+    .equipment-table td:last-child,
+    #equipmentTable td:last-child {
+        min-width: 330px !important;
+    }
+
+    /* Expanded column spacing for large displays */
+    .col-manufacturer, .col-model { min-width: 180px !important; }
+    .col-serial, .col-location { min-width: 150px !important; }
+    .col-category, .col-type { min-width: 130px !important; }
+
+    /* Larger, more spaced buttons */
+    .action-button {
+        min-width: 120px !important;
+        margin-bottom: 0.6rem !important;
+        margin-right: 0.6rem !important;
+        padding: 0.45rem 0.9rem !important;
+    }
+
+    /* More generous padding for large displays */
+    .equipment-table td,
+    .equipment-table th,
+    #equipmentTable td,
+    #equipmentTable th {
+        padding: 8px 12px !important;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 992px) {
+    /* Prevent layout from getting too wide */
+    body.container-width-wide,
+    body.container-width-full,
+    body.container-width-standard {
+        max-width: 100% !important;
+    }
+
+    /* Reorganize action buttons for tablets */
+    .action-button {
+        min-width: 90px !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+
+    /* Condensed table for tablets */
+    .equipment-table {
+        font-size: 0.85rem !important;
+    }
+
+    /* Abbreviated text for column headers */
+    .equipment-table th .full-text {
+        display: none !important;
+    }
+
+    .equipment-table th .short-text {
+        display: inline !important;
+    }
+}
+
+/* Mobile optimizations - enhanced */
+@media (max-width: 768px) {
+    /* Full-width container on mobile */
+    body.container-width-wide,
+    body.container-width-full,
+    body.container-width-standard,
+    body.container-width-small {
+        max-width: 100% !important;
+    }
+
+    /* Stack buttons vertically on mobile */
+    .action-button {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 5px !important;
+        padding: 0.25rem !important;
+        min-width: auto !important;
+    }
+
+    /* Compact text on mobile */
+    .equipment-table {
+        font-size: 0.75rem !important;
+    }
+
+    /* Abbreviate button text on mobile */
+    .action-button .button-text {
+        display: none !important;
+    }
+
+    /* Only show icons on mobile */
+    .action-button i {
+        margin-right: 0 !important;
+        font-size: 1.2rem !important;
+    }
+
+    /* Minimized padding for mobile */
+    .container-fluid {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    /* Horizontal scrolling for tables on mobile */
+    .table-responsive {
+        overflow-x: auto !important;
+    }
+}
+
+/* Special column handling */
+.equipment-table td:last-child,
+#equipmentTable td:last-child {
+    text-align: center !important;
+    min-width: 230px !important;
+}
+
+/* ID column formatting */
+.col-id,
+.equipment-table td:first-child,
+#equipmentTable td:first-child {
+    white-space: nowrap !important;
+    text-align: center !important;
+}
+
+/* Status badges - make them more readable */
+.badge {
+    font-size: 85% !important;
+    padding: 5px 7px !important;
+    margin-bottom: 2px !important;
+    display: inline-block !important;
+}
+
+/* Layout settings button in header */
+.layout-settings-btn {
+    background-color: transparent;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.layout-settings-btn:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.dark-mode .layout-settings-btn,
+.dracula-mode .layout-settings-btn,
+.sweet-dracula-mode .layout-settings-btn {
+    border-color: rgba(255,255,255,0.2);
+}
+
+.dark-mode .layout-settings-btn:hover,
+.dracula-mode .layout-settings-btn:hover,
+.sweet-dracula-mode .layout-settings-btn:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+/* Layout settings modal */
+.layout-settings-modal .modal-body {
+    padding: 20px;
+}
+
+.layout-settings-modal .control-section {
+    margin-bottom: 20px;
+}
+
+.layout-settings-modal .control-section h6 {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.layout-settings-modal .btn-group {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.layout-settings-modal .btn-group .btn {
+    flex: 1;
+    margin: 0 5px 5px 0;
+    white-space: nowrap;
+}
+
+/* Theme-specific modal styling */
+.sweet-dracula-mode .layout-settings-modal .modal-content {
+    background-color: #282a36;
+    color: #f8f8f2;
+}
+
+.sweet-dracula-mode .layout-settings-modal .modal-header {
+    border-bottom-color: #44475a;
+}
+
+.sweet-dracula-mode .layout-settings-modal .modal-footer {
+    border-top-color: #44475a;
+}
+
+.sweet-dracula-mode .layout-settings-modal .btn-outline-primary {
+    color: #bd93f9;
+    border-color: #bd93f9;
+}
+
+.sweet-dracula-mode .layout-settings-modal .btn-outline-primary:hover {
+    background-color: #bd93f9;
+    color: #282a36;
+}
+
+.sweet-dracula-mode .layout-settings-modal .btn-outline-primary.active {
+    background-color: #bd93f9;
+    color: #282a36;
+}
+
+/* Indicators that settings are active */
+.layout-active-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 5px;
+    background-color: #28a745;
+}
+
+/* Better button text */
+.equipment-table .btn {
+    font-weight: 500 !important;
+}

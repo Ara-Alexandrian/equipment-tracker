@@ -3,6 +3,13 @@
 {% block title %}Equipment List - GearVue{% endblock %}
 
 {% block head %}
+<script>
+    // Add class to body for wider container
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('page-equipment');
+        document.body.classList.add('wide-container');
+    });
+</script>
 <style>
     /* Reduce overall font size in table */
     .equipment-table {
@@ -302,15 +309,42 @@
                     <table class="table table-hover equipment-table">
                         <thead>
                             <tr>
-                                <th class="col-category">Category</th>
-                                <th class="col-type">Type</th>
-                                <th class="col-manufacturer">MFR</th>
-                                <th class="col-model">Model</th>
-                                <th class="col-serial">Serial Number</th>
-                                <th class="col-location">Location</th>
-                                <th class="col-status">Status</th>
-                                <th class="col-operational">Condition</th>
-                                <th class="col-actions">Actions</th>
+                                <th class="col-category">
+                                    <span class="full-text">Category</span>
+                                    <span class="short-text d-none">Cat</span>
+                                </th>
+                                <th class="col-type">
+                                    <span class="full-text">Type</span>
+                                    <span class="short-text d-none">Type</span>
+                                </th>
+                                <th class="col-manufacturer">
+                                    <span class="full-text">Manufacturer</span>
+                                    <span class="short-text d-none">MFR</span>
+                                </th>
+                                <th class="col-model">
+                                    <span class="full-text">Model</span>
+                                    <span class="short-text d-none">Model</span>
+                                </th>
+                                <th class="col-serial">
+                                    <span class="full-text">Serial Number</span>
+                                    <span class="short-text d-none">SN</span>
+                                </th>
+                                <th class="col-location">
+                                    <span class="full-text">Location</span>
+                                    <span class="short-text d-none">Loc</span>
+                                </th>
+                                <th class="col-status">
+                                    <span class="full-text">Status</span>
+                                    <span class="short-text d-none">Stat</span>
+                                </th>
+                                <th class="col-condition">
+                                    <span class="full-text">Condition</span>
+                                    <span class="short-text d-none">Cond</span>
+                                </th>
+                                <th class="col-actions">
+                                    <span class="full-text">Actions</span>
+                                    <span class="short-text d-none">Act</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -368,16 +402,16 @@
                                     <div class="d-flex justify-content-between">
                                         <!-- Left column: View & QR -->
                                         <div class="d-flex flex-column" style="gap: 4px; width: 45%;">
-                                            <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-xs btn-outline-primary w-100">
-                                                <i class="bi bi-eye"></i> View Details
+                                            <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-xs btn-outline-primary w-100 action-button">
+                                                <i class="bi bi-eye"></i> <span class="button-text">View Details</span>
                                             </a>
-                                            
-                                            <button type="button" class="btn btn-xs btn-outline-info qr-dashboard-btn w-100"
+
+                                            <button type="button" class="btn btn-xs btn-outline-info qr-dashboard-btn w-100 action-button"
                                                   data-id="{{ item.id }}"
                                                   data-manufacturer="{{ item.manufacturer }}"
                                                   data-model="{{ item.model }}"
                                                   data-serial="{{ item.serial_number }}">
-                                                <i class="bi bi-qr-code"></i> QR Code
+                                                <i class="bi bi-qr-code"></i> <span class="button-text">QR Code</span>
                                             </button>
                                         </div>
                                         
@@ -385,23 +419,23 @@
                                         <div class="d-flex flex-column" style="gap: 4px; width: 52%;">
                                             <!-- Check in/out button based on status -->
                                             {% if status and status.status == "Checked Out" %}
-                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}" class="btn btn-xs btn-success w-100">
-                                                    <i class="bi bi-box-arrow-in-left"></i> Check In
+                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}" class="btn btn-xs btn-success w-100 action-button">
+                                                    <i class="bi bi-box-arrow-in-left"></i> <span class="button-text">Check In</span>
                                                 </a>
                                             {% else %}
-                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}" class="btn btn-xs btn-primary w-100">
-                                                    <i class="bi bi-box-arrow-right"></i> Check Out
+                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}" class="btn btn-xs btn-primary w-100 action-button">
+                                                    <i class="bi bi-box-arrow-right"></i> <span class="button-text">Check Out</span>
                                                 </a>
                                             {% endif %}
 
                                             <!-- Ticket button -->
-                                            <a href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}" class="btn btn-xs btn-warning w-100">
-                                                <i class="bi bi-ticket"></i> Report Issue
+                                            <a href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}" class="btn btn-xs btn-warning w-100 action-button">
+                                                <i class="bi bi-ticket"></i> <span class="button-text">Report</span>
                                             </a>
-                                            
+
                                             <!-- Transport button -->
-                                            <a href="{{ url_for('transport.create', equipment_id=item.id) }}" class="btn btn-xs btn-info w-100">
-                                                <i class="bi bi-truck"></i> Request Transport
+                                            <a href="{{ url_for('transport.create', equipment_id=item.id) }}" class="btn btn-xs btn-info w-100 action-button">
+                                                <i class="bi bi-truck"></i> <span class="button-text">Transport</span>
                                             </a>
                                         </div>
                                     </div>
