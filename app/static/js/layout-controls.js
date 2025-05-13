@@ -48,11 +48,100 @@ function initLayoutControls() {
     // Force container centering
     updateContainerCentering();
 
+    // Apply mobile optimizations
+    applyMobileOptimizations();
+
     // Create layout settings button in navbar
     createLayoutSettingsButton();
 
     // Create settings modal
     createLayoutSettingsModal();
+}
+
+// Apply mobile-specific optimizations
+function applyMobileOptimizations() {
+    // Auto-detect mobile devices and apply force-mobile-optimization class
+    detectMobileDevice();
+
+    // Add short-text spans to any table headers that don't have them
+    const tableHeaders = document.querySelectorAll('.equipment-table th, #equipmentTable th');
+    tableHeaders.forEach(header => {
+        // Skip if it already has short/full text spans
+        if (header.querySelector('.short-text') || header.querySelector('.full-text')) {
+            return;
+        }
+
+        // Get the current text
+        const originalText = header.textContent.trim();
+
+        // Create abbreviated version - first 3 chars or whole word if shorter
+        let shortText = originalText;
+        if (originalText.length > 3) {
+            shortText = originalText.substring(0, 3);
+        }
+
+        // Clear original content and add spans
+        header.innerHTML = `
+            <span class="full-text">${originalText}</span>
+            <span class="short-text d-none">${shortText}</span>
+        `;
+    });
+
+    // Ensure all action buttons have proper button-text wrapping
+    const actionButtons = document.querySelectorAll('.action-button');
+    actionButtons.forEach(button => {
+        // Skip if button already has proper structure
+        if (button.querySelector('.button-text') || !button.textContent.trim()) {
+            return;
+        }
+
+        // Find the icon
+        const icon = button.querySelector('i');
+        if (!icon) {
+            return;
+        }
+
+        // Get text content excluding the icon
+        const buttonText = button.textContent.trim();
+
+        // Remove text nodes
+        Array.from(button.childNodes)
+            .filter(node => node.nodeType === Node.TEXT_NODE)
+            .forEach(node => node.remove());
+
+        // Add wrapped text
+        const textSpan = document.createElement('span');
+        textSpan.className = 'button-text';
+        textSpan.textContent = buttonText;
+        button.appendChild(textSpan);
+    });
+
+    // Find all table cells that contain action buttons (typically last column)
+    const actionCells = document.querySelectorAll('.equipment-table td:last-child, #equipmentTable td:last-child');
+    actionCells.forEach(cell => {
+        // Skip if already wrapped
+        if (cell.querySelector('.action-button-container')) {
+            return;
+        }
+
+        // Check if it contains action buttons
+        const buttons = cell.querySelectorAll('.action-button, .btn');
+        if (buttons.length === 0) {
+            return;
+        }
+
+        // Create container if cell contains at least one button
+        const container = document.createElement('div');
+        container.className = 'action-button-container';
+
+        // Move all children to container
+        while (cell.firstChild) {
+            container.appendChild(cell.firstChild);
+        }
+
+        // Add container to cell
+        cell.appendChild(container);
+    });
 }
 
 // Create layout settings button in navbar
@@ -350,8 +439,31 @@ function fixActionButtons() {
     });
 }
 
+// Auto-detect mobile and tablet devices
+function detectMobileDevice() {
+    // Check if device is mobile/tablet
+    const isMobileOrTablet =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        window.innerWidth <= 991;
+
+    if (isMobileOrTablet) {
+        // Add force-mobile-optimization class to body
+        document.body.classList.add('force-mobile-optimization');
+        console.log('Mobile device detected - applying mobile optimizations');
+    }
+}
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     initLayoutControls();
     fixActionButtons();
+
+    // Listen for resize events to detect rotation or window size changes
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 991) {
+            document.body.classList.add('force-mobile-optimization');
+        } else {
+            document.body.classList.remove('force-mobile-optimization');
+        }
+    });
 });
