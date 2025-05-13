@@ -64,6 +64,7 @@ email_service.init_app(app)
 
 # Import and register routes
 from app.routes import dashboard, api, checkout, visual, reports, admin, ticket, equipment_landing, qr_access
+from app.routes import transport, qr_transport
 
 app.register_blueprint(dashboard.bp)
 app.register_blueprint(api.bp)
@@ -74,6 +75,8 @@ app.register_blueprint(admin.bp)
 app.register_blueprint(ticket.bp)
 app.register_blueprint(equipment_landing.bp)
 app.register_blueprint(qr_access.bp)
+app.register_blueprint(transport.bp)
+app.register_blueprint(qr_transport.bp)
 
 # Add template context processors
 @app.context_processor
@@ -96,6 +99,38 @@ def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
         except (ValueError, TypeError):
             return value
     return value.strftime(format)
+
+@app.template_filter('friendly_datetime')
+def friendly_datetime(value):
+    """Format a datetime object or string as MM/DD/YYYY HH:MM AM/PM."""
+    if not value:
+        return ''
+    if isinstance(value, str):
+        try:
+            value = datetime.datetime.fromisoformat(value)
+        except (ValueError, TypeError):
+            # If conversion fails, try another approach by parsing ISO format
+            if 'T' in value:
+                parts = value.split('T')
+                if len(parts) == 2:
+                    date_parts = parts[0].split('-')
+                    time_parts = parts[1].split(':')
+                    if len(date_parts) == 3 and len(time_parts) >= 2:
+                        # Build date string in MM/DD/YYYY format
+                        date_str = f"{date_parts[1]}/{date_parts[2]}/{date_parts[0]}"
+
+                        # Build time string in HH:MM AM/PM format
+                        hour = int(time_parts[0])
+                        am_pm = 'AM' if hour < 12 else 'PM'
+                        display_hour = hour if hour <= 12 else hour - 12
+                        display_hour = display_hour if display_hour != 0 else 12
+                        time_str = f"{display_hour}:{time_parts[1]} {am_pm}"
+
+                        return f"{date_str} {time_str}"
+            return value
+
+    # Format datetime object
+    return value.strftime("%m/%d/%Y %I:%M %p")
 
 # Define main route 
 # Add special header for QR routes

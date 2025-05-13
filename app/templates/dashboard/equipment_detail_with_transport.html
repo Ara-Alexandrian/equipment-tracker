@@ -207,7 +207,7 @@
                                                 {{ request.status|capitalize }}
                                             </span>
                                         </td>
-                                        <td>{{ request.requested_date|datetime('%Y-%m-%d') }}</td>
+                                        <td>{{ request.requested_date|friendly_datetime }}</td>
                                         <td>{{ request.requested_by }}</td>
                                         <td>
                                             <a href="{{ url_for('transport.view', request_id=request.id) }}" class="btn btn-sm btn-primary">
@@ -245,7 +245,7 @@
                                 <tbody>
                                     {% for entry in checkout_history %}
                                     <tr>
-                                        <td>{{ entry.timestamp|datetime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ entry.timestamp|friendly_datetime }}</td>
                                         <td>
                                             {% if entry.new_status == 'Checked Out' %}
                                             <span class="badge bg-primary">Checked Out</span>
