@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pastel-mode.css') }}?v={{ now.timestamp()|int }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tab-fixes.css') }}?v={{ now.timestamp()|int }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-enhancements.css') }}?v={{ now.timestamp()|int }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout-controls.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout-fixed.css') }}?v={{ now.timestamp()|int }}">
 
     <!-- Immediate theme application script - runs before anything else -->
     <script>
@@ -65,7 +65,7 @@
     <!-- Theme switcher (with cache busting) -->
     <script src="{{ url_for('static', filename='js/theme-unified.js') }}?v={{ now.timestamp()|int }}"></script>
 </head>
-<body id="gearvue-body" class="container-width-standard">
+<body id="gearvue-body" class="container-width-standard centered-content">
     <!-- The theme classes are now applied by the unified theme switcher script -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid px-4">
@@ -359,7 +359,7 @@
     </script>
 
     <!-- Layout controls -->
-    <script src="{{ url_for('static', filename='js/layout-controls.js') }}?v={{ now.timestamp()|int }}"></script>
+    <script src="{{ url_for('static', filename='js/layout-fixed.js') }}?v={{ now.timestamp()|int }}"></script>
 
     {% block scripts %}{% endblock %}
 </body>
