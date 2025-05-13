@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Transport Request - {{ equipment.manufacturer }} {{ equipment.model }} - GearVue{% endblock %}
+
+{% block head %}
+<style>
+    /* Mobile-friendly adjustments */
+    @media (max-width: 576px) {
+        .card {
+            border-radius: 0;
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+        
+        .container {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        
+        .col-md-8, .col-md-4 {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+        }
+        
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <h1>Transport Request <i class="bi bi-truck"></i></h1>
+        <p class="lead">{{ equipment.manufacturer }} {{ equipment.model }} (S/N: {{ equipment.serial_number }})</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Request Equipment Transport</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('qr_transport.submit_request', equipment_id=equipment.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="requester_name" class="form-label">Your Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="requester_name" name="requester_name" required
+                               placeholder="Enter your full name">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="requester_contact" class="form-label">Your Contact Info</label>
+                        <input type="text" class="form-control" id="requester_contact" name="requester_contact"
+                               placeholder="Email or phone number">
+                        <div class="form-text">So we can contact you about this request if needed</div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <label for="origin" class="form-label">Current Location</label>
+                        <input type="text" class="form-control" id="origin" name="origin" 
+                               value="{{ status.location if status else equipment.location }}" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="destination" class="form-label">Destination Location <span class="text-danger">*</span></label>
+                        <select class="form-select" id="destination" name="destination" required>
+                            <option value="" selected disabled>Where should it go?</option>
+                            {% for location in locations %}
+                            <option value="{{ location }}">{{ location }}</option>
+                            {% endfor %}
+                            <option value="other">Other (specify in instructions)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="requested_date" class="form-label">Requested Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="requested_date" name="requested_date" 
+                              required min="{{ min_date }}" value="{{ default_date }}">
+                        <div class="form-text">When do you need it transported?</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="transport_type" class="form-label">Type</label>
+                            <select class="form-select" id="transport_type" name="transport_type">
+                                {% for key, value in transport_types.items() %}
+                                {% if key not in ['__module__', '__doc__', '__dict__', '__weakref__'] %}
+                                <option value="{{ value }}">{{ key|capitalize }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-6 mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                {% for key, value in transport_priorities.items() %}
+                                {% if key not in ['__module__', '__doc__', '__dict__', '__weakref__'] %}
+                                <option value="{{ value }}">{{ key|capitalize }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="special_instructions" class="form-label">Special Instructions</label>
+                        <textarea class="form-control" id="special_instructions" name="special_instructions" rows="3"
+                                  placeholder="Any additional information or special handling requirements?"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
+                        <i class="bi bi-send"></i> Submit Transport Request
+                    </button>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('qr.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                        
+                        <a href="{{ url_for('qr_transport.equipment_history', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-clock-history"></i> Request History
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Equipment Details Collapsible -->
+        <div class="accordion mb-4" id="equipmentAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        Equipment Details
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#equipmentAccordion">
+                    <div class="accordion-body">
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <th>Category</th>
+                                    <td>{{ equipment.category }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Type</th>
+                                    <td>{{ equipment.equipment_type }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Manufacturer</th>
+                                    <td>{{ equipment.manufacturer }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Model</th>
+                                    <td>{{ equipment.model }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Serial Number</th>
+                                    <td>{{ equipment.serial_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Location</th>
+                                    <td>{{ equipment.location }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td>{{ status.status if status else "Available" }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add validation for the form
+    document.addEventListener('DOMContentLoaded', function() {
+        const destinationSelect = document.getElementById('destination');
+        const requesterName = document.getElementById('requester_name');
+        const submitButton = document.querySelector('button[type="submit"]');
+        
+        function validateForm() {
+            if (destinationSelect.value === '' || requesterName.value.trim() === '') {
+                submitButton.disabled = true;
+            } else {
+                submitButton.disabled = false;
+            }
+        }
+        
+        destinationSelect.addEventListener('change', validateForm);
+        requesterName.addEventListener('input', validateForm);
+        validateForm(); // Initial validation
+    });
+</script>
+{% endblock %}

@@ -5,9 +5,11 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models.equipment import EquipmentDataManager
 from app import equipment_manager, checkout_manager
 from app.models.ticket import TicketManager
+from app.models.transport_request import TransportManager
 
-# Initialize ticket manager
+# Initialize managers
 ticket_manager = TicketManager()
+transport_manager = TransportManager()
 from datetime import datetime
 
 bp = Blueprint('dashboard', __name__)
@@ -17,14 +19,28 @@ def index():
     """Render the main dashboard page."""
     # Get equipment statistics
     stats = equipment_manager.get_equipment_stats()
-    
+
     # Get the latest equipment
     latest_equipment = equipment_manager.get_all_equipment()[:10]
-    
+
+    # Get pending transport requests
+    transport_requests = transport_manager.get_pending_transport_requests()[:5]
+
+    # Get open tickets
+    open_tickets = ticket_manager.get_tickets_by_status('open')[:5]
+
+    # Add transport request stats
+    stats['transport_requests'] = len(transport_manager.get_pending_transport_requests())
+
     return render_template(
-        'dashboard/index.html', 
-        stats=stats, 
-        latest_equipment=latest_equipment
+        'dashboard/index.html',
+        stats=stats,
+        latest_equipment=latest_equipment,
+        transport_requests=transport_requests,
+        open_tickets=open_tickets,
+        checkout_manager=checkout_manager,
+        ticket_manager=ticket_manager,
+        equipment_manager=equipment_manager
     )
 
 @bp.route('/equipment')
@@ -34,7 +50,7 @@ def equipment_list():
     category = request.args.get('category')
     location = request.args.get('location')
     search_query = request.args.get('q')
-    
+
     # Filter equipment based on parameters
     if category:
         equipment = equipment_manager.get_equipment_by_category(category)
@@ -44,10 +60,13 @@ def equipment_list():
         equipment = equipment_manager.search_equipment(search_query)
     else:
         equipment = equipment_manager.get_all_equipment()
-    
+
     # Get unique locations and manufacturers for filters
     locations = equipment_manager.get_unique_locations()
-    
+
+    # Get transport requests for status indicators
+    transport_requests = transport_manager.get_pending_transport_requests()
+
     return render_template(
         'dashboard/equipment_list.html',
         equipment=equipment,
@@ -56,7 +75,8 @@ def equipment_list():
         selected_location=location,
         search_query=search_query,
         checkout_manager=checkout_manager,
-        ticket_manager=ticket_manager
+        ticket_manager=ticket_manager,
+        transport_requests=transport_requests
     )
 
 @bp.route('/equipment/<string:equipment_id>')
@@ -64,21 +84,52 @@ def equipment_detail(equipment_id):
     """Render the equipment detail page."""
     # Get equipment by ID
     equipment = equipment_manager.get_equipment_by_id(equipment_id)
-    
+
     if not equipment:
         flash('Equipment not found', 'error')
         return redirect(url_for('dashboard.equipment_list'))
-    
+
     # Get checkout status
     status = checkout_manager.get_equipment_status(equipment_id)
-    
-    return render_template(
-        'dashboard/equipment_detail.html',
-        equipment=equipment,
-        status=status,
-        checkout_manager=checkout_manager,
-        ticket_manager=ticket_manager
-    )
+
+    # Get checkout history
+    history = checkout_manager.get_checkout_history(equipment_id=equipment_id)
+
+    # Get tickets for this equipment
+    tickets = ticket_manager.get_tickets_by_equipment(equipment_id)
+
+    # Get transport requests for this equipment
+    transport_requests = transport_manager.get_requests_by_equipment(equipment_id)
+
+    # Check if transport-enabled template exists
+    try:
+        # Use the new template with transport integrated
+        return render_template(
+            'dashboard/equipment_detail_with_transport.html',
+            equipment=equipment,
+            status=status,
+            history=history,
+            tickets=tickets,
+            transport_requests=transport_requests,
+            checkout_manager=checkout_manager,
+            ticket_manager=ticket_manager,
+            equipment_manager=equipment_manager,
+            status_options=checkout_manager.STATUS_OPTIONS,
+            now=datetime.now(),
+            condition=ticket_manager.get_equipment_condition(equipment_id)
+        )
+    except:
+        # Fall back to standard template
+        return render_template(
+            'dashboard/equipment_detail.html',
+            equipment=equipment,
+            status=status,
+            history=history,
+            tickets=tickets,
+            checkout_manager=checkout_manager,
+            ticket_manager=ticket_manager,
+            status_options=checkout_manager.STATUS_OPTIONS
+        )
 
 @bp.route('/calibration')
 def calibration_overview():

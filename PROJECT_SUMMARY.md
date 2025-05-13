@@ -31,8 +31,11 @@ The Equipment Tracker is a web-based application designed for clinical physicist
 - **Unified Data Model**: Combined data from multiple Excel sheets into a single coherent model
 - **Interactive Visualizations**: D3.js-based network visualization of equipment relationships
 - **Checkout System**: Complete system for tracking equipment location and status
+- **Transport Request System**: Full-featured system for requesting, approving, and tracking equipment movement
+- **Zero-Friction QR Code Integration**: Mobile-optimized interface for all equipment operations
 - **Report Generation**: PDF, Excel, and CSV report generation for audits
 - **Role-Based Access**: Three user roles with appropriate permissions
+- **Visual Status Indicators**: Traffic light system and transport badges for at-a-glance status
 - **Containerized Deployment**: Docker support for easy deployment
 
 ## Running the Application

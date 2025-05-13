@@ -8,6 +8,7 @@ A comprehensive web-based application for tracking medical physics equipment, th
 - **Calibration Tracking:** Monitor calibration due dates and receive email notifications for upcoming and overdue calibrations
 - **Equipment Checkout System:** Track equipment locations and checkout history
 - **Zero-Friction QR Code System:** Scan equipment QR codes for instant access - no login required
+- **Transport Request System:** Request and track equipment movements between locations
 - **Ticketing System:** Submit and track equipment issues with status indicators (green/yellow/red)
 - **Visual Interface:** Interactive network visualization of equipment relationships
 - **User Management:** Role-based access control (Admin, Physicist, Regular User)
@@ -25,6 +26,7 @@ A comprehensive web-based application for tracking medical physics equipment, th
 
 2. Build and start the containers:
    ```bash
+   cd docker
    docker-compose up -d
    ```
 
@@ -76,6 +78,7 @@ The application uses JSON files for data storage, located in the `app/data` dire
 - `notification_logs.json`: History of sent calibration notifications
 - `tickets.json`: Equipment issue tickets and comments
 - `equipment_conditions.json`: Traffic light status indicators (green/yellow/red)
+- `transport_requests.json`: Equipment transport requests and movement tracking
 
 ### QR Code System
 
@@ -84,7 +87,8 @@ The application features a zero-friction QR code system that allows users to:
 1. Scan QR codes attached to equipment to view details
 2. Check equipment in/out without login
 3. Submit issue tickets directly from mobile devices
-4. View equipment status with visual traffic light indicators
+4. Request equipment transport between locations
+5. View equipment status with visual traffic light indicators
 
 To use the QR code system:
 1. Administrators can generate QR codes from the equipment detail page
@@ -92,6 +96,8 @@ To use the QR code system:
 3. Users can scan codes with their mobile devices and immediately take action
 
 See [QR_CODE_GUIDE.md](QR_CODE_GUIDE.md) for detailed instructions and best practices.
+
+For information on using the transport request system, refer to [TRANSPORT_GUIDE.md](docs/TRANSPORT_GUIDE.md).
 
 ### Email Notifications
 
@@ -139,8 +145,20 @@ gearvue/
 │   ├── routes/             # Route handlers
 │   ├── static/             # Static assets (CSS, JS, images)
 │   └── templates/          # HTML templates
+├── docs/                   # Documentation files
+│   ├── DEPLOYMENT_GUIDE.md # Deployment instructions
+│   └── QR_CODE_GUIDE.md    # QR code system guide
+├── docker/                 # Docker configuration
+│   ├── docker-compose.yml  # Docker Compose configuration
+│   ├── Dockerfile          # Main application Dockerfile
+│   └── Dockerfile.cron     # Cron jobs Dockerfile
+├── logs/                   # Log files
 ├── scripts/                # Utility scripts
-└── docker-compose.yml      # Docker configuration
+│   ├── analysis/           # Data analysis scripts
+│   └── utilities/          # Utility tools and scripts
+└── tests/                  # Test suite
+    ├── debug_tools/        # Debugging utilities
+    └── unit_tests/         # Unit tests
 ```
 
 ### Running Tests

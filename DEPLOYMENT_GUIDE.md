@@ -16,6 +16,7 @@ GearVue is a comprehensive web-based system designed specifically for medical ph
 | **Equipment Tracking** | Complete inventory management with status indicators |
 | **Calibration Management** | Automated tracking and notifications for calibration due dates |
 | **Location Tracking** | Real-time equipment location and checkout history |
+| **Transport Management** | Request and track equipment movements between locations |
 | **QR Code System** | Zero-friction mobile access with no login requirements |
 | **Ticketing System** | Issue reporting with severity levels and status tracking |
 | **Theme Support** | Light, Dark, and Dracula modes with persistent preferences |

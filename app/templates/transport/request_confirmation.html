@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Submitted - {{ equipment.manufacturer }} {{ equipment.model }} - GearVue{% endblock %}
+
+{% block head %}
+<style>
+    .confirmation-container {
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .confirmation-icon {
+        font-size: 5rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+    
+    .confirmation-details {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: left;
+    }
+    
+    @media (max-width: 576px) {
+        .confirmation-container {
+            padding: 1rem;
+        }
+        
+        .confirmation-icon {
+            font-size: 3rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirmation-container">
+    <div class="confirmation-icon">
+        <i class="bi bi-check-circle-fill"></i>
+    </div>
+    
+    <h2 class="mb-3">Transport Request Submitted</h2>
+    <p class="lead mb-4">Your request has been received and will be processed by the physics team.</p>
+    
+    <div class="confirmation-details">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Request Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th style="width: 40%">Request ID:</th>
+                            <td>{{ transport_request.id[:8] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Equipment:</th>
+                            <td>{{ equipment.manufacturer }} {{ equipment.model }}</td>
+                        </tr>
+                        <tr>
+                            <th>Serial Number:</th>
+                            <td>{{ equipment.serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>From:</th>
+                            <td>{{ transport_request.origin }}</td>
+                        </tr>
+                        <tr>
+                            <th>To:</th>
+                            <td>{{ transport_request.destination }}</td>
+                        </tr>
+                        <tr>
+                            <th>Requested Date:</th>
+                            <td>{{ transport_request.requested_date|datetime('%Y-%m-%d') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                <span class="badge bg-info">Requested</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">What's Next?</h5>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li>The physics team will review your request</li>
+                    <li>You'll be notified when it's approved and scheduled</li>
+                    <li>The equipment will be transported according to the schedule</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="{{ url_for('qr_transport.view_request', request_id=transport_request.id) }}" class="btn btn-primary">
+                <i class="bi bi-eye"></i> View Request Status
+            </a>
+            
+            <a href="{{ url_for('qr.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Equipment
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
