@@ -108,9 +108,29 @@
                             {% endif %}
                         </ul>
                     </li>
+
+                    <!-- Transport section -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/transport' in request.path and not '/qr/transport' in request.path %}active{% endif %}" href="#" id="transportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Transport
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="transportDropdown">
+                            <li><a class="dropdown-item {% if request.path == url_for('transport.index') %}active{% endif %}" href="{{ url_for('transport.index') }}">Transport Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.equipment_list') }}">
+                                <i class="bi bi-plus-circle"></i> Create Transport Request
+                                <small class="d-block text-muted">(Choose equipment first)</small>
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('transport.completed') }}">Completed Requests</a></li>
+                            {% if user and user.role in ['admin', 'physicist'] %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('transport.index') }}#coordinator">Requests I'm Coordinating</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
                     
-                    <!-- Admin section -->
-                    {% if user and user.role in ['admin', 'physicist'] %}
+                    <!-- Admin section - Admin only -->
+                    {% if user and user.role == 'admin' %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {% if '/checkout/admin' in request.path or '/reports' in request.path or '/admin' in request.path %}active{% endif %}" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Administration
@@ -118,10 +138,28 @@
                         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('checkout.admin') }}">Admin Dashboard</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.equipment_management') }}">Equipment Management</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.calendar') }}">Equipment Calendar</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('checkout.manage_users') }}">Manage Users</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.settings') }}">System Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">Generate Reports</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- Physicist Tools - Shown only to physicists -->
+                    {% if user and user.role == 'physicist' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/reports' in request.path or '/admin/calendar' in request.path %}active{% endif %}" href="#" id="physicistDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Physicist Tools
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="physicistDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.calendar') }}">Equipment Calendar</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">Generate Reports</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('ticket.list_tickets', status='open') }}">Open Tickets</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('ticket.list_tickets', assigned_to=user.username) }}">My Assigned Tickets</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.calibration_overview') }}">Calibration Status</a></li>
                         </ul>
                     </li>
                     {% endif %}
@@ -197,7 +235,7 @@
                     <p>A tool for tracking and managing equipment inventory and calibration.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0">Version 1.2.0 - "Advanced Calibration"</p>
+                    <p class="mb-0">Version 1.2.0 - "GearVue Advanced Equipment Tracker"</p>
                     <p>&copy; {{ now.year }} Mary Bird Perkins Cancer Center</p>
                     <p class="small mb-0">For assistance contact: <a href="mailto:aalexandrian@marybird.com?subject=GearVue%20Support%20Request&body=Hello,%0A%0AI%20need%20assistance%20with%20the%20GearVue%20application.%0A%0ADetails%20of%20my%20issue:%0A-%20%0A%0AEquipment%20ID%20(if%20applicable):%20%0ALocation:%20%0A%0AThank%20you,%0A" class="text-light">aalexandrian@marybird.com</a></p>
                 </div>

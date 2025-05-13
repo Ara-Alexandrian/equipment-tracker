@@ -170,13 +170,17 @@
                     <div class="row g-2">
                         <div class="col-md-6">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <span class="badge bg-success me-1"><i class="bi bi-check-circle"></i>Ready</span>
                                     <span class="small text-nowrap">Available for use</span>
                                 </div>
-                                <div class="col-md-6">
-                                    <span class="badge bg-info me-1"><i class="bi bi-arrow-bar-right"></i>Out</span> 
-                                    <span class="small text-nowrap">Currently checked out</span>
+                                <div class="col-md-4">
+                                    <span class="badge bg-info me-1"><i class="bi bi-arrow-bar-right"></i>Out</span>
+                                    <span class="small text-nowrap">Checked out</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-secondary me-1"><i class="bi bi-truck"></i>Transport</span>
+                                    <span class="small text-nowrap">Has transport request</span>
                                 </div>
                             </div>
                         </div>
@@ -193,6 +197,35 @@
                                 <div class="col-md-4">
                                     <span class="badge bg-danger me-1"><i class="bi bi-x-circle-fill"></i>OOS</span>
                                     <span class="small text-nowrap">Out of service</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transport Section Legend -->
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <h6 class="mb-2 border-bottom pb-1 text-muted" style="font-size: 0.9rem;">Action Buttons</h6>
+                            <div class="d-flex flex-wrap" style="gap: 10px;">
+                                <div>
+                                    <button class="btn btn-xs btn-outline-primary disabled"><i class="bi bi-eye"></i> View</button>
+                                    <span class="small">Equipment details</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-xs btn-outline-info disabled"><i class="bi bi-qr-code"></i> QR Code</button>
+                                    <span class="small">Generate/view QR</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-xs btn-primary disabled"><i class="bi bi-box-arrow-right"></i> Check Out</button>
+                                    <span class="small">Assign to location</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-xs btn-warning disabled"><i class="bi bi-ticket"></i> Issue</button>
+                                    <span class="small">Report problem</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-xs btn-info disabled"><i class="bi bi-truck"></i> Transport</button>
+                                    <span class="small">Request movement</span>
                                 </div>
                             </div>
                         </div>
@@ -235,6 +268,27 @@
                                     {% else %}
                                         <span class="badge bg-success"><i class="bi bi-check-circle"></i>Ready</span>
                                     {% endif %}
+
+                                    <!-- Check for active transport requests -->
+                                    {% set active_transport = false %}
+                                    {% set transport_status = '' %}
+                                    {% set is_in_transit = false %}
+
+                                    {% for request in transport_requests %}
+                                        {% if request.equipment_id == item.id and request.status not in ['completed', 'cancelled'] %}
+                                            {% set active_transport = true %}
+                                            {% set transport_status = request.status %}
+                                            {% set is_in_transit = request.status == 'in_transit' %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if active_transport %}
+                                        <span class="badge
+                                            {% if is_in_transit %}bg-dark{% else %}bg-secondary{% endif %} mt-1">
+                                            <i class="bi bi-truck"></i>
+                                            {% if is_in_transit %}Moving{% else %}Transport{% endif %}
+                                        </span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% set condition = ticket_manager.get_equipment_condition(item.id) %}
@@ -247,43 +301,44 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="d-flex flex-column align-items-center">
-                                        <!-- Top row: View button centered -->
-                                        <div class="mb-1">
-                                            <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-xs btn-outline-primary" style="width: 75px;">
+                                    <div class="d-flex justify-content-between">
+                                        <!-- Left column: View & QR -->
+                                        <div class="d-flex flex-column" style="gap: 4px; width: 45%;">
+                                            <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-xs btn-outline-primary w-100">
                                                 <i class="bi bi-eye"></i> View
                                             </a>
+                                            
+                                            <button type="button" class="btn btn-xs btn-outline-info qr-dashboard-btn w-100"
+                                                  data-id="{{ item.id }}"
+                                                  data-manufacturer="{{ item.manufacturer }}"
+                                                  data-model="{{ item.model }}"
+                                                  data-serial="{{ item.serial_number }}">
+                                                <i class="bi bi-qr-code"></i> QR Code
+                                            </button>
                                         </div>
-
-                                        <!-- Bottom row buttons -->
-                                        <div class="d-flex flex-wrap" style="gap: 4px;">
+                                        
+                                        <!-- Right column: Action buttons -->
+                                        <div class="d-flex flex-column" style="gap: 4px; width: 52%;">
                                             <!-- Check in/out button based on status -->
                                             {% if status and status.status == "Checked Out" %}
-                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}" class="btn btn-xs btn-success" style="width: 85px;">
+                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}" class="btn btn-xs btn-success w-100">
                                                     <i class="bi bi-box-arrow-in-left"></i> Check In
                                                 </a>
                                             {% else %}
-                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}" class="btn btn-xs btn-primary" style="width: 85px;">
+                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}" class="btn btn-xs btn-primary w-100">
                                                     <i class="bi bi-box-arrow-right"></i> Check Out
                                                 </a>
                                             {% endif %}
 
                                             <!-- Ticket button -->
-                                            <a href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}" class="btn btn-xs btn-warning" style="width: 60px;">
+                                            <a href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}" class="btn btn-xs btn-warning w-100">
                                                 <i class="bi bi-ticket"></i> Issue
                                             </a>
-                                        </div>
-
-                                        <!-- Third row: QR code button -->
-                                        <div class="mt-1">
-                                            <button type="button" class="btn btn-xs btn-outline-info qr-dashboard-btn"
-                                                  data-id="{{ item.id }}"
-                                                  data-manufacturer="{{ item.manufacturer }}"
-                                                  data-model="{{ item.model }}"
-                                                  data-serial="{{ item.serial_number }}"
-                                                  style="width: 125px;">
-                                                <i class="bi bi-qr-code"></i> Show QR
-                                            </button>
+                                            
+                                            <!-- Transport button -->
+                                            <a href="{{ url_for('transport.create', equipment_id=item.id) }}" class="btn btn-xs btn-info w-100">
+                                                <i class="bi bi-truck"></i> Transport
+                                            </a>
                                         </div>
                                     </div>
                                 </td>

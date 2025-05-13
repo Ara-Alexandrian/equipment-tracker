@@ -12,6 +12,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Recent Updates
 
+### Transport Request System (May 2025)
+- **Equipment Movement**: New system for requesting, approving, and tracking equipment transport between locations
+- **Mobile-Optimized**: Zero-friction QR code integration for transport requests
+- **Visual Indicators**: Equipment lists show transport status with truck icon badges
+- **Dashboard Integration**: Main dashboard shows pending transport requests
+- **Implementation**: See `/app/routes/transport.py` and `/app/models/transport_request.py` for implementation
+
 ### Theme System (May 2025)
 - **Theme Persistence**: Application now properly maintains theme selection (Light/Dark/Dracula) across page navigation
 - **Custom Dracula Icon**: The Dracula theme uses a custom SVG icon (`/Resources/dracula-icon.svg`)

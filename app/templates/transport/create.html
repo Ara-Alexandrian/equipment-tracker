@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Transport Request - {{ equipment.manufacturer }} {{ equipment.model }} - GearVue{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Create Transport Request</h1>
+        <p class="lead">Request transportation for {{ equipment.manufacturer }} {{ equipment.model }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('transport.equipment_requests', equipment_id=equipment.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back to Transport Requests
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Transport Request Information</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('transport.create', equipment_id=equipment.id) }}" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="origin" class="form-label">Origin Location</label>
+                            <input type="text" class="form-control" id="origin" name="origin" 
+                                   value="{{ status.location if status else equipment.location }}" readonly>
+                            <div class="form-text">Current location of the equipment</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="destination" class="form-label">Destination Location <span class="text-danger">*</span></label>
+                            <select class="form-select" id="destination" name="destination" required>
+                                <option value="" selected disabled>Select destination</option>
+                                {% for location in locations %}
+                                <option value="{{ location }}">{{ location }}</option>
+                                {% endfor %}
+                                <option value="other">Other (specify in instructions)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="requested_date" class="form-label">Requested Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="requested_date" name="requested_date" 
+                                  required min="{{ min_date }}" value="{{ default_date }}">
+                            <div class="form-text">When would you like the equipment to be transported?</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="transport_type" class="form-label">Transport Type</label>
+                            <select class="form-select" id="transport_type" name="transport_type">
+                                {% for key, value in transport_types.items() %}
+                                {% if key not in ['__module__', '__doc__', '__dict__', '__weakref__'] %}
+                                <option value="{{ value }}">{{ key|capitalize }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select class="form-select" id="priority" name="priority">
+                            {% for key, value in transport_priorities.items() %}
+                            {% if key not in ['__module__', '__doc__', '__dict__', '__weakref__'] %}
+                            <option value="{{ value }}">{{ key|capitalize }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="special_instructions" class="form-label">Special Instructions</label>
+                        <textarea class="form-control" id="special_instructions" name="special_instructions" rows="4"
+                                  placeholder="Any special handling requirements or additional information">{{ contact_info }}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-truck"></i> Create Transport Request
+                    </button>
+                    <a href="{{ url_for('transport.equipment_requests', equipment_id=equipment.id) }}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Equipment Information Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Category</th>
+                            <td>{{ equipment.category }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ equipment.equipment_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Manufacturer</th>
+                            <td>{{ equipment.manufacturer }}</td>
+                        </tr>
+                        <tr>
+                            <th>Model</th>
+                            <td>{{ equipment.model }}</td>
+                        </tr>
+                        <tr>
+                            <th>Serial Number</th>
+                            <td>{{ equipment.serial_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>{{ equipment.location }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Current Status Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Current Status</h5>
+            </div>
+            <div class="card-body">
+                <!-- Checkout Status -->
+                <div class="mb-3">
+                    <h6>Checkout Status</h6>
+                    {% if status and status.status == "Checked Out" %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-box-arrow-right"></i> Checked Out
+                        <br>by {{ status.checked_out_by }}
+                        {% if status.expected_return %}
+                            <br>Due back: {{ status.expected_return|datetime('%Y-%m-%d') }}
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-box-arrow-in-left"></i> {{ status.status if status else "Available" }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add validation for destination - disable submit until destination is selected
+    document.addEventListener('DOMContentLoaded', function() {
+        const destinationSelect = document.getElementById('destination');
+        const submitButton = document.querySelector('button[type="submit"]');
+        
+        function validateForm() {
+            if (destinationSelect.value === '') {
+                submitButton.disabled = true;
+            } else {
+                submitButton.disabled = false;
+            }
+        }
+        
+        destinationSelect.addEventListener('change', validateForm);
+        validateForm(); // Initial validation
+    });
+</script>
+{% endblock %}
