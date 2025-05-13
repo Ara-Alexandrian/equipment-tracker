@@ -38,16 +38,19 @@ const STORAGE_KEY = 'gearVueLayoutSettings';
 // Initialize layout controls
 function initLayoutControls() {
     console.log('Initializing layout controls');
-    
+
     // Load saved settings
     const settings = loadLayoutSettings();
-    
+
     // Apply current settings
     applyLayoutSettings(settings);
-    
+
+    // Force container centering
+    updateContainerCentering();
+
     // Create layout settings button in navbar
     createLayoutSettingsButton();
-    
+
     // Create settings modal
     createLayoutSettingsModal();
 }
@@ -196,18 +199,50 @@ function setupLayoutControls() {
     });
 }
 
-// Update layout width
+// Update layout width with centering support
 function updateLayoutWidth(width) {
     // Remove all width classes
     Object.values(LAYOUT_CLASSES.width).forEach(cls => {
         document.body.classList.remove(cls);
     });
-    
+
     // Add the selected width class
     document.body.classList.add(LAYOUT_CLASSES.width[width]);
-    
+
     // Update data attribute
     document.body.setAttribute('data-layout-width', width);
+
+    // Update any dynamic containers
+    updateContainerCentering();
+}
+
+// Force container centering to update
+function updateContainerCentering() {
+    // Get all container fluid elements
+    const containers = document.querySelectorAll('.container-fluid');
+
+    // Ensure they all have mx-auto child divs for proper centering
+    containers.forEach(container => {
+        // Skip if already has mx-auto direct child
+        if (container.querySelector(':scope > .mx-auto')) {
+            return;
+        }
+
+        // If container has children but no mx-auto wrapper
+        if (container.children.length > 0) {
+            // Create wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mx-auto';
+
+            // Move all children to wrapper
+            while (container.firstChild) {
+                wrapper.appendChild(container.firstChild);
+            }
+
+            // Add wrapper to container
+            container.appendChild(wrapper);
+        }
+    });
 }
 
 // Update font size
@@ -229,10 +264,13 @@ function resetLayoutSettings() {
     // Apply default settings
     updateLayoutWidth(DEFAULT_SETTINGS.width);
     updateFontSize(DEFAULT_SETTINGS.fontSize);
-    
+
     // Update buttons
     updateLayoutControlButtons(DEFAULT_SETTINGS);
-    
+
+    // Update container centering
+    updateContainerCentering();
+
     // Remove from local storage
     localStorage.removeItem(STORAGE_KEY);
 }

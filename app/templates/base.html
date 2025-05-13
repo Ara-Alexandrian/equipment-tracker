@@ -65,7 +65,8 @@
 <body id="gearvue-body" class="container-width-standard">
     <!-- The theme classes are now applied by the unified theme switcher script -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
+        <div class="container-fluid px-4">
+            <div class="mx-auto">
             <a class="navbar-brand" href="{{ url_for('index') }}">
                 <!-- Light mode logo (transparent) - hidden in dark mode -->
                 <img src="{{ url_for('static', filename='img/gearvue-notext-transparent.png') }}" alt="GearVue Logo" height="30" class="d-inline-block align-text-top me-2 light-mode-logo">
@@ -224,20 +225,23 @@
                     {% endif %}
                 </div>
             </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container container-fluid my-4">
-        {% for category, message in get_flashed_messages(with_categories=true) %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
+    <div class="container-fluid my-4 px-4">
+        <div class="mx-auto">
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
 
-
-        {% block content %}{% endblock %}
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container container-fluid">
+        <div class="container-fluid px-4">
+            <div class="mx-auto">
             <div class="row align-items-center">
                 <div class="col-md-1 d-none d-md-block">
                     <!-- Light mode logo (transparent) - hidden in dark mode -->
@@ -255,12 +259,42 @@
                     <p class="small mb-0">For assistance contact: <a href="mailto:aalexandrian@marybird.com?subject=GearVue%20Support%20Request&body=Hello,%0A%0AI%20need%20assistance%20with%20the%20GearVue%20application.%0A%0ADetails%20of%20my%20issue:%0A-%20%0A%0AEquipment%20ID%20(if%20applicable):%20%0ALocation:%20%0A%0AThank%20you,%0A" class="text-light">aalexandrian@marybird.com</a></p>
                 </div>
             </div>
+            </div>
         </div>
     </footer>
 
     <!-- Add jQuery before Bootstrap to ensure proper JavaScript functionality -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Immediate fix for container layout centering -->
+    <script>
+        // Fix container centering on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure all container-fluid elements have mx-auto wrappers
+            const containers = document.querySelectorAll('.container-fluid');
+            containers.forEach(container => {
+                // Skip if already has mx-auto direct child
+                if (container.querySelector(':scope > .mx-auto')) {
+                    return;
+                }
+
+                // Create wrapper if needed
+                if (container.children.length > 0) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'mx-auto';
+
+                    // Move all children to wrapper
+                    while (container.firstChild) {
+                        wrapper.appendChild(container.firstChild);
+                    }
+
+                    // Add wrapper to container
+                    container.appendChild(wrapper);
+                }
+            });
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}?v={{ now.timestamp()|int }}"></script>
     <script src="{{ url_for('static', filename='js/table-enhancements.js') }}?v={{ now.timestamp()|int }}"></script>

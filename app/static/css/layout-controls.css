@@ -19,7 +19,7 @@
     --table-font-size-large: 1rem;
 }
 
-/* Base container width classes - resolution optimized */
+/* Base container width classes - resolution optimized and centered */
 .container-width-small {
     max-width: var(--small-screen-width) !important;
 }
@@ -33,6 +33,39 @@
 }
 
 .container-width-full {
+    max-width: var(--xl-screen-width) !important;
+}
+
+/* Dynamically center content based on width setting */
+.container-width-small .mx-auto,
+.container-width-standard .mx-auto,
+.container-width-wide .mx-auto,
+.container-width-full .mx-auto {
+    max-width: inherit;
+    width: 100%;
+}
+
+/* Apply centered container for all navbar/footer/content containers */
+.container-fluid {
+    width: 100% !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
+/* Ensure dynamic centering */
+body.container-width-small .container-fluid .mx-auto {
+    max-width: var(--small-screen-width) !important;
+}
+
+body.container-width-standard .container-fluid .mx-auto {
+    max-width: var(--default-screen-width) !important;
+}
+
+body.container-width-wide .container-fluid .mx-auto {
+    max-width: var(--large-screen-width) !important;
+}
+
+body.container-width-full .container-fluid .mx-auto {
     max-width: var(--xl-screen-width) !important;
 }
 
