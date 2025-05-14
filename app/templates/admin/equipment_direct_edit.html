@@ -2,6 +2,10 @@
 
 {% block title %}Edit Equipment - {{ equipment.id }} - GearVue{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
@@ -21,8 +25,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Equipment Details</h5>
                 <!-- Delete Button - Opens Delete Modal -->
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteEquipmentModal" 
-                    onclick="prepareDeleteModal('{{ equipment.id }}', '{{ equipment.manufacturer }}', '{{ equipment.model }}', '{{ equipment.serial_number }}')">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteEquipmentModal">
                     <i class="bi bi-trash"></i> Delete Equipment
                 </button>
             </div>
@@ -120,12 +123,12 @@
                 <p>Are you sure you want to delete this equipment?</p>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <p><strong>ID:</strong> <span id="delete_equipment_id"></span></p>
-                        <p><strong>Equipment:</strong> <span id="delete_equipment_name"></span></p>
-                        <p><strong>Serial Number:</strong> <span id="delete_equipment_serial"></span></p>
+                        <p><strong>ID:</strong> {{ equipment.id }}</p>
+                        <p><strong>Equipment:</strong> {{ equipment.manufacturer }} {{ equipment.model }}</p>
+                        <p><strong>Serial Number:</strong> {{ equipment.serial_number }}</p>
                     </div>
                 </div>
-                <div class="alert alert-warning">
+                <div class="alert alert-warning" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
                     <h6 class="alert-heading">Cascade Deletion Warning</h6>
                     <p><i class="bi bi-exclamation-triangle"></i> The following related data will also be deleted:</p>
                     <ul>
@@ -139,7 +142,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteEquipmentForm" action="" method="POST">
+                <form id="deleteEquipmentForm" action="/admin/equipment/delete/{{ equipment.id }}" method="POST">
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash"></i> Delete Equipment & Related Data
                     </button>
@@ -192,18 +195,30 @@
 
 {% block scripts %}
 <script>
-    // Function to prepare the delete modal with equipment details
-    function prepareDeleteModal(id, manufacturer, model, serial) {
-        console.log("Preparing delete modal for:", { id, manufacturer, model, serial });
-
-        // Set values in the modal
-        document.getElementById('delete_equipment_id').textContent = id;
-        document.getElementById('delete_equipment_name').textContent = manufacturer + " " + model;
-        document.getElementById('delete_equipment_serial').textContent = serial;
-
-        // Set form action URL
-        document.getElementById('deleteEquipmentForm').action = `/admin/equipment/delete/${id}`;
-    }
+    // Add CSS rule to ensure warning stays visible
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create style element
+        const style = document.createElement('style');
+        style.textContent = `
+            .modal-body .alert-warning {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Make sure warning stays visible when modal is shown
+        const deleteModal = document.getElementById('deleteEquipmentModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('shown.bs.modal', function() {
+                const warningElement = document.querySelector('.modal-body .alert-warning');
+                if (warningElement) {
+                    warningElement.setAttribute('style', 'display: block !important; opacity: 1 !important; visibility: visible !important;');
+                }
+            });
+        }
+    });
 
     // Function to generate QR code for equipment
     function generateQRCode(equipmentId, manufacturer, model, serialNumber) {

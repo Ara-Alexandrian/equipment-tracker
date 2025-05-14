@@ -2,6 +2,10 @@
 
 {% block title %}Equipment Checkout - Equipment Tracker{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
@@ -30,23 +34,23 @@
             <div class="card-body">
                 {% if checked_out %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover checked-out-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Location</th>
-                                <th>Checked Out By</th>
-                                <th>Expected Return</th>
+                                <th class="col-id">ID</th>
+                                <th class="col-location">Location</th>
+                                <th class="col-user">Checked Out By</th>
+                                <th class="col-date">Expected Return</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in checked_out %}
                             <tr>
-                                <td>{{ item.id }}</td>
-                                <td>{{ item.location }}</td>
-                                <td>{{ item.checked_out_by }}</td>
-                                <td>{{ item.expected_return }}</td>
+                                <td class="col-id" title="{{ item.id }}">{{ item.id }}</td>
+                                <td class="col-location">{{ item.location }}</td>
+                                <td class="col-user">{{ item.checked_out_by }}</td>
+                                <td class="col-date">{{ item.expected_return }}</td>
                                 <td>
                                     <a href="{{ url_for('checkout.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i> View
@@ -75,23 +79,23 @@
             <div class="card-body">
                 {% if overdue %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover overdue-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Location</th>
-                                <th>Checked Out By</th>
-                                <th>Days Overdue</th>
+                                <th class="col-id">ID</th>
+                                <th class="col-location">Location</th>
+                                <th class="col-user">Checked Out By</th>
+                                <th class="col-date">Days Overdue</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in overdue %}
                             <tr>
-                                <td>{{ item.id }}</td>
-                                <td>{{ item.location }}</td>
-                                <td>{{ item.checked_out_by }}</td>
-                                <td class="text-danger fw-bold">{{ item.days_overdue }}</td>
+                                <td class="col-id" title="{{ item.id }}">{{ item.id }}</td>
+                                <td class="col-location">{{ item.location }}</td>
+                                <td class="col-user">{{ item.checked_out_by }}</td>
+                                <td class="col-date text-danger fw-bold">{{ item.days_overdue }}</td>
                                 <td>
                                     <a href="{{ url_for('checkout.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i> View
@@ -124,26 +128,26 @@
             <div class="card-body">
                 {% if history %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover activity-table">
                         <thead>
                             <tr>
-                                <th>Time</th>
-                                <th>Equipment ID</th>
-                                <th>Action</th>
-                                <th>User</th>
-                                <th>Details</th>
+                                <th class="col-time">Time</th>
+                                <th class="col-equipment-id">Equipment ID</th>
+                                <th class="col-action">Action</th>
+                                <th class="col-user">User</th>
+                                <th class="col-details">Details</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for entry in history %}
                             <tr>
-                                <td>{{ entry.timestamp }}</td>
-                                <td>
+                                <td class="col-time">{{ entry.timestamp }}</td>
+                                <td class="col-equipment-id">
                                     <a href="{{ url_for('checkout.equipment_detail', equipment_id=entry.equipment_id) }}">
                                         {{ entry.equipment_id }}
                                     </a>
                                 </td>
-                                <td>
+                                <td class="col-action">
                                     {% if entry.previous_status != entry.new_status %}
                                         Status changed from <strong>{{ entry.previous_status }}</strong> to <strong>{{ entry.new_status }}</strong>
                                     {% elif entry.previous_location != entry.new_location %}
@@ -152,8 +156,8 @@
                                         Updated
                                     {% endif %}
                                 </td>
-                                <td>{{ entry.user }}</td>
-                                <td>
+                                <td class="col-user">{{ entry.user }}</td>
+                                <td class="col-details">
                                     {% if entry.notes %}
                                     <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ entry.notes }}">
                                         <i class="bi bi-info-circle"></i> Notes

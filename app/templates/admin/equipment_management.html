@@ -1,6 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %}Equipment Management - Admin - Equipment Tracker{% endblock %}
+{% block title %}Equipment Management - Admin - GearVue{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+<script>
+    // Add class to body for wider container
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('page-admin-equipment');
+        document.body.classList.add('wide-container');
+    });
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
@@ -117,20 +128,20 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover" id="equipmentTable">
+                    <table class="table table-hover equipment-table" id="equipmentTable">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th>Manufacturer</th>
-                                <th>Model</th>
-                                <th>Serial Number</th>
-                                <th>Location</th>
-                                <th>Calibration Due</th>
-                                <th>Status</th>
-                                <th>Condition</th>
-                                <th>Actions</th>
+                                <th class="col-id">ID</th>
+                                <th class="col-category">Category</th>
+                                <th class="col-type">Type</th>
+                                <th class="col-manufacturer">Manufacturer</th>
+                                <th class="col-model">Model</th>
+                                <th class="col-serial">Serial Number</th>
+                                <th class="col-location">Location</th>
+                                <th class="col-calibration">Calibration Due</th>
+                                <th class="col-status">Status</th>
+                                <th class="col-condition">Condition</th>
+                                <th class="col-actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -165,39 +176,40 @@
                                         <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i>OOS</span>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="{{ url_for('admin.edit_equipment_direct', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                <td class="action-buttons">
+                                    <div class="d-flex flex-wrap justify-content-end">
+                                        <a href="{{ url_for('admin.edit_equipment_direct', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary me-1 mb-1 action-button" title="Edit equipment details">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-outline-info qr-btn"
-                                                data-id="{{ item.id }}"
-                                                data-manufacturer="{{ item.manufacturer }}"
-                                                data-model="{{ item.model }}"
-                                                data-serial="{{ item.serial_number }}"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#qrCodeModal">
-                                                <i class="bi bi-qr-code"></i> Show
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary qr-regenerate-btn"
-                                                data-id="{{ item.id }}"
-                                                data-manufacturer="{{ item.manufacturer }}"
-                                                data-model="{{ item.model }}"
-                                                data-serial="{{ item.serial_number }}"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#qrCodeModal">
-                                                <i class="bi bi-arrow-repeat"></i> Regen
-                                            </button>
-                                        </div>
-                                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+                                        <button type="button" class="btn btn-sm btn-outline-info me-1 mb-1 qr-btn action-button"
+                                            data-id="{{ item.id }}"
+                                            data-manufacturer="{{ item.manufacturer }}"
+                                            data-model="{{ item.model }}"
+                                            data-serial="{{ item.serial_number }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#qrCodeModal"
+                                            title="Show QR code">
+                                            <i class="bi bi-qr-code"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1 qr-regenerate-btn action-button"
+                                            data-id="{{ item.id }}"
+                                            data-manufacturer="{{ item.manufacturer }}"
+                                            data-model="{{ item.model }}"
+                                            data-serial="{{ item.serial_number }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#qrCodeModal"
+                                            title="Regenerate QR code">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger mb-1 delete-btn action-button"
                                             data-id="{{ item.id }}"
                                             data-manufacturer="{{ item.manufacturer }}"
                                             data-model="{{ item.model }}"
                                             data-serial="{{ item.serial_number }}"
                                             data-bs-toggle="modal"
                                             data-bs-target="#deleteEquipmentModal"
-                                            onclick="prepareDeleteModal('{{ item.id }}', '{{ item.manufacturer }}', '{{ item.model }}', '{{ item.serial_number }}')">
+                                            onclick="prepareDeleteModal('{{ item.id }}', '{{ item.manufacturer }}', '{{ item.model }}', '{{ item.serial_number }}')"
+                                            title="Delete equipment">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>

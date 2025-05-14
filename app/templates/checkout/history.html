@@ -2,6 +2,10 @@
 
 {% block title %}Checkout History - Equipment Tracker{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
@@ -56,12 +60,12 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover activity-table">
                 <thead>
                     <tr>
-                        <th>Time</th>
-                        <th>Equipment ID</th>
-                        <th>User</th>
+                        <th class="col-time">Time</th>
+                        <th class="col-equipment-id">Equipment ID</th>
+                        <th class="col-user">User</th>
                         <th>Previous Status</th>
                         <th>New Status</th>
                         <th>Previous Location</th>
@@ -71,13 +75,13 @@
                 <tbody>
                     {% for entry in history %}
                     <tr>
-                        <td>{{ entry.timestamp }}</td>
-                        <td>
+                        <td class="col-time">{{ entry.timestamp }}</td>
+                        <td class="col-equipment-id" title="{{ entry.equipment_id }}">
                             <a href="{{ url_for('checkout.equipment_detail', equipment_id=entry.equipment_id) }}">
                                 {{ entry.equipment_id }}
                             </a>
                         </td>
-                        <td>{{ entry.user }}</td>
+                        <td class="col-user">{{ entry.user }}</td>
                         <td>{{ entry.previous_status }}</td>
                         <td>{{ entry.new_status }}</td>
                         <td>{{ entry.previous_location }}</td>

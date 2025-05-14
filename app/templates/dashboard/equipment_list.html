@@ -3,6 +3,7 @@
 {% block title %}Equipment List - GearVue{% endblock %}
 
 {% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
 <script>
     // Add class to body for wider container
     document.addEventListener('DOMContentLoaded', function() {
@@ -341,9 +342,13 @@
                                     <span class="full-text">Condition</span>
                                     <span class="short-text d-none">Cond</span>
                                 </th>
-                                <th class="col-actions">
-                                    <span class="full-text">Actions</span>
-                                    <span class="short-text d-none">Act</span>
+                                <th class="col-actions text-center">
+                                    <div class="text-center" style="width: 100%;">
+                                        <div class="table-action-header">Actions</div>
+                                        <div class="table-action-subheader">
+                                            <span>View / Actions</span>
+                                        </div>
+                                    </div>
                                 </th>
                             </tr>
                         </thead>
@@ -399,43 +404,48 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="d-flex justify-content-between">
-                                        <!-- Left column: View & QR -->
-                                        <div class="d-flex flex-column" style="gap: 4px; width: 45%;">
-                                            <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-xs btn-outline-primary w-100 action-button">
-                                                <i class="bi bi-eye"></i> <span class="button-text">View Details</span>
+                                    <div class="action-container">
+                                        <!-- Row 1: View & QR buttons -->
+                                        <div class="action-row view-row">
+                                            <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}"
+                                                class="btn btn-xs btn-outline-primary action-button view-button">
+                                                <i class="bi bi-eye"></i> <span class="button-text">View</span>
                                             </a>
 
-                                            <button type="button" class="btn btn-xs btn-outline-info qr-dashboard-btn w-100 action-button"
-                                                  data-id="{{ item.id }}"
-                                                  data-manufacturer="{{ item.manufacturer }}"
-                                                  data-model="{{ item.model }}"
-                                                  data-serial="{{ item.serial_number }}">
-                                                <i class="bi bi-qr-code"></i> <span class="button-text">QR Code</span>
+                                            <button type="button" class="btn btn-xs btn-outline-info action-button qr-button qr-dashboard-btn"
+                                                data-id="{{ item.id }}"
+                                                data-manufacturer="{{ item.manufacturer }}"
+                                                data-model="{{ item.model }}"
+                                                data-serial="{{ item.serial_number }}">
+                                                <i class="bi bi-qr-code"></i> <span class="button-text">QR</span>
                                             </button>
                                         </div>
-                                        
-                                        <!-- Right column: Action buttons -->
-                                        <div class="d-flex flex-column" style="gap: 4px; width: 52%;">
+
+                                        <!-- Row 2: Actions buttons in a single row -->
+                                        <div class="action-row operation-row">
                                             <!-- Check in/out button based on status -->
                                             {% if status and status.status == "Checked Out" %}
-                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}" class="btn btn-xs btn-success w-100 action-button">
-                                                    <i class="bi bi-box-arrow-in-left"></i> <span class="button-text">Check In</span>
+                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}"
+                                                    class="btn btn-xs btn-success action-button op-button">
+                                                    <i class="bi bi-box-arrow-in-left"></i> <span class="button-text">In</span>
                                                 </a>
                                             {% else %}
-                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}" class="btn btn-xs btn-primary w-100 action-button">
-                                                    <i class="bi bi-box-arrow-right"></i> <span class="button-text">Check Out</span>
+                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}"
+                                                    class="btn btn-xs btn-primary action-button op-button">
+                                                    <i class="bi bi-box-arrow-right"></i> <span class="button-text">Out</span>
                                                 </a>
                                             {% endif %}
 
                                             <!-- Ticket button -->
-                                            <a href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}" class="btn btn-xs btn-warning w-100 action-button">
-                                                <i class="bi bi-ticket"></i> <span class="button-text">Report</span>
+                                            <a href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}"
+                                                class="btn btn-xs btn-warning action-button op-button">
+                                                <i class="bi bi-ticket"></i> <span class="button-text">Fix</span>
                                             </a>
 
                                             <!-- Transport button -->
-                                            <a href="{{ url_for('transport.create', equipment_id=item.id) }}" class="btn btn-xs btn-info w-100 action-button">
-                                                <i class="bi bi-truck"></i> <span class="button-text">Transport</span>
+                                            <a href="{{ url_for('transport.create', equipment_id=item.id) }}"
+                                                class="btn btn-xs btn-info action-button op-button">
+                                                <i class="bi bi-truck"></i> <span class="button-text">Move</span>
                                             </a>
                                         </div>
                                     </div>
@@ -496,6 +506,39 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    // Add QR functionality to the "View Details & QR" button
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all View Details buttons
+        const viewDetailsButtons = document.querySelectorAll('a.btn-outline-primary.action-button');
+
+        // Add click event to each button
+        viewDetailsButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Check if Shift key is pressed during click
+                if (e.shiftKey) {
+                    e.preventDefault(); // Prevent default navigation
+
+                    // Find the corresponding hidden QR button
+                    const equipmentRow = this.closest('tr');
+                    const qrButton = equipmentRow.querySelector('.qr-dashboard-btn');
+
+                    // Trigger QR code generation
+                    if (qrButton) {
+                        const id = qrButton.getAttribute('data-id');
+                        const manufacturer = qrButton.getAttribute('data-manufacturer');
+                        const model = qrButton.getAttribute('data-model');
+                        const serial = qrButton.getAttribute('data-serial');
+
+                        // Call the QR code generation function
+                        generateQRCodeForEquipment(id, manufacturer, model, serial);
+                    }
+                }
+                // Otherwise, normal navigation happens
+            });
+        });
+    });
+</script>
 <!-- Load the debug script -->
 <script src="{{ url_for('static', filename='js/qr-debug.js') }}"></script>
 
