@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from app import checkout_manager, equipment_manager, csrf
 from app.models.forms import LoginForm, NotificationPreferencesForm
 from app.models.json_utils import DateTimeEncoder
+from datetime import datetime
 import functools
 import json
 import os
@@ -432,28 +433,32 @@ def equipment_detail(equipment_id):
     """Equipment checkout status and history."""
     # Get equipment details
     equipment = equipment_manager.get_equipment_by_id(equipment_id)
-    
+
     if not equipment:
         flash('Equipment not found', 'error')
         return redirect(url_for('dashboard.equipment_list'))
-    
+
     # Get status
     status = checkout_manager.get_equipment_status(equipment_id)
-    
+
     # Get checkout history
     history = checkout_manager.get_checkout_history(equipment_id=equipment_id)
-    
+
+    # Get tickets for this equipment
+    from app.routes.dashboard import ticket_manager
+    tickets = ticket_manager.get_tickets_by_equipment(equipment_id)
+
     # Handle checkout/return actions
     if request.method == 'POST':
         action = request.form.get('action')
-        
+
         if action == 'checkout':
             location = request.form.get('location')
             expected_return_days = int(request.form.get('expected_return_days', 1))
             notes = request.form.get('notes', '')
-            
+
             if checkout_manager.checkout_equipment(
-                equipment_id, 
+                equipment_id,
                 session['user']['username'],
                 location,
                 expected_return_days,
@@ -462,11 +467,11 @@ def equipment_detail(equipment_id):
                 flash('Equipment checked out successfully', 'success')
             else:
                 flash('Failed to check out equipment', 'danger')
-                
+
         elif action == 'return':
             return_location = request.form.get('return_location')
             notes = request.form.get('notes', '')
-            
+
             if checkout_manager.return_equipment(
                 equipment_id,
                 session['user']['username'],
@@ -476,12 +481,12 @@ def equipment_detail(equipment_id):
                 flash('Equipment returned successfully', 'success')
             else:
                 flash('Failed to return equipment', 'danger')
-                
+
         elif action == 'update_status' and session['user']['role'] in ['admin', 'physicist']:
             new_status = request.form.get('status')
             location = request.form.get('location')
             notes = request.form.get('notes', '')
-            
+
             if checkout_manager.update_equipment_status(
                 equipment_id,
                 new_status,
@@ -492,18 +497,20 @@ def equipment_detail(equipment_id):
                 flash('Equipment status updated successfully', 'success')
             else:
                 flash('Failed to update equipment status', 'danger')
-        
+
         # Refresh status and history
         status = checkout_manager.get_equipment_status(equipment_id)
         history = checkout_manager.get_checkout_history(equipment_id=equipment_id)
-    
+
     return render_template(
         'checkout/equipment_detail.html',
         equipment=equipment,
         status=status,
         history=history,
         status_options=checkout_manager.STATUS_OPTIONS,
-        checkout_manager=checkout_manager
+        checkout_manager=checkout_manager,
+        tickets=tickets,
+        ticket_manager=ticket_manager
     )
 
 @bp.route('/history')
@@ -528,17 +535,22 @@ def history():
 @admin_required
 def admin():
     """Administrator dashboard."""
-    # Get all users
-    users = {username: info for username, info in checkout_manager.users.items() 
-             if 'password' not in info}
-    
+    # Get all users (with password field removed)
+    users = {}
+    for username, info in checkout_manager.users.items():
+        user_info = info.copy()
+        if 'password' in user_info:
+            del user_info['password']
+        users[username] = user_info
+
     # Get equipment counts by status
     status_counts = {}
     for status in checkout_manager.STATUS_OPTIONS:
         status_counts[status] = len(checkout_manager.get_equipment_by_status(status))
-    
+
+    # Use the redesigned admin template
     return render_template(
-        'checkout/admin.html',
+        'checkout/admin_redesigned.html',
         users=users,
         status_counts=status_counts
     )
@@ -575,7 +587,7 @@ def manage_users():
                     flash('Email cannot be empty', 'danger')
                     return redirect(url_for('checkout.manage_users'))
 
-                if not role or role not in ['admin', 'physicist', 'user']:
+                if not role or role not in ['admin', 'physicist']:
                     flash('Invalid role selected', 'danger')
                     return redirect(url_for('checkout.manage_users'))
 

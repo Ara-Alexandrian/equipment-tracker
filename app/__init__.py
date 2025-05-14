@@ -132,6 +132,20 @@ def friendly_datetime(value):
     # Format datetime object
     return value.strftime("%m/%d/%Y %I:%M %p")
 
+@app.template_filter('from_iso_date')
+def from_iso_date(value):
+    """Convert ISO date string to datetime object."""
+    if not value:
+        return datetime.datetime.now()
+    
+    if isinstance(value, str):
+        try:
+            return datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+        except (ValueError, TypeError):
+            return datetime.datetime.now()
+    
+    return value
+
 # Define main route 
 # Add special header for QR routes
 @app.after_request

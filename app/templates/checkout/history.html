@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Checkout History - Equipment Tracker{% endblock %}
+{% block title %}Checkout History - GearVue{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
@@ -19,25 +19,74 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Filters</h5>
-            <a href="{{ url_for('checkout.history') }}" class="btn btn-sm btn-outline-secondary">
-                Clear Filters
-            </a>
+<!-- Status Cards -->
+<div class="row mb-4">
+    <div class="col-xl-4 col-md-6 mb-3">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Entries</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ history|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-list-ul fs-2 text-primary"></i>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-3">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Check-ins</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ history|selectattr('new_status', 'equalto', 'In Storage')|list|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-box-arrow-in-left fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-3">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Check-outs</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ history|selectattr('new_status', 'equalto', 'Checked Out')|list|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-box-arrow-right fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Filters</h5>
+        <a href="{{ url_for('checkout.history') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-x-circle"></i> Clear Filters
+        </a>
     </div>
     <div class="card-body">
         <form method="GET" action="{{ url_for('checkout.history') }}" class="row">
             <div class="col-md-5">
                 <label for="equipment_id" class="form-label">Equipment ID</label>
-                <input type="text" class="form-control" id="equipment_id" name="equipment_id" 
+                <input type="text" class="form-control" id="equipment_id" name="equipment_id"
                        value="{{ equipment_id or '' }}" placeholder="Filter by equipment ID">
             </div>
             <div class="col-md-5">
                 <label for="user" class="form-label">User</label>
-                <input type="text" class="form-control" id="user" name="user" 
+                <input type="text" class="form-control" id="user" name="user"
                        value="{{ user or '' }}" placeholder="Filter by user">
             </div>
             <div class="col-md-2 d-flex align-items-end">
@@ -49,41 +98,117 @@
     </div>
 </div>
 
-{% if history %}
-<div class="card mt-4">
-    <div class="card-header">
-        <h5 class="mb-0">
-            {{ history|length }} {{ 'Entry' if history|length == 1 else 'Entries' }}
-            {% if equipment_id %}for equipment {{ equipment_id }}{% endif %}
-            {% if user %}by user {{ user }}{% endif %}
-        </h5>
+<!-- Legend -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Status Legend</h5>
     </div>
     <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="border-bottom pb-2">Equipment Status</h6>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-primary me-2" style="min-width:80px;">Checked Out</span>
+                    <span class="text-muted">Equipment currently in use at a different location</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-warning me-2" style="min-width:80px;">Calibration</span>
+                    <span class="text-muted">Equipment sent for calibration</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-success me-2" style="min-width:80px;">In Storage</span>
+                    <span class="text-muted">Equipment available in its default location</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6 class="border-bottom pb-2">History Types</h6>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-primary me-2" style="min-width:80px;">Check Out</span>
+                    <span class="text-muted">Equipment was checked out from storage</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-success me-2" style="min-width:80px;">Check In</span>
+                    <span class="text-muted">Equipment was returned to storage</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-info me-2" style="min-width:80px;">Status Change</span>
+                    <span class="text-muted">Equipment status was updated</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if history %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            History {% if equipment_id %}for Equipment {{ equipment_id }}{% endif %}
+            {% if user %}by User {{ user }}{% endif %}
+        </h5>
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="historySearchInput" class="form-control" placeholder="Search history...">
+        </div>
+    </div>
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover activity-table">
-                <thead>
+            <table class="table table-hover table-striped activity-table mb-0" id="history-table">
+                <thead class="table-dark">
                     <tr>
-                        <th class="col-time">Time</th>
-                        <th class="col-equipment-id">Equipment ID</th>
-                        <th class="col-user">User</th>
-                        <th>Previous Status</th>
-                        <th>New Status</th>
-                        <th>Previous Location</th>
-                        <th>New Location</th>
+                        <th style="width: 15%">Time</th>
+                        <th style="width: 15%">Equipment ID</th>
+                        <th style="width: 15%">User</th>
+                        <th style="width: 13%">Previous Status</th>
+                        <th style="width: 13%">New Status</th>
+                        <th style="width: 15%">Previous Location</th>
+                        <th style="width: 15%">New Location</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for entry in history %}
                     <tr>
-                        <td class="col-time">{{ entry.timestamp }}</td>
-                        <td class="col-equipment-id" title="{{ entry.equipment_id }}">
+                        <td>{{ entry.timestamp|datetime('%Y-%m-%d %H:%M') }}</td>
+                        <td title="{{ entry.equipment_id }}">
                             <a href="{{ url_for('checkout.equipment_detail', equipment_id=entry.equipment_id) }}">
                                 {{ entry.equipment_id }}
                             </a>
                         </td>
-                        <td class="col-user">{{ entry.user }}</td>
-                        <td>{{ entry.previous_status }}</td>
-                        <td>{{ entry.new_status }}</td>
+                        <td>{{ entry.user }}</td>
+                        <td>
+                            {% if entry.previous_status %}
+                                {% if entry.previous_status == 'Checked Out' %}
+                                    <span class="badge bg-primary">Checked Out</span>
+                                {% elif entry.previous_status == 'In Storage' %}
+                                    <span class="badge bg-success">In Storage</span>
+                                {% elif entry.previous_status == 'In Calibration' %}
+                                    <span class="badge bg-warning">In Calibration</span>
+                                {% elif entry.previous_status == 'Under Repair' %}
+                                    <span class="badge bg-info">Under Repair</span>
+                                {% elif entry.previous_status == 'Out of Service' %}
+                                    <span class="badge bg-secondary">Out of Service</span>
+                                {% else %}
+                                    <span class="badge bg-dark">{{ entry.previous_status }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entry.new_status %}
+                                {% if entry.new_status == 'Checked Out' %}
+                                    <span class="badge bg-primary">Checked Out</span>
+                                {% elif entry.new_status == 'In Storage' %}
+                                    <span class="badge bg-success">In Storage</span>
+                                {% elif entry.new_status == 'In Calibration' %}
+                                    <span class="badge bg-warning">In Calibration</span>
+                                {% elif entry.new_status == 'Under Repair' %}
+                                    <span class="badge bg-info">Under Repair</span>
+                                {% elif entry.new_status == 'Out of Service' %}
+                                    <span class="badge bg-secondary">Out of Service</span>
+                                {% else %}
+                                    <span class="badge bg-dark">{{ entry.new_status }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
                         <td>{{ entry.previous_location }}</td>
                         <td>{{ entry.new_location }}</td>
                     </tr>
@@ -94,8 +219,53 @@
     </div>
 </div>
 {% else %}
-<div class="alert alert-info mt-4">
+<div class="alert alert-info">
     <i class="bi bi-info-circle-fill"></i> No history entries found matching your criteria.
 </div>
 {% endif %}
+
+<style>
+    .border-left-primary { border-left: 4px solid #4e73df; }
+    .border-left-success { border-left: 4px solid #1cc88a; }
+    .border-left-info { border-left: 4px solid #36b9cc; }
+    .border-left-warning { border-left: 4px solid #f6c23e; }
+    
+    /* Hover effect for status cards */
+    .card.border-left-primary:hover,
+    .card.border-left-success:hover,
+    .card.border-left-info:hover,
+    .card.border-left-warning:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Search functionality for history table
+    document.getElementById('historySearchInput').addEventListener('keyup', function() {
+        var searchText = this.value.toLowerCase();
+        var table = document.getElementById('history-table');
+        var rows = table.querySelectorAll('tbody tr');
+        
+        rows.forEach(function(row) {
+            var match = false;
+            var cells = row.querySelectorAll('td');
+            
+            cells.forEach(function(cell) {
+                if (cell.textContent.toLowerCase().indexOf(searchText) > -1) {
+                    match = true;
+                }
+            });
+            
+            if (match) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}
