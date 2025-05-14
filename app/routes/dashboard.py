@@ -67,7 +67,12 @@ def equipment_list():
     if status_filter:
         filtered_equipment = []
         for item in equipment:
-            item_status = checkout_manager.get_equipment_status(item.id)
+            # Equipment items are dictionaries, use the 'id' key not attribute
+            item_id = item.get('id')
+            if not item_id:
+                continue
+
+            item_status = checkout_manager.get_equipment_status(item_id)
 
             if status_filter == 'available' and (not item_status or item_status.status != "Checked Out"):
                 filtered_equipment.append(item)
@@ -76,7 +81,7 @@ def equipment_list():
             elif status_filter == 'in_transport':
                 # Check if item is in transport
                 for req in transport_manager.get_pending_transport_requests():
-                    if req.equipment_id == item.id and req.status not in ['completed', 'cancelled']:
+                    if req.equipment_id == item_id and req.status not in ['completed', 'cancelled']:
                         filtered_equipment.append(item)
                         break
         equipment = filtered_equipment
@@ -85,7 +90,12 @@ def equipment_list():
     if condition_filter:
         filtered_equipment = []
         for item in equipment:
-            item_condition = ticket_manager.get_equipment_condition(item.id)
+            # Equipment items are dictionaries, use the 'id' key not attribute
+            item_id = item.get('id')
+            if not item_id:
+                continue
+
+            item_condition = ticket_manager.get_equipment_condition(item_id)
             if item_condition == condition_filter:
                 filtered_equipment.append(item)
         equipment = filtered_equipment
