@@ -74,16 +74,24 @@ def equipment_list():
 
             item_status = checkout_manager.get_equipment_status(item_id)
 
-            if status_filter == 'available' and (not item_status or item_status.status != "Checked Out"):
+            if status_filter == 'available' and (not item_status or item_status.get('status') != "Checked Out"):
                 filtered_equipment.append(item)
-            elif status_filter == 'checked_out' and item_status and item_status.status == "Checked Out":
+            elif status_filter == 'checked_out' and item_status and item_status.get('status') == "Checked Out":
                 filtered_equipment.append(item)
             elif status_filter == 'in_transport':
                 # Check if item is in transport
                 for req in transport_manager.get_pending_transport_requests():
-                    if req.equipment_id == item_id and req.status not in ['completed', 'cancelled']:
-                        filtered_equipment.append(item)
-                        break
+                    # Check if req is a dictionary or object
+                    if hasattr(req, 'equipment_id'):
+                        # Object with attributes
+                        if req.equipment_id == item_id and req.status not in ['completed', 'cancelled']:
+                            filtered_equipment.append(item)
+                            break
+                    else:
+                        # Dictionary with keys
+                        if req.get('equipment_id') == item_id and req.get('status') not in ['completed', 'cancelled']:
+                            filtered_equipment.append(item)
+                            break
         equipment = filtered_equipment
 
     # Apply condition filter if provided
