@@ -77,7 +77,7 @@ html, body {
     margin-right: auto !important;
 }
 
-/* Table-specific font size controls */
+/* Table-specific font size controls with responsive scaling */
 .table-font-normal .equipment-table,
 .table-font-normal #equipmentTable {
     font-size: var(--table-font-size-default) !important;
@@ -93,26 +93,71 @@ html, body {
     font-size: calc(var(--table-font-size-large) + 0.1rem) !important;
 }
 
-/* Enhanced action button styling - prevents collisions */
+/* Scale fonts based on container width */
+.container-width-small .equipment-table,
+.container-width-small #equipmentTable {
+    font-size: 0.85rem !important;
+}
+
+.container-width-standard .equipment-table,
+.container-width-standard #equipmentTable {
+    font-size: 0.85rem !important;
+}
+
+.container-width-wide .equipment-table,
+.container-width-wide #equipmentTable {
+    font-size: 0.9rem !important;
+}
+
+.container-width-full .equipment-table,
+.container-width-full #equipmentTable {
+    font-size: 0.95rem !important;
+}
+
+/* Micro-compact action button styling */
 .action-button {
     white-space: nowrap !important;
     overflow: visible !important;
-    min-width: var(--button-min-width) !important;
-    text-overflow: initial !important;
-    margin-bottom: var(--button-spacing) !important;
-    margin-right: var(--button-spacing) !important;
+    min-width: 40px !important; /* Super minimal width */
+    max-width: 58px !important; /* Limit maximum width */
+    text-overflow: ellipsis !important;
+    margin: 1px !important; /* Uniform tiny margin */
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
-    height: var(--button-height) !important;
-    padding: 0.375rem 0.75rem !important;
+    height: 20px !important; /* Extremely small height */
+    padding: 0.05rem 0.25rem !important; /* Very minimal padding */
     touch-action: manipulation !important;
+    font-size: 0.65rem !important; /* Micro text */
+    border-radius: 2px !important; /* Smaller corners */
+    box-shadow: none !important; /* No shadow */
+    letter-spacing: -0.02em !important; /* Tighter letter spacing */
+    border-width: 1px !important; /* Thinner border */
+    line-height: 1 !important; /* Tighter line height */
 }
 
-/* Button icon alignment */
+/* Button icon alignment - extremely compact */
 .action-button i {
-    margin-right: 0.25rem;
+    margin-right: 0.1rem !important;
+    font-size: 0.65rem !important;
+}
+
+/* Icon-only buttons for ultra-compact view */
+.icon-only-btn {
+    min-width: 22px !important;
+    max-width: 24px !important;
+    width: 22px !important;
+    padding: 0.1rem !important;
+}
+
+.icon-only-btn i {
+    margin-right: 0 !important;
+    font-size: 0.7rem !important;
+}
+
+.icon-only-btn .button-text {
+    display: none !important;
 }
 
 /* Extra small buttons */
@@ -138,25 +183,115 @@ html, body {
     display: flex;
     flex-wrap: wrap;
     gap: var(--button-spacing);
-    justify-content: flex-end;
+    justify-content: center; /* Changed from flex-end to center */
 }
 
-/* Optimize column widths */
+/* Optimize column widths with more compact layout */
 .col-actions {
-    min-width: 280px !important;
+    min-width: 210px !important; /* Further reduced for better fit */
     width: auto !important;
+    text-align: center !important;
 }
 
-/* Better padding for table cells */
+/* Ensure that the actions column header is properly aligned */
+th.col-actions {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding-top: 2px !important;
+    padding-bottom: 1px !important;
+}
+
+/* Styling for the actions header */
+.table-action-header {
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+    margin-bottom: 1px !important;
+}
+
+/* Styling for the actions subheader */
+.table-action-subheader {
+    font-size: 0.6rem !important;
+    color: rgba(90, 90, 90, 0.9) !important;
+    font-weight: normal !important;
+    line-height: 1 !important;
+}
+
+/* Center the content within all action cells */
+.equipment-table td:last-child {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 3px 1px !important;
+}
+
+/* Action buttons container - single column layout for all actions */
+.action-buttons-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1px;
+    width: 100%;
+    max-width: 120px;
+    margin: 0 auto;
+}
+
+/* First row of buttons - View and QR Side by side */
+.action-row-primary {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1px;
+    width: 100%;
+}
+
+/* Second row of buttons - Operations */
+.action-row-operations {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1px;
+    width: 100%;
+}
+
+/* Better padding for table cells with smaller fonts */
 .equipment-table td,
 .equipment-table th,
 #equipmentTable td,
 #equipmentTable th {
-    padding: 6px 8px !important;
+    padding: 4px 5px !important;
     vertical-align: middle !important;
     text-align: center !important;
     overflow-wrap: break-word !important;
     word-wrap: break-word !important;
+    font-size: 0.8rem !important; /* Smaller font size for all table content */
+}
+
+/* Make table headers slightly bolder to compensate for smaller size */
+.equipment-table th,
+#equipmentTable th {
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+}
+
+/* Force center alignment for ALL table cells */
+.equipment-table td,
+#equipmentTable td {
+    text-align: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+    display: table-cell !important;
+}
+
+/* Fix status indentation */
+.equipment-table td span,
+#equipmentTable td span,
+.equipment-table td div,
+#equipmentTable td div {
+    text-align: center !important;
+    display: block !important;
+    margin: 0 auto !important;
+    width: 100% !important;
 }
 
 /* Table header alignment and styling */
@@ -170,16 +305,33 @@ html, body {
     background-color: var(--bs-table-bg, #fff) !important;
 }
 
-/* Ensure proper column sizing with sensible defaults */
-.col-id { min-width: 80px !important; width: 5% !important; }
-.col-category { min-width: 100px !important; width: 8% !important; }
-.col-type { min-width: 120px !important; width: 10% !important; }
-.col-manufacturer { min-width: 150px !important; width: 12% !important; }
-.col-model { min-width: 150px !important; width: 12% !important; }
-.col-serial { min-width: 120px !important; width: 10% !important; }
-.col-location { min-width: 120px !important; width: 10% !important; }
-.col-status { min-width: 100px !important; width: 8% !important; }
-.col-condition { min-width: 100px !important; width: 8% !important; }
+/* Improved column sizing for better use of space */
+.col-id { min-width: 55px !important; width: 5% !important; text-align: center !important; }
+.col-category { min-width: 75px !important; width: 7% !important; text-align: center !important; }
+.col-type { min-width: 85px !important; width: 8% !important; text-align: center !important; }
+.col-manufacturer { min-width: 110px !important; width: 10% !important; text-align: center !important; }
+.col-model { min-width: 110px !important; width: 10% !important; text-align: center !important; }
+.col-serial { min-width: 95px !important; width: 10% !important; text-align: center !important; }
+.col-location { min-width: 95px !important; width: 10% !important; text-align: center !important; }
+.col-status { min-width: 75px !important; width: 7% !important; text-align: center !important; }
+.col-condition { min-width: 90px !important; width: 7% !important; text-align: center !important; white-space: nowrap !important; }
+.col-actions { min-width: 210px !important; width: auto !important; text-align: center !important; }
+
+/* Specific fix for location - ensure all content is centered */
+td.col-location,
+.equipment-table td.col-location,
+#equipmentTable td.col-location {
+    text-align: center !important;
+    display: table-cell !important;
+}
+
+/* Make any content inside cell centered */
+td.col-location *,
+.equipment-table td.col-location *,
+#equipmentTable td.col-location * {
+    text-align: center !important;
+    margin: 0 auto !important;
+}
 
 /* Table improvements */
 .equipment-table {
@@ -193,26 +345,30 @@ html, body {
     .col-actions,
     .equipment-table td:last-child,
     #equipmentTable td:last-child {
-        min-width: 260px !important;
+        min-width: 200px !important; /* Reduced from 260px */
     }
-    
-    /* Slightly compact column spacing */
-    .col-manufacturer, .col-model { min-width: 130px !important; }
-    .col-serial, .col-location { min-width: 110px !important; }
-    
-    /* Slightly reduced button spacing for compact layout */
+
+    /* More compact column spacing */
+    .col-manufacturer, .col-model { min-width: 100px !important; }
+    .col-serial, .col-location { min-width: 90px !important; }
+    .col-category, .col-type { min-width: 80px !important; }
+    .col-status, .col-condition { min-width: 70px !important; }
+
+    /* More compact button layout */
     .action-button {
-        min-width: 105px !important;
-        margin-bottom: 0.35rem !important;
-        margin-right: 0.35rem !important;
+        min-width: 90px !important;
+        margin-bottom: 0.25rem !important;
+        margin-right: 0.25rem !important;
+        font-size: 0.8rem !important;
     }
-    
-    /* Compact padding for table cells */
+
+    /* Very compact padding for table cells */
     .equipment-table td,
     .equipment-table th,
     #equipmentTable td,
     #equipmentTable th {
-        padding: 4px 6px !important;
+        padding: 3px 4px !important;
+        font-size: 0.8rem !important;
     }
 }
 
@@ -222,18 +378,18 @@ html, body {
     .col-actions,
     .equipment-table td:last-child,
     #equipmentTable td:last-child {
-        min-width: 285px !important;
+        min-width: 220px !important; /* Reduced from 285px */
     }
-    
+
     /* Standard column spacing for target resolution */
-    .col-manufacturer, .col-model { min-width: 150px !important; }
-    .col-serial, .col-location { min-width: 130px !important; }
-    
+    .col-manufacturer, .col-model { min-width: 120px !important; }
+    .col-serial, .col-location { min-width: 100px !important; }
+
     /* Standard button sizes */
     .action-button {
-        min-width: 110px !important;
-        margin-bottom: 0.5rem !important;
-        margin-right: 0.5rem !important;
+        min-width: 95px !important;
+        margin-bottom: 0.35rem !important;
+        margin-right: 0.35rem !important;
     }
 }
 
@@ -243,28 +399,28 @@ html, body {
     .col-actions,
     .equipment-table td:last-child,
     #equipmentTable td:last-child {
-        min-width: 330px !important;
+        min-width: 250px !important; /* Reduced from 330px */
     }
-    
-    /* Expanded column spacing for large displays */
-    .col-manufacturer, .col-model { min-width: 180px !important; }
-    .col-serial, .col-location { min-width: 150px !important; }
-    .col-category, .col-type { min-width: 130px !important; }
-    
-    /* Larger, more spaced buttons */
+
+    /* Expanded column spacing for large displays - but more moderate */
+    .col-manufacturer, .col-model { min-width: 140px !important; }
+    .col-serial, .col-location { min-width: 120px !important; }
+    .col-category, .col-type { min-width: 110px !important; }
+
+    /* Still compact buttons even on large displays */
     .action-button {
-        min-width: 120px !important;
-        margin-bottom: 0.6rem !important;
-        margin-right: 0.6rem !important;
-        padding: 0.45rem 0.9rem !important;
+        min-width: 100px !important;
+        margin-bottom: 0.4rem !important;
+        margin-right: 0.4rem !important;
+        padding: 0.35rem 0.7rem !important;
     }
-    
-    /* More generous padding for large displays */
+
+    /* Slightly more generous padding for large displays - but still compact */
     .equipment-table td,
     .equipment-table th,
     #equipmentTable td,
     #equipmentTable th {
-        padding: 8px 12px !important;
+        padding: 6px 8px !important;
     }
 }
 
@@ -494,42 +650,158 @@ html, body {
     text-align: center !important;
 }
 
-/* Status badges - make them more readable */
+/* Status badges - make them more readable and centered */
 .badge {
     font-size: 85% !important;
     padding: 5px 7px !important;
     margin-bottom: 2px !important;
     display: inline-block !important;
+    text-align: center !important;
 }
 
-/* Layout settings button in header */
+/* Fix for status cells specifically */
+.equipment-table td .badge,
+#equipmentTable td .badge {
+    display: inline-block !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+/* Enforce vertical and horizontal centering for ALL cells */
+.equipment-table td,
+#equipmentTable td {
+    vertical-align: middle !important;
+    text-align: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+    display: table-cell !important;
+}
+
+/* Force all text inside cells to center */
+.equipment-table td *:not(.btn):not(.action-button),
+#equipmentTable td *:not(.btn):not(.action-button) {
+    text-align: center !important;
+}
+
+/* Cell containing status */
+td.col-status,
+.equipment-table td.col-status,
+#equipmentTable td.col-status {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Center any spans or divs inside status cells */
+td.col-status span,
+td.col-status div,
+.equipment-table td.col-status span,
+.equipment-table td.col-status div,
+#equipmentTable td.col-status span,
+#equipmentTable td.col-status div {
+    text-align: center !important;
+    display: inline-block !important;
+    margin: 0 auto !important;
+}
+
+/* Body element width overrides - enforce width changes */
+body.container-width-small {
+    max-width: 1200px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+body.container-width-standard {
+    max-width: 1550px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+body.container-width-wide {
+    max-width: 1800px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+body.container-width-full {
+    max-width: 2100px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Layout settings button in header - improved styling */
 .layout-settings-btn {
     background-color: transparent;
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
     border-radius: 4px;
     padding: 4px 8px;
-    margin-left: 10px;
+    margin-right: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    height: 38px;
+    width: 38px;
+    color: white;
+}
+
+.layout-settings-btn i {
+    font-size: 1.2rem;
+    color: white;
 }
 
 .layout-settings-btn:hover {
-    background-color: rgba(0,0,0,0.05);
+    background-color: rgba(255,255,255,0.15);
 }
 
-.dark-mode .layout-settings-btn,
-.dracula-mode .layout-settings-btn,
-.sweet-dracula-mode .layout-settings-btn {
-    border-color: rgba(255,255,255,0.2);
+/* Logo container with semi-transparent background */
+.logo-container {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgba(255,255,255,0.15);
+    border-radius: 5px;
+    padding: 4px;
+    margin-right: 8px;
 }
 
-.dark-mode .layout-settings-btn:hover,
-.dracula-mode .layout-settings-btn:hover,
-.sweet-dracula-mode .layout-settings-btn:hover {
-    background-color: rgba(255,255,255,0.1);
+/* Brand text styling - enhanced for text-only logo */
+.brand-text {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #fff 25%, #e9ecef 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0px 1px 1px rgba(0,0,0,0.1);
+}
+
+.layout-settings-btn.active {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* Custom Navbar Toggler (Hamburger) Styling */
+.custom-toggler {
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    padding: 6px 10px !important;
+    margin-right: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #fff !important;
+}
+
+.custom-toggler:hover {
+    background-color: rgba(255,255,255,0.1) !important;
+}
+
+.custom-toggler:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.15) !important;
+}
+
+.custom-toggler i {
+    color: #fff !important;
+    font-size: 1.5rem !important;
 }
 
 /* Mobile toggle button styles */
@@ -544,6 +816,14 @@ html, body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+/* Size toggle button active state */
+#size-toggle-btn.active {
+    background-color: rgba(255,255,255,0.3) !important;
+    color: white !important;
+    transform: scale(1.1) !important;
+    transition: all 0.1s ease-in-out !important;
 }
 
 .mobile-mode-toggle.active {

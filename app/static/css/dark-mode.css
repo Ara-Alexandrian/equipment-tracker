@@ -165,6 +165,34 @@ body.dark-mode a:not(.btn):hover {
   color: #aecbfa !important;
 }
 
+/* Nav tabs with better contrast for dark mode */
+body.dark-mode .nav-tabs {
+  border-bottom-color: #4d4d4d !important;
+}
+
+body.dark-mode .nav-tabs .nav-link {
+  color: #ffffff !important;
+  background-color: #444444 !important;
+  border-color: #666666 !important;
+  margin-right: 3px !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+}
+
+body.dark-mode .nav-tabs .nav-link:hover {
+  background-color: #555555 !important;
+  border-color: #777777 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .nav-tabs .nav-link.active {
+  background-color: #0d6efd !important;
+  color: #ffffff !important;
+  border-color: #0d6efd !important;
+  font-weight: bold !important;
+  box-shadow: 0 0 8px rgba(13, 110, 253, 0.5) !important;
+}
+
 /* Buttons */
 body.dark-mode .btn-outline-light {
   color: #f8f9fa !important;

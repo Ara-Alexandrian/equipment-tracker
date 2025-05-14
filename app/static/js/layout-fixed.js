@@ -244,17 +244,74 @@ function createLayoutSettingsButton() {
     // Find the navbar theme button
     const themeBtn = document.getElementById('theme-btn');
     if (!themeBtn) return;
-    
+
     // Create settings button
     const settingsBtn = document.createElement('button');
     settingsBtn.className = 'layout-settings-btn';
+    settingsBtn.id = 'layout-settings-btn';  // Add ID for easier finding
     settingsBtn.innerHTML = '<i class="bi bi-grid-3x3-gap-fill"></i>';
-    settingsBtn.setAttribute('title', 'Table Layout Settings');
-    settingsBtn.setAttribute('data-bs-toggle', 'modal');
-    settingsBtn.setAttribute('data-bs-target', '#layoutSettingsModal');
-    
-    // Insert after theme button
-    themeBtn.parentNode.insertBefore(settingsBtn, themeBtn.nextSibling);
+    settingsBtn.setAttribute('title', 'Layout Size: Click to toggle');
+    settingsBtn.setAttribute('type', 'button'); // Explicit button type
+
+    // Simple direct toggle through sizes instead of modal
+    settingsBtn.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log('Layout size toggle clicked');
+
+        // Get current width and determine next width
+        const currentWidth = document.body.getAttribute('data-layout-width') || 'standard';
+        let nextWidth;
+
+        switch(currentWidth) {
+            case 'small':
+                nextWidth = 'standard';
+                break;
+            case 'standard':
+                nextWidth = 'wide';
+                break;
+            case 'wide':
+                nextWidth = 'full';
+                break;
+            case 'full':
+                nextWidth = 'small';
+                break;
+            default:
+                nextWidth = 'standard';
+        }
+
+        // Update width
+        console.log(`Toggling layout width from ${currentWidth} to ${nextWidth}`);
+        updateLayoutWidth(nextWidth);
+
+        // Flash the button to indicate change
+        this.classList.add('active');
+        setTimeout(() => {
+            this.classList.remove('active');
+        }, 300);
+
+        // Update tooltip to show current setting
+        this.setAttribute('title', `Layout Size: ${nextWidth} (click to toggle)`);
+
+        // Save settings
+        saveLayoutSettings();
+
+        // Apply immediately
+        applyLayoutSettings({
+            width: nextWidth,
+            fontSize: document.body.getAttribute('data-font-size') || 'normal',
+            mobileMode: document.body.classList.contains('force-mobile-optimization')
+        });
+
+        return false;
+    };
+
+    // Insert before theme button
+    themeBtn.parentNode.insertBefore(settingsBtn, themeBtn);
+
+    // Log success message
+    console.log('Layout settings button added successfully');
 }
 
 // Create layout settings modal
@@ -346,47 +403,150 @@ function createLayoutSettingsModal() {
 
 // Set up layout control event handlers
 function setupLayoutControls() {
+    console.log('Setting up layout controls...');
+
     // Get current settings
     const settings = loadLayoutSettings();
-    
+    console.log('Loaded settings:', settings);
+
     // Update buttons to reflect current settings
     updateLayoutControlButtons(settings);
-    
-    // Add event listeners to width buttons
-    const widthButtons = document.querySelectorAll('.layout-width-group button');
-    widthButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const width = this.getAttribute('data-width');
-            updateLayoutWidth(width);
-            
-            // Update selected button
-            widthButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Save settings if remember is checked
-            if (document.getElementById('rememberLayoutSettings').checked) {
-                saveLayoutSettings();
-            }
+
+    // Enhanced button handler setup with improved reliability
+    function setupButtons() {
+        // Debug current settings state before binding
+        console.log('Setting up buttons with current settings:', {
+            width: document.body.getAttribute('data-layout-width'),
+            fontSize: document.body.getAttribute('data-font-size'),
+            mobileMode: document.body.classList.contains('force-mobile-optimization')
         });
-    });
-    
-    // Add event listeners to font size buttons
-    const fontSizeButtons = document.querySelectorAll('.font-size-group button');
-    fontSizeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const fontSize = this.getAttribute('data-font-size');
-            updateFontSize(fontSize);
-            
-            // Update selected button
-            fontSizeButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Save settings if remember is checked
-            if (document.getElementById('rememberLayoutSettings').checked) {
-                saveLayoutSettings();
-            }
-        });
-    });
+
+        // Width buttons - critical layout control
+        const widthButtons = document.querySelectorAll('.layout-width-group button');
+        console.log('Found width buttons:', widthButtons.length);
+
+        if (widthButtons.length > 0) {
+            // Clear any existing handlers
+            widthButtons.forEach(button => {
+                // Clone and replace to remove existing handlers
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+            });
+
+            // Re-query the fresh buttons
+            const freshWidthButtons = document.querySelectorAll('.layout-width-group button');
+
+            // Add new handlers
+            freshWidthButtons.forEach(button => {
+                // Use both addEventListener and onclick for maximum compatibility
+                const widthValue = button.getAttribute('data-width');
+                console.log('Setting up handler for width button:', widthValue);
+
+                button.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Width button clicked (onclick):', widthValue);
+
+                    // Apply the width change
+                    updateLayoutWidth(widthValue);
+
+                    // Update active state
+                    freshWidthButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Save settings
+                    if (document.getElementById('rememberLayoutSettings').checked) {
+                        saveLayoutSettings();
+                    }
+
+                    // Apply immediately
+                    applyLayoutSettings({
+                        width: widthValue,
+                        fontSize: document.body.getAttribute('data-font-size') || 'normal',
+                        mobileMode: document.body.classList.contains('force-mobile-optimization')
+                    });
+
+                    return false;
+                };
+
+                // Add click listener as backup
+                button.addEventListener('click', function(e) {
+                    console.log('Width button clicked (addEventListener):', widthValue);
+                    // The onclick handler above should take precedence
+                });
+
+                // Mark active based on current settings
+                if (widthValue === (document.body.getAttribute('data-layout-width') || 'standard')) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        // Font size buttons
+        const fontSizeButtons = document.querySelectorAll('.font-size-group button');
+        console.log('Found font size buttons:', fontSizeButtons.length);
+
+        if (fontSizeButtons.length > 0) {
+            // Clear any existing handlers
+            fontSizeButtons.forEach(button => {
+                // Clone and replace to remove existing handlers
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+            });
+
+            // Re-query the fresh buttons
+            const freshFontButtons = document.querySelectorAll('.font-size-group button');
+
+            // Add new handlers
+            freshFontButtons.forEach(button => {
+                // Use both addEventListener and onclick for maximum compatibility
+                const fontSizeValue = button.getAttribute('data-font-size');
+                console.log('Setting up handler for font size button:', fontSizeValue);
+
+                button.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Font size button clicked (onclick):', fontSizeValue);
+
+                    // Apply the font size change
+                    updateFontSize(fontSizeValue);
+
+                    // Update active state
+                    freshFontButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Save settings
+                    if (document.getElementById('rememberLayoutSettings').checked) {
+                        saveLayoutSettings();
+                    }
+
+                    // Apply immediately
+                    applyLayoutSettings({
+                        width: document.body.getAttribute('data-layout-width') || 'standard',
+                        fontSize: fontSizeValue,
+                        mobileMode: document.body.classList.contains('force-mobile-optimization')
+                    });
+
+                    return false;
+                };
+
+                // Add click listener as backup
+                button.addEventListener('click', function(e) {
+                    console.log('Font size button clicked (addEventListener):', fontSizeValue);
+                    // The onclick handler above should take precedence
+                });
+
+                // Mark active based on current settings
+                if (fontSizeValue === (document.body.getAttribute('data-font-size') || 'normal')) {
+                    button.classList.add('active');
+                }
+            });
+        }
+    }
+
+    // Run setup with delay
+    setTimeout(setupButtons, 300);
+}
     
     // Add event listener to mobile mode toggle
     const mobileModeToggle = document.getElementById('mobileMode');
@@ -428,36 +588,111 @@ function setupLayoutControls() {
     });
 }
 
-// Update layout width with centering support
+// Update layout width with centering support - enhanced reliability
 function updateLayoutWidth(width) {
-    // Remove all width classes
+    console.log('Updating layout width to:', width);
+
+    // Validate width parameter
+    if (!LAYOUT_CLASSES.width[width]) {
+        console.error('Invalid width:', width);
+        width = 'standard'; // Fallback to standard
+    }
+
+    // Get the target class
+    const targetClass = LAYOUT_CLASSES.width[width];
+    console.log('Target width class:', targetClass);
+
+    // Debug before update
+    console.log('Current body classes before width update:', document.body.className);
+
+    // Remove all width classes with error checking
     Object.values(LAYOUT_CLASSES.width).forEach(cls => {
-        document.body.classList.remove(cls);
+        if (document.body.classList.contains(cls)) {
+            console.log('Removing class:', cls);
+            document.body.classList.remove(cls);
+        }
     });
-    
+
     // Add the selected width class
-    document.body.classList.add(LAYOUT_CLASSES.width[width]);
-    
+    console.log('Adding class:', targetClass);
+    document.body.classList.add(targetClass);
+
     // Update data attribute
     document.body.setAttribute('data-layout-width', width);
-    
+
+    // Debug after update
+    console.log('Current body classes after width update:', document.body.className);
+
     // Apply centering to fix black bar
     fixBlackBarIssue();
     fixContentCentering();
+
+    // Update any active buttons
+    const widthButtons = document.querySelectorAll('.layout-width-group button');
+    widthButtons.forEach(button => {
+        if (button.getAttribute('data-width') === width) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    });
+
+    // Update layout settings button tooltip if it exists
+    const layoutBtn = document.getElementById('layout-settings-btn');
+    if (layoutBtn) {
+        layoutBtn.setAttribute('title', `Layout Size: ${width} (click to toggle)`);
+    }
+
+    // Dispatch a custom event for the width change
+    document.dispatchEvent(new CustomEvent('layout-width-changed', {
+        detail: { width: width, class: targetClass }
+    }));
 }
 
-// Update font size
+// Update font size - enhanced reliability
 function updateFontSize(fontSize) {
-    // Remove all font size classes
+    console.log('Updating font size to:', fontSize);
+
+    // Validate font size parameter
+    if (!LAYOUT_CLASSES.fontSize[fontSize]) {
+        console.error('Invalid font size:', fontSize);
+        fontSize = 'normal'; // Fallback to normal
+    }
+
+    // Get the target class
+    const targetClass = LAYOUT_CLASSES.fontSize[fontSize];
+    console.log('Target font size class:', targetClass);
+
+    // Debug before update
+    console.log('Current body classes before font size update:', document.body.className);
+
+    // Remove all font size classes with error checking
     Object.values(LAYOUT_CLASSES.fontSize).forEach(cls => {
-        document.body.classList.remove(cls);
+        if (document.body.classList.contains(cls)) {
+            console.log('Removing class:', cls);
+            document.body.classList.remove(cls);
+        }
     });
-    
+
     // Add the selected font size class
-    document.body.classList.add(LAYOUT_CLASSES.fontSize[fontSize]);
-    
+    console.log('Adding class:', targetClass);
+    document.body.classList.add(targetClass);
+
     // Update data attribute
     document.body.setAttribute('data-font-size', fontSize);
+
+    // Debug after update
+    console.log('Current body classes after font size update:', document.body.className);
+
+    // Update any active buttons
+    const fontSizeButtons = document.querySelectorAll('.font-size-group button');
+    fontSizeButtons.forEach(button => {
+        if (button.getAttribute('data-font-size') === fontSize) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    });
 }
 
 // Reset layout settings to defaults
@@ -542,18 +777,72 @@ function saveLayoutSettings(settings) {
 
 // Apply layout settings
 function applyLayoutSettings(settings) {
-    // Apply width
-    updateLayoutWidth(settings.width);
-    
-    // Apply font size
-    updateFontSize(settings.fontSize);
-    
+    console.log('Applying layout settings:', settings);
+
+    // Make sure we have valid settings
+    const validSettings = {
+        width: settings.width || 'standard',
+        fontSize: settings.fontSize || 'normal',
+        mobileMode: settings.mobileMode || false
+    };
+
+    // Apply width with proper class
+    const widthClass = LAYOUT_CLASSES.width[validSettings.width];
+    if (widthClass) {
+        // Remove all width classes
+        Object.values(LAYOUT_CLASSES.width).forEach(cls => {
+            document.body.classList.remove(cls);
+        });
+
+        // Add the selected width class
+        document.body.classList.add(widthClass);
+
+        // Update data attribute for tracking
+        document.body.setAttribute('data-layout-width', validSettings.width);
+
+        console.log('Applied width class:', widthClass);
+    } else {
+        console.warn('Invalid width setting:', validSettings.width);
+    }
+
+    // Apply font size with proper class
+    const fontSizeClass = LAYOUT_CLASSES.fontSize[validSettings.fontSize];
+    if (fontSizeClass) {
+        // Remove all font size classes
+        Object.values(LAYOUT_CLASSES.fontSize).forEach(cls => {
+            document.body.classList.remove(cls);
+        });
+
+        // Add the selected font size class
+        document.body.classList.add(fontSizeClass);
+
+        // Update data attribute for tracking
+        document.body.setAttribute('data-font-size', validSettings.fontSize);
+
+        console.log('Applied font size class:', fontSizeClass);
+    } else {
+        console.warn('Invalid font size setting:', validSettings.fontSize);
+    }
+
     // Apply mobile mode
-    if (settings.mobileMode) {
+    if (validSettings.mobileMode) {
         document.body.classList.add('force-mobile-optimization');
     } else {
         document.body.classList.remove('force-mobile-optimization');
     }
+
+    // Update the mobile toggle in the modal if it exists
+    const mobileToggle = document.getElementById('mobileMode');
+    if (mobileToggle) {
+        mobileToggle.checked = validSettings.mobileMode;
+    }
+
+    // Fix any visual layout issues
+    fixBlackBarIssue();
+    fixContentCentering();
+
+    // Debug output of applied settings
+    console.log('Current body classes:', document.body.className);
 }
 
 // Update layout control buttons to reflect current settings
@@ -621,18 +910,63 @@ function detectMobileDevice() {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    initLayoutControls();
-    fixActionButtons();
-    
+    console.log('Initializing layout controls with persistent scale');
+
+    // Load settings immediately - this ensures persistence across page navigation
+    const settings = loadLayoutSettings();
+    console.log('Retrieved saved layout settings:', settings);
+
+    // Apply settings immediately to prevent flash of unstyled content
+    applyLayoutSettings(settings);
+
+    // Initialize with a short delay to ensure all elements are loaded
+    setTimeout(() => {
+        console.log('Continuing initialization after delay');
+        initLayoutControls();
+        fixActionButtons();
+
+        // Re-apply settings to ensure everything is consistent
+        applyLayoutSettings(settings);
+
+        // Ensure any missed elements are updated
+        setTimeout(() => {
+            fixContentCentering();
+            fixBlackBarIssue();
+
+            // Double check that classes are applied
+            Object.values(LAYOUT_CLASSES.width).forEach(cls => {
+                if (document.body.classList.contains(cls)) {
+                    console.log('Width class verified:', cls);
+                }
+            });
+        }, 200);
+    }, 50);
+
+    // Add settings button to static elements for additional reliability
+    const addLayoutControls = () => {
+        // Add buttons if they don't exist yet
+        if (!document.getElementById('layout-settings-btn')) {
+            createLayoutSettingsButton();
+        }
+
+        if (!document.getElementById('mobile-mode-toggle')) {
+            createMobileToggleButton();
+        }
+    };
+
+    // Try adding buttons immediately and after a delay
+    addLayoutControls();
+    setTimeout(addLayoutControls, 1000);
+
     // Listen for resize events to detect rotation or window size changes
     window.addEventListener('resize', function() {
         // Fix black bar on resize
         fixBlackBarIssue();
-        
+
         // Toggle mobile mode based on screen size
         if (window.innerWidth <= 991) {
             document.body.classList.add('force-mobile-optimization');
-            
+
             // Update mobile button
             const mobileBtn = document.getElementById('mobile-mode-toggle');
             if (mobileBtn) mobileBtn.classList.add('active');
@@ -641,10 +975,37 @@ document.addEventListener('DOMContentLoaded', function() {
             const settings = loadLayoutSettings();
             if (!settings.mobileMode) {
                 document.body.classList.remove('force-mobile-optimization');
-                
+
                 // Update mobile button
                 const mobileBtn = document.getElementById('mobile-mode-toggle');
                 if (mobileBtn) mobileBtn.classList.remove('active');
+            }
+        }
+    });
+
+    // Make the layout settings button more reliable
+    document.addEventListener('click', function(e) {
+        // Handle direct clicks on the settings button even if dynamically added later
+        if (e.target && (
+            e.target.id === 'layout-settings-btn' ||
+            (e.target.parentNode && e.target.parentNode.id === 'layout-settings-btn')
+        )) {
+            console.log('Layout settings button clicked via delegate');
+
+            // Ensure modal exists
+            let modalElement = document.getElementById('layoutSettingsModal');
+            if (!modalElement) {
+                createLayoutSettingsModal();
+                modalElement = document.getElementById('layoutSettingsModal');
+            }
+
+            if (modalElement && typeof bootstrap !== 'undefined') {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+
+                setTimeout(() => {
+                    setupLayoutControls();
+                }, 300);
             }
         }
     });

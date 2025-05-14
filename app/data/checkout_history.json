@@ -86,5 +86,60 @@
     "new_location": "",
     "user": "aalexandrian",
     "notes": ""
+  },
+  {
+    "id": "8ec0f6ef-8f35-4c0e-a68f-234e83c8648b",
+    "equipment_id": "Chamber-CNMC-123456",
+    "timestamp": "2025-05-11T16:13:22.195167",
+    "previous_status": "In Storage",
+    "new_status": "Checked Out",
+    "previous_location": "Essen (BR)",
+    "new_location": "Gonzales",
+    "user": "echorniak",
+    "notes": ""
+  },
+  {
+    "id": "937498d3-f923-4e22-b3f6-53b0677c9b23",
+    "equipment_id": "Electrometer-PTW-778899",
+    "timestamp": "2025-05-12T00:01:32.399318",
+    "previous_status": "In Storage",
+    "new_status": "Checked Out",
+    "previous_location": "Gonzales",
+    "new_location": "Essen (BR)",
+    "user": "echorniak",
+    "notes": ""
+  },
+  {
+    "id": "85b4be04-2376-49be-b449-3a90538006b5",
+    "equipment_id": "Survey-Meter-Mirion-665544",
+    "timestamp": "2025-05-12T11:14:27.708684",
+    "previous_status": "In Calibration",
+    "new_status": "Checked Out",
+    "previous_location": "Hammond",
+    "new_location": "Essen (BR)",
+    "user": "amcguffey",
+    "notes": "Fun "
+  },
+  {
+    "id": "6cc3ac9e-55dd-4ded-8861-850c689fbfee",
+    "equipment_id": "Chamber-CNMC-456789",
+    "timestamp": "2025-05-12T11:35:38.797622",
+    "previous_status": "In Storage",
+    "new_status": "Checked Out",
+    "previous_location": "",
+    "new_location": "Picardy (BRG)",
+    "user": "aalexandrian",
+    "notes": "Tricked y"
+  },
+  {
+    "id": "2c7d4981-2135-4000-bbe3-281dc524eddc",
+    "equipment_id": "Chamber-CNMC-456789",
+    "timestamp": "2025-05-12T11:35:57.675007",
+    "previous_status": "Checked Out",
+    "new_status": "In Storage",
+    "previous_location": "Picardy (BRG)",
+    "new_location": "Essen (BR)",
+    "user": "aalexandrian",
+    "notes": ""
   }
 ]

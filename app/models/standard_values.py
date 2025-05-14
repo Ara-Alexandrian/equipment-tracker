@@ -186,3 +186,90 @@ class StandardValuesManager:
             self.save_data()
             return True
         return False
+
+    def edit_category(self, old_value, new_value):
+        """Edit an existing category.
+
+        Args:
+            old_value: The current value to be changed
+            new_value: The new value to replace it with
+
+        Returns:
+            bool: Whether the edit was successful
+        """
+        if old_value not in self.categories or new_value in self.categories:
+            return False
+
+        # Update the category in the list
+        index = self.categories.index(old_value)
+        self.categories[index] = new_value
+
+        # Update the equipment types dictionary key
+        if old_value in self.equipment_types:
+            self.equipment_types[new_value] = self.equipment_types.pop(old_value)
+
+        self.save_data()
+        return True
+
+    def edit_equipment_type(self, category, old_value, new_value):
+        """Edit an existing equipment type.
+
+        Args:
+            category: The category the equipment type belongs to
+            old_value: The current value to be changed
+            new_value: The new value to replace it with
+
+        Returns:
+            bool: Whether the edit was successful
+        """
+        if (category not in self.equipment_types or
+            old_value not in self.equipment_types[category] or
+            new_value in self.equipment_types[category]):
+            return False
+
+        # Update the equipment type in the list
+        index = self.equipment_types[category].index(old_value)
+        self.equipment_types[category][index] = new_value
+
+        self.save_data()
+        return True
+
+    def edit_manufacturer(self, old_value, new_value):
+        """Edit an existing manufacturer.
+
+        Args:
+            old_value: The current value to be changed
+            new_value: The new value to replace it with
+
+        Returns:
+            bool: Whether the edit was successful
+        """
+        if old_value not in self.manufacturers or new_value in self.manufacturers:
+            return False
+
+        # Update the manufacturer in the list
+        index = self.manufacturers.index(old_value)
+        self.manufacturers[index] = new_value
+
+        self.save_data()
+        return True
+
+    def edit_location(self, old_value, new_value):
+        """Edit an existing location.
+
+        Args:
+            old_value: The current value to be changed
+            new_value: The new value to replace it with
+
+        Returns:
+            bool: Whether the edit was successful
+        """
+        if old_value not in self.locations or new_value in self.locations:
+            return False
+
+        # Update the location in the list
+        index = self.locations.index(old_value)
+        self.locations[index] = new_value
+
+        self.save_data()
+        return True

@@ -193,7 +193,7 @@
 .action-buttons {
     min-width: 160px !important;
     width: auto !important;
-    text-align: right !important;
+    text-align: center !important; /* Changed from right to center */
     white-space: nowrap !important;
 }
 
@@ -210,11 +210,48 @@
     vertical-align: middle !important;
 }
 
-/* Fix QR code generator button wrapping */
-.action-buttons .d-flex {
+/* Ensure action buttons container is properly centered */
+td.action-buttons {
+    text-align: center !important;
+}
+
+/* Center the flex container for action buttons */
+.action-buttons .d-flex,
+.table td .d-flex.flex-nowrap.justify-content-center {
     flex-wrap: nowrap !important;
-    justify-content: flex-end !important;
+    justify-content: center !important; /* Changed from flex-end to center */
     gap: 2px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Ensure actions column is properly centered */
+.equipment-table th.col-actions,
+.equipment-table td.col-actions,
+#equipmentTable th.col-actions,
+#equipmentTable td.col-actions {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Force center alignment for action buttons container and contents */
+.action-buttons,
+td.action-buttons,
+.action-buttons > div,
+.action-buttons .d-flex {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+}
+
+/* Equipment table positioning */
+.equipment-table {
+    position: static !important; /* Ensures z-index hierarchy works properly */
 }
 
 /* Equipment table column sizes */
@@ -225,24 +262,133 @@
     word-break: break-word !important;
 }
 
-.equipment-table th.col-actions, .equipment-table td.col-actions {
-    min-width: 160px !important;
-    width: 165px !important;
+/* Equipment list column standardization */
+.equipment-table th, .equipment-table td {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 8px 6px !important;
+    height: 60px !important; /* Fixed row height for consistency */
 }
 
-/* New action container with separate rows for view/QR and operations */
+/* True side-by-side buttons styling */
+.action-buttons-container {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0 !important; /* No gap between buttons */
+    width: auto !important;
+}
+
+.action-buttons-container .btn,
+.action-buttons-container .dropdown button {
+    padding: 0 8px !important;
+    height: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 32px !important;
+    margin: 0 !important;
+}
+
+/* Button group appearance (joined buttons) */
+.action-buttons-container {
+    display: inline-block !important;
+    white-space: nowrap !important;
+}
+
+/* Fix the dropdown to be inline */
+.action-buttons-container .dropdown {
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+/* Column width standardization for all equipment lists */
+.equipment-table th.col-category, .equipment-table td:nth-child(1) { width: 10% !important; }
+.equipment-table th.col-type, .equipment-table td:nth-child(2) { width: 10% !important; }
+.equipment-table th.col-manufacturer, .equipment-table td:nth-child(3) { width: 12% !important; }
+.equipment-table th.col-model, .equipment-table td:nth-child(4) { width: 12% !important; }
+.equipment-table th.col-serial, .equipment-table td:nth-child(5) { width: 10% !important; }
+.equipment-table th.col-location, .equipment-table td:nth-child(6) { width: 15% !important; }
+.equipment-table th.col-status, .equipment-table td:nth-child(7) { width: 10% !important; }
+.equipment-table th.col-condition, .equipment-table td:nth-child(8) { width: 10% !important; }
+.equipment-table th.col-actions, .equipment-table td:nth-child(9) { width: 100px !important; min-width: 100px !important; max-width: 100px !important; text-align: center !important; padding: 0 !important; }
+
+/* Combined ID & Category cell styling */
+.equipment-table th.col-id-category, .equipment-table td.col-id-category {
+    min-width: 225px !important;
+    max-width: 350px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    padding-right: 12px !important;
+    border-right: 1px solid rgba(0,0,0,0.1) !important;
+    width: 25% !important;
+}
+
+.id-category-cell {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    padding: 5px 0 !important;
+}
+
+.equipment-id {
+    word-break: break-word !important;
+    white-space: normal !important;
+    font-size: 0.8rem !important;
+    max-width: 100% !important;
+    line-height: 1.3 !important;
+}
+
+.equipment-category, .equipment-type {
+    font-size: 0.8rem !important;
+}
+
+.equipment-table th.col-manufacturer, .equipment-table td.col-manufacturer {
+    min-width: 120px !important;
+    max-width: 180px !important;
+    padding-left: 12px !important;
+}
+
+.equipment-table th.col-actions, .equipment-table td.col-actions {
+    min-width: 140px !important;
+    width: 150px !important;
+    text-align: center !important;
+}
+
+/* Adjust column condition width to prevent line breaks */
+.equipment-table th.col-condition, .equipment-table td.col-condition {
+    min-width: 90px !important;
+    white-space: nowrap !important;
+}
+
+/* Clickable stat cards */
+.stat-card {
+    transition: all 0.2s ease-in-out !important;
+    cursor: pointer !important;
+    border: 1px solid rgba(0,0,0,0.125) !important;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+}
+
+/* Simplified action container layout */
 .action-container {
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
     gap: 6px !important;
+    align-items: center !important;
 }
 
 /* Row for View and QR buttons (top row) */
 .action-row.view-row {
     display: flex !important;
     flex-direction: row !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
     gap: 4px !important;
     width: 100% !important;
 }
@@ -251,35 +397,171 @@
 .action-row.operation-row {
     display: flex !important;
     flex-direction: row !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
     gap: 2px !important;
     width: 100% !important;
 }
 
-/* Common button styling */
-.action-button {
+/* Status and condition cell styling */
+.status-cell, .condition-cell {
+    position: relative !important;
+    min-width: 60px !important;
+    width: auto !important;
+    padding: 8px 4px !important;
+    text-align: center !important;
+}
+
+.status-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+}
+
+.location-info {
+    font-size: 0.75rem !important;
+    color: #666 !important;
+    max-width: 90% !important;
     white-space: nowrap !important;
-    font-size: 0.7rem !important;
-    padding: 0.1rem 0.2rem !important;
-    height: 22px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+}
+
+.dark-mode .location-info,
+.dracula-mode .location-info,
+.sweet-dracula-mode .location-info {
+    color: #ccc !important;
+}
+
+/* Action dropdown styling */
+.equipment-table .dropdown-menu {
+    min-width: 180px !important;
+    padding: 0.25rem 0 !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+    z-index: 1050 !important; /* Higher z-index to ensure dropdown appears above other content */
+}
+
+.equipment-table .dropdown-item {
+    font-size: 0.85rem !important;
+    padding: 0.4rem 0.75rem !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease-in-out !important;
+    position: relative !important;
+    z-index: 1060 !important; /* Even higher z-index for items */
+}
+
+.equipment-table .dropdown-item:hover {
+    background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+.equipment-table .dropdown-item i {
+    margin-right: 8px !important;
+    width: 14px !important;
+    text-align: center !important;
+}
+
+/* Make sure the dropdown container itself has a high z-index */
+.equipment-table .dropdown {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+/* Ensure dropdown stays open and visible */
+.equipment-table .dropdown.show {
+    z-index: 2000 !important; /* Much higher z-index to overcome any other elements */
+    position: relative !important;
+}
+
+.equipment-table .dropdown.show .dropdown-menu {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 2100 !important; /* Even higher z-index for the menu */
+    position: absolute !important;
+}
+
+/* Fix for three dots menu click issue */
+.table td {
+    position: static !important; /* Ensure table cells don't create stacking contexts */
+}
+
+/* Specific fix for the action buttons */
+#equipmentTable td:last-child {
+    position: relative !important;
+    z-index: 1 !important; /* Default z-index */
+}
+
+#equipmentTable td:last-child:hover,
+#equipmentTable td:last-child:active,
+#equipmentTable td:last-child:focus-within {
+    z-index: 1900 !important; /* Increase z-index when interacting */
+    position: relative !important;
+}
+
+/* Fix click issues with three dots button */
+.btn-outline-secondary[data-bs-toggle="dropdown"],
+.dropdown-toggle {
+    z-index: 1950 !important;
+    position: relative !important;
+}
+
+/* Improved action dropdown styling for better clickability */
+.action-dropdown {
+    display: inline-block !important;
+    position: relative !important;
+    z-index: 2000 !important;
+}
+
+.action-dropdown-toggle {
+    width: 32px !important;
+    height: 32px !important; /* Slightly larger button */
+    padding: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin: 0 !important;
-    flex: 1 !important;
-    min-width: 40px !important;
-    max-width: none !important;
+    cursor: pointer !important;
+    border-radius: 4px !important;
+    position: relative !important;
+    z-index: 2000 !important;
 }
 
-/* Specific styling for view and QR buttons */
-.view-button, .qr-button {
-    flex-basis: 48% !important;
+.action-dropdown-toggle i {
+    font-size: 1rem !important; /* Slightly larger icon */
 }
 
-/* Specific styling for operation buttons */
-.op-button {
-    flex-basis: 32% !important;
-    font-size: 0.65rem !important;
+.actions-cell {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+.actions-cell:hover .action-dropdown-toggle,
+.actions-cell:focus-within .action-dropdown-toggle {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ensure dropdown menu appears above everything */
+.action-dropdown .dropdown-menu {
+    z-index: 3000 !important;
+    position: absolute !important;
+    width: auto !important;
+    min-width: 200px !important;
+}
+
+/* View button and dropdown toggle */
+.equipment-table .btn-sm {
+    height: 28px !important;
+    padding: 0rem 0.5rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+}
+
+.equipment-table .btn-sm i {
+    font-size: 0.9rem !important;
 }
 
 /* Better QR modal layout */
@@ -291,13 +573,14 @@
     padding: 1.5rem !important;
 }
 
-#qrCodeImage {
+#qrCodeImage, #editQRImage {
     max-width: 100% !important;
     height: auto !important;
     border: 1px solid rgba(0,0,0,0.1) !important;
     border-radius: 4px !important;
     padding: 0.5rem !important;
     background-color: white !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
 }
 
 /* Fix button layout in modal footer */
@@ -309,4 +592,304 @@
 #qrCodeModal .modal-footer button,
 #qrCodeModal .modal-footer a {
     white-space: nowrap !important;
+}
+
+/* Edit Equipment QR Code Panel */
+#editEquipmentModal .col-md-4 {
+    background-color: #f8f9fa !important;
+    border-left: 1px solid #dee2e6 !important;
+}
+
+.dark-mode #editEquipmentModal .col-md-4,
+.dracula-mode #editEquipmentModal .col-md-4,
+.sweet-dracula-mode #editEquipmentModal .col-md-4 {
+    background-color: #343a40 !important;
+    border-left: 1px solid #495057 !important;
+}
+
+#editEquipmentModal .modal-dialog {
+    max-width: 1200px !important;
+}
+
+#editQRDisplay {
+    background-color: white !important;
+    padding: 15px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    margin-bottom: 15px !important;
+}
+
+.dark-mode #editQRDisplay,
+.dracula-mode #editQRDisplay,
+.sweet-dracula-mode #editQRDisplay {
+    background-color: #212529 !important;
+    border-color: #495057 !important;
+}
+
+#editEquipmentModal .btn {
+    margin-bottom: 8px !important;
+}
+
+#editQREquipmentId, #directQREquipmentId {
+    font-weight: 600 !important;
+    margin-top: 10px !important;
+}
+
+/* Direct Edit Equipment Page Styling */
+#directQRDisplay {
+    background-color: white !important;
+    padding: 15px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    margin-bottom: 15px !important;
+}
+
+.dark-mode #directQRDisplay,
+.dracula-mode #directQRDisplay,
+.sweet-dracula-mode #directQRDisplay {
+    background-color: #212529 !important;
+    border-color: #495057 !important;
+}
+
+#directQRImage {
+    max-width: 100% !important;
+    height: auto !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    border-radius: 4px !important;
+    padding: 0.5rem !important;
+    background-color: white !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
+/* Accent color for equipment type info with theme-specific colors */
+.equipment-type-info {
+    color: #ffb86c !important; /* Dracula orange/gold color */
+    font-style: italic !important;
+    margin-top: 3px !important;
+    font-size: 0.85rem !important;
+    display: block !important;
+    text-align: center !important;
+}
+
+/* Sweet Dracula and standard Dracula Mode */
+.sweet-dracula-mode .equipment-type-info,
+.dracula-mode .equipment-type-info {
+    color: #ffb86c !important; /* Dracula orange/gold */
+}
+
+/* Dark Mode */
+.dark-mode .equipment-type-info {
+    color: #f1fa8c !important; /* Dracula yellow */
+}
+
+/* Light Mode */
+body:not(.dark-mode):not(.dracula-mode):not(.sweet-dracula-mode) .equipment-type-info {
+    color: #ff9800 !important; /* Warm orange for light mode */
+}
+
+/* Ensure table headers in Recent Equipment are properly centered */
+.table.table-hover.table-compact th {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 8px 6px !important;
+}
+
+/* Ensure table cells in Recent Equipment are properly spaced */
+.table.table-hover.table-compact td {
+    padding: 8px 6px !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+/* Improve spacing in dashboard recent equipment table */
+#dashboard-recent-equipment td,
+.dashboard-recent-equipment td,
+.table.table-hover.table-compact td {
+    padding: 10px 6px !important;
+    line-height: 1.4 !important;
+}
+
+/* Ensure badges are properly centered */
+td .badge,
+.badge {
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    padding: 0.35em 0.65em !important;
+}
+
+/* Apply consistent styling to all table cells in dashboard */
+.table.table-hover td,
+.table.table-compact td,
+.table.table-hover th,
+.table.table-compact th {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Column width adjustments for Recent Equipment table */
+#dashboard-recent-equipment th:first-child,
+#dashboard-recent-equipment td:first-child,
+#dashboard-recent-equipment td.manufacturer-model-cell {
+    width: 30% !important; /* Make Manufacturer/Model column even wider */
+    min-width: 250px !important;
+    max-width: 350px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.4 !important;
+}
+
+#dashboard-recent-equipment th:nth-child(2),
+#dashboard-recent-equipment td:nth-child(2) {
+    width: 12% !important; /* Serial number */
+}
+
+#dashboard-recent-equipment th:nth-child(3),
+#dashboard-recent-equipment td:nth-child(3) {
+    width: 15% !important; /* Location */
+}
+
+#dashboard-recent-equipment th:nth-child(4),
+#dashboard-recent-equipment td:nth-child(4) {
+    width: 12% !important; /* Status */
+}
+
+#dashboard-recent-equipment th:nth-child(5),
+#dashboard-recent-equipment td:nth-child(5) {
+    width: 12% !important; /* Condition */
+}
+
+#dashboard-recent-equipment th:last-child,
+#dashboard-recent-equipment td:last-child {
+    width: 120px !important; /* Actions - exact width for better alignment */
+}
+
+/* Ensure actions column cells are perfectly centered */
+/* Align Actions header with buttons below */
+#dashboard-recent-equipment th.actions-header,
+#dashboard-recent-equipment th:last-child {
+    text-align: center !important;
+    width: 120px !important;
+}
+
+/* Center the button container in action cells */
+#dashboard-recent-equipment td:last-child .d-flex {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+}
+
+/* Better handling of manufacturer/model column text */
+.manufacturer-model-cell {
+    line-height: 1.4 !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    text-align: center !important;
+    word-break: break-word !important;
+}
+
+.manufacturer-model-cell strong {
+    display: inline-block !important;
+    margin-right: 4px !important;
+}
+
+/* Improve equipment type info display */
+.equipment-type-info {
+    padding-top: 3px !important;
+    line-height: 1.3 !important;
+    max-width: 90% !important;
+    margin: 0 auto !important;
+}
+
+/* Make Action buttons more compact but better aligned */
+#dashboard-recent-equipment td:last-child .d-flex a,
+#dashboard-recent-equipment td:last-child .d-flex button {
+    height: 28px !important;
+    width: 32px !important;
+    margin: 0 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Center the actions column content */
+#dashboard-recent-equipment td:last-child .d-flex {
+    margin: 0 auto !important;
+}
+
+/* Location display styling */
+.small.text-muted {
+    font-size: 0.75rem !important;
+    opacity: 0.8 !important;
+}
+
+/* Admin table styling */
+#equipmentTable th {
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 0.85rem !important;
+}
+
+#equipmentTable .badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.75rem !important;
+    padding: 0.35em 0.5em !important;
+    white-space: nowrap !important;
+}
+
+#equipmentTable .badge i {
+    margin-right: 0.25rem !important;
+    font-size: 0.8rem !important;
+}
+
+/* Status Legend Styling */
+#legendCollapse .card-body {
+    padding: 1.25rem !important;
+}
+
+#legendCollapse h6 {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.75rem !important;
+    color: #495057 !important;
+}
+
+#legendCollapse .badge {
+    min-width: 80px !important;
+    justify-content: center !important;
+    margin-right: 0.75rem !important;
+}
+
+#legendCollapse .d-flex {
+    margin-bottom: 0.5rem !important;
+}
+
+/* Dark mode and Dracula mode support for the legend */
+.dark-mode #legendCollapse h6,
+.dracula-mode #legendCollapse h6,
+.sweet-dracula-mode #legendCollapse h6 {
+    color: #f8f9fa !important;
+    border-bottom-color: #495057 !important;
+}
+
+.dark-mode #legendCollapse .text-muted,
+.dracula-mode #legendCollapse .text-muted,
+.sweet-dracula-mode #legendCollapse .text-muted {
+    color: #adb5bd !important;
+}
+
+/* Legend toggle button improvement */
+#legendCollapse {
+    transition: all 0.3s ease-in-out !important;
+}
+
+.legend-toggle {
+    cursor: pointer !important;
+    padding: 0.375rem 0.75rem !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
 }

@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Theme switcher is now handled by theme-unified.js
     console.log('Theme switching is managed by theme-unified.js');
     
-    // Add fade-out to alerts after 3 seconds
+    // Add fade-out to alerts after 3 seconds, except for specific permanent alerts
     setTimeout(function() {
-        document.querySelectorAll('.alert').forEach(function(alert) {
+        document.querySelectorAll('.alert:not(.alert-permanent)').forEach(function(alert) {
             alert.classList.add('fade');
             setTimeout(function() {
                 alert.remove();

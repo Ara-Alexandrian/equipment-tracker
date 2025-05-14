@@ -76,21 +76,21 @@ function setupUnifiedThemeSwitcher() {
 
 /**
  * Apply a specific theme
- * @param {string} theme - The theme to apply ('light', 'dark', or 'dracula')
+ * @param {string} theme - The theme to apply ('light', 'dark', 'dracula', 'sweet-dracula', or 'pastel')
  */
 function applyTheme(theme) {
     console.log('Applying theme:', theme);
-    
+
     // First ensure we have a valid theme
-    if (!theme || !['light', 'dark', 'dracula'].includes(theme)) {
+    if (!theme || !['light', 'dark', 'dracula', 'sweet-dracula', 'pastel'].includes(theme)) {
         console.warn('Invalid theme specified:', theme, 'defaulting to light');
         theme = 'light';
     }
-    
+
     // Reset all themes first - important for a clean state
-    document.documentElement.classList.remove('dark-mode', 'dracula-mode');
-    document.body.classList.remove('dark-mode', 'dracula-mode');
-    
+    document.documentElement.classList.remove('dark-mode', 'dracula-mode', 'sweet-dracula-mode', 'pastel-mode');
+    document.body.classList.remove('dark-mode', 'dracula-mode', 'sweet-dracula-mode', 'pastel-mode');
+
     // Apply the specified theme
     if (theme === 'dark') {
         document.documentElement.classList.add('dark-mode');
@@ -100,22 +100,30 @@ function applyTheme(theme) {
         document.documentElement.classList.add('dracula-mode');
         document.body.classList.add('dracula-mode');
     }
-    
+    else if (theme === 'sweet-dracula') {
+        document.documentElement.classList.add('sweet-dracula-mode');
+        document.body.classList.add('sweet-dracula-mode');
+    }
+    else if (theme === 'pastel') {
+        document.documentElement.classList.add('pastel-mode');
+        document.body.classList.add('pastel-mode');
+    }
+
     // Always save the theme preference to localStorage - crucial for persistence
     localStorage.setItem('theme', theme);
-    
+
     // Log what we're saving to localStorage
     console.log('Saving theme to localStorage:', theme);
-    
+
     // Toggle logo visibility based on theme
     toggleLogosForTheme(theme);
-    
+
     // Apply theme to additional elements
     applyThemeToElements(theme);
-    
+
     // Update the button icon to match the current theme
     updateThemeButtonIcon(theme);
-    
+
     console.log('Theme fully applied:', theme);
 }
 
@@ -146,17 +154,17 @@ function applyThemeToElements(theme) {
     if (theme === 'light') {
         // Remove theme classes from all elements
         document.querySelectorAll('table, .card, .footer, footer').forEach(el => {
-            el.classList.remove('dark-mode', 'dracula-mode');
+            el.classList.remove('dark-mode', 'dracula-mode', 'sweet-dracula-mode', 'pastel-mode');
         });
         return;
     }
-    
+
     // Apply theme class to tables, cards, etc.
     document.querySelectorAll('table, .card, .footer, footer').forEach(el => {
-        el.classList.remove('dark-mode', 'dracula-mode');
+        el.classList.remove('dark-mode', 'dracula-mode', 'sweet-dracula-mode', 'pastel-mode');
         el.classList.add(`${theme}-mode`);
     });
-    
+
     // Update chart themes if Chart.js is available
     if (typeof Chart !== 'undefined' && typeof updateChartsForTheme === 'function') {
         updateChartsForTheme(theme);
@@ -179,6 +187,12 @@ function updateThemeButtonIcon(theme) {
     else if (theme === 'dracula') {
         themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/dracula-icon.svg" style="width:38px;height:38px;margin-top:-10px;margin-bottom:-10px;margin-left:-8px;margin-right:-8px;" />';
     }
+    else if (theme === 'sweet-dracula') {
+        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/sweet-dracula-icon.svg" style="width:38px;height:38px;margin-top:-10px;margin-bottom:-10px;margin-left:-8px;margin-right:-8px;" />';
+    }
+    else if (theme === 'pastel') {
+        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-palette-fill" style="color:#ffffff;font-size:1.2rem;text-shadow:0 0 5px rgba(0,0,0,0.2);"></i>';
+    }
     else {
         themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-sun-fill"></i>';
     }
@@ -187,43 +201,47 @@ function updateThemeButtonIcon(theme) {
 }
 
 /**
- * Cycle through themes: Light -> Dark -> Dracula -> Light
+ * Cycle through themes: Light -> Dark -> Dracula -> Sweet Dracula -> Pastel -> Light
  */
 function cycleTheme(event) {
     if (event) event.preventDefault();
-    
+
     console.log('Cycling theme...');
-    
+
     // Get current theme
     const currentTheme = localStorage.getItem('theme') || 'light';
     console.log('Current theme before cycling:', currentTheme);
-    
+
     // Determine the next theme in the cycle
     let newTheme;
     if (currentTheme === 'light') {
         newTheme = 'dark';
     } else if (currentTheme === 'dark') {
         newTheme = 'dracula';
+    } else if (currentTheme === 'dracula') {
+        newTheme = 'sweet-dracula';
+    } else if (currentTheme === 'sweet-dracula') {
+        newTheme = 'pastel';
     } else {
         newTheme = 'light';
     }
-    
+
     console.log('Switching to new theme:', newTheme);
-    
+
     // Apply the new theme
     applyTheme(newTheme);
-    
+
     // Force save to localStorage
     localStorage.setItem('theme', newTheme);
-    
+
     // Update the theme button icon
     updateThemeButtonIcon(newTheme);
-    
+
     // Show a brief debug message
     showThemeChangeMessage(newTheme);
-    
+
     console.log('Theme cycled to:', newTheme);
-    
+
     return false; // Prevent default action
 }
 

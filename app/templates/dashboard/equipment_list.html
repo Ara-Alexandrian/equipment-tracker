@@ -142,12 +142,6 @@
             </a>
             {% endif %}
         </div>
-        <div class="btn-group" role="group">
-            <a href="{{ url_for('dashboard.equipment_list') }}" class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
-            <a href="{{ url_for('dashboard.equipment_list', category='Chamber') }}" class="btn {% if selected_category == 'Chamber' %}btn-primary{% else %}btn-outline-primary{% endif %}">Chambers</a>
-            <a href="{{ url_for('dashboard.equipment_list', category='Electrometer') }}" class="btn {% if selected_category == 'Electrometer' %}btn-primary{% else %}btn-outline-primary{% endif %}">Electrometers</a>
-            <a href="{{ url_for('dashboard.equipment_list', category='Survey Meter') }}" class="btn {% if selected_category == 'Survey Meter' %}btn-primary{% else %}btn-outline-primary{% endif %}">Survey Meters</a>
-        </div>
     </div>
 </div>
 
@@ -161,16 +155,43 @@
 <!-- New Filter Dropdown at Top -->
 <div class="mb-4">
     <div class="d-flex align-items-center flex-wrap">
+        <!-- Category Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="categoryFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-tags"></i> Category:
+                {% if selected_category == 'Chamber' %}Chambers
+                {% elif selected_category == 'Electrometer' %}Electrometers
+                {% elif selected_category == 'Survey Meter' %}Survey Meters
+                {% else %}All
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="categoryFilterDropdown">
+                <li><a class="dropdown-item {% if not selected_category %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', location=selected_location, status=status_filter, condition=condition_filter) }}">
+                    <i class="bi bi-grid-3x3-gap"></i> All Categories
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item {% if selected_category == 'Chamber' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category='Chamber', location=selected_location, status=status_filter, condition=condition_filter) }}">
+                    <i class="bi bi-circle-square"></i> Chambers
+                </a></li>
+                <li><a class="dropdown-item {% if selected_category == 'Electrometer' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category='Electrometer', location=selected_location, status=status_filter, condition=condition_filter) }}">
+                    <i class="bi bi-device-ssd"></i> Electrometers
+                </a></li>
+                <li><a class="dropdown-item {% if selected_category == 'Survey Meter' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category='Survey Meter', location=selected_location, status=status_filter, condition=condition_filter) }}">
+                    <i class="bi bi-radioactive"></i> Survey Meters
+                </a></li>
+            </ul>
+        </div>
+
         <!-- Location Filter -->
         <div class="dropdown me-2 mb-2">
             <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="locationFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-geo-alt"></i> Location: {{ selected_location or 'All' }}
             </button>
             <ul class="dropdown-menu" aria-labelledby="locationFilterDropdown" style="max-height: 350px; overflow-y: auto;">
-                <li><a class="dropdown-item {% if not selected_location %}active{% endif %}" href="{{ url_for('dashboard.equipment_list') }}">All Locations</a></li>
+                <li><a class="dropdown-item {% if not selected_location %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category=selected_category, status=status_filter, condition=condition_filter) }}">All Locations</a></li>
                 <li><hr class="dropdown-divider"></li>
                 {% for location in locations %}
-                <li><a class="dropdown-item {% if selected_location == location %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', location=location) }}">{{ location }}</a></li>
+                <li><a class="dropdown-item {% if selected_location == location %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', location=location, category=selected_category, status=status_filter, condition=condition_filter) }}">{{ location }}</a></li>
                 {% endfor %}
             </ul>
         </div>
@@ -186,11 +207,17 @@
                 {% endif %}
             </button>
             <ul class="dropdown-menu" aria-labelledby="statusFilterDropdown">
-                <li><a class="dropdown-item {% if not status_filter %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category=selected_category, location=selected_location) }}">All Statuses</a></li>
+                <li><a class="dropdown-item {% if not status_filter %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category=selected_category, location=selected_location, condition=condition_filter) }}">All Statuses</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item {% if status_filter == 'available' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='available', category=selected_category, location=selected_location) }}">Available</a></li>
-                <li><a class="dropdown-item {% if status_filter == 'checked_out' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='checked_out', category=selected_category, location=selected_location) }}">Checked Out</a></li>
-                <li><a class="dropdown-item {% if status_filter == 'in_transport' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='in_transport', category=selected_category, location=selected_location) }}">In Transport</a></li>
+                <li><a class="dropdown-item {% if status_filter == 'available' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='available', category=selected_category, location=selected_location, condition=condition_filter) }}">
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Available</span>
+                </a></li>
+                <li><a class="dropdown-item {% if status_filter == 'checked_out' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='checked_out', category=selected_category, location=selected_location, condition=condition_filter) }}">
+                    <span class="badge bg-info"><i class="bi bi-box-arrow-right"></i> Checked Out</span>
+                </a></li>
+                <li><a class="dropdown-item {% if status_filter == 'in_transport' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='in_transport', category=selected_category, location=selected_location, condition=condition_filter) }}">
+                    <span class="badge bg-secondary"><i class="bi bi-truck"></i> In Transport</span>
+                </a></li>
             </ul>
         </div>
 
@@ -207,9 +234,15 @@
             <ul class="dropdown-menu" aria-labelledby="conditionFilterDropdown">
                 <li><a class="dropdown-item {% if not condition_filter %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category=selected_category, location=selected_location, status=status_filter) }}">All Conditions</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item {% if condition_filter == 'normal' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='normal', category=selected_category, location=selected_location, status=status_filter) }}">Normal</a></li>
-                <li><a class="dropdown-item {% if condition_filter == 'warning' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='warning', category=selected_category, location=selected_location, status=status_filter) }}">Needs Attention</a></li>
-                <li><a class="dropdown-item {% if condition_filter == 'critical' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='critical', category=selected_category, location=selected_location, status=status_filter) }}">Out of Service</a></li>
+                <li><a class="dropdown-item {% if condition_filter == 'normal' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='normal', category=selected_category, location=selected_location, status=status_filter) }}">
+                    <span class="badge bg-success"><i class="bi bi-circle-fill"></i> Normal</span>
+                </a></li>
+                <li><a class="dropdown-item {% if condition_filter == 'warning' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='warning', category=selected_category, location=selected_location, status=status_filter) }}">
+                    <span class="badge bg-warning"><i class="bi bi-exclamation-triangle-fill"></i> Needs Attention</span>
+                </a></li>
+                <li><a class="dropdown-item {% if condition_filter == 'critical' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='critical', category=selected_category, location=selected_location, status=status_filter) }}">
+                    <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Out of Service</span>
+                </a></li>
             </ul>
         </div>
 
@@ -320,64 +353,53 @@
                     <table class="table table-hover equipment-table">
                         <thead>
                             <tr>
-                                <th class="col-category">
-                                    <span class="full-text">Category</span>
-                                    <span class="short-text d-none">Cat</span>
+                                <th class="col-category text-center">
+                                    Category
                                 </th>
-                                <th class="col-type">
-                                    <span class="full-text">Type</span>
-                                    <span class="short-text d-none">Type</span>
+                                <th class="col-type text-center">
+                                    Type
                                 </th>
-                                <th class="col-manufacturer">
-                                    <span class="full-text">Manufacturer</span>
-                                    <span class="short-text d-none">MFR</span>
+                                <th class="col-manufacturer text-center">
+                                    Manufacturer
                                 </th>
-                                <th class="col-model">
-                                    <span class="full-text">Model</span>
-                                    <span class="short-text d-none">Model</span>
+                                <th class="col-model text-center">
+                                    Model
                                 </th>
-                                <th class="col-serial">
-                                    <span class="full-text">Serial Number</span>
-                                    <span class="short-text d-none">SN</span>
+                                <th class="col-serial text-center">
+                                    Serial Number
                                 </th>
-                                <th class="col-location">
-                                    <span class="full-text">Location</span>
-                                    <span class="short-text d-none">Loc</span>
+                                <th class="col-location text-center">
+                                    Location
                                 </th>
-                                <th class="col-status">
-                                    <span class="full-text">Status</span>
-                                    <span class="short-text d-none">Stat</span>
+                                <th class="col-status text-center">
+                                    Status
                                 </th>
-                                <th class="col-condition">
-                                    <span class="full-text">Condition</span>
-                                    <span class="short-text d-none">Cond</span>
+                                <th class="col-condition text-center">
+                                    Condition
                                 </th>
                                 <th class="col-actions text-center">
-                                    <div class="text-center" style="width: 100%;">
-                                        <div class="table-action-header">Actions</div>
-                                        <div class="table-action-subheader">
-                                            <span>View / Actions</span>
-                                        </div>
-                                    </div>
+                                    Actions
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in equipment %}
                             <tr>
-                                <td>{{ item.category }}</td>
-                                <td>{{ item.equipment_type }}</td>
-                                <td class="manufacturer-cell">{{ item.manufacturer }}</td>
-                                <td>{{ item.model }}</td>
-                                <td>{{ item.serial_number }}</td>
-                                <td>{{ item.location }}</td>
-                                <td>
+                                <td class="text-center">{{ item.category }}</td>
+                                <td class="text-center">{{ item.equipment_type }}</td>
+                                <td class="text-center manufacturer-cell">{{ item.manufacturer }}</td>
+                                <td class="text-center">{{ item.model }}</td>
+                                <td class="text-center">{{ item.serial_number }}</td>
+                                <td class="text-center">{{ item.location }}</td>
+                                <td class="text-center status-cell">
                                     {% set status = checkout_manager.get_equipment_status(item.id) %}
                                     {% if status and status.status == "Checked Out" %}
-                                        <span class="badge bg-info"><i class="bi bi-arrow-bar-right"></i>Out</span>
-                                        {% if status.location and status.location != item.location %}
-                                            <span class="d-block text-truncate" style="max-width: 100px;" title="{{ status.location }}">{{ status.location }}</span>
-                                        {% endif %}
+                                        <div class="status-container">
+                                            <span class="badge bg-info"><i class="bi bi-arrow-bar-right"></i>Out</span>
+                                            {% if status.location and status.location != item.location %}
+                                                <span class="d-block location-info" title="{{ status.location }}">{{ status.location }}</span>
+                                            {% endif %}
+                                        </div>
                                     {% else %}
                                         <span class="badge bg-success"><i class="bi bi-check-circle"></i>Ready</span>
                                     {% endif %}
@@ -396,14 +418,16 @@
                                     {% endfor %}
 
                                     {% if active_transport %}
-                                        <span class="badge
-                                            {% if is_in_transit %}bg-dark{% else %}bg-secondary{% endif %} mt-1">
-                                            <i class="bi bi-truck"></i>
-                                            {% if is_in_transit %}Moving{% else %}Transport{% endif %}
-                                        </span>
+                                        <div class="mt-2">
+                                            <span class="badge
+                                                {% if is_in_transit %}bg-dark{% else %}bg-secondary{% endif %}">
+                                                <i class="bi bi-truck"></i>
+                                                {% if is_in_transit %}Moving{% else %}Transport{% endif %}
+                                            </span>
+                                        </div>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     {% set condition = ticket_manager.get_equipment_condition(item.id) %}
                                     {% if condition == 'normal' %}
                                         <span class="badge bg-success"><i class="bi bi-circle-fill"></i>OK</span>
@@ -413,51 +437,56 @@
                                         <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i>OOS</span>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    <div class="action-container">
-                                        <!-- Row 1: View & QR buttons -->
-                                        <div class="action-row view-row">
-                                            <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}"
-                                                class="btn btn-xs btn-outline-primary action-button view-button">
-                                                <i class="bi bi-eye"></i> <span class="button-text">View</span>
-                                            </a>
+                                <td class="text-center">
+                                    <div style="display: inline-block; white-space: nowrap;">
+                                        <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary py-0 px-2 mr-1" style="margin-right: 2px;" data-bs-toggle="tooltip" data-bs-placement="top" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle py-0 px-2" type="button" id="actions-{{ item.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actions-{{ item.id }}">
+                                                <!-- QR Code -->
+                                                <li>
+                                                    <a class="dropdown-item py-1 qr-dashboard-btn" href="javascript:void(0);"
+                                                       data-id="{{ item.id }}"
+                                                       data-manufacturer="{{ item.manufacturer }}"
+                                                       data-model="{{ item.model }}"
+                                                       data-serial="{{ item.serial_number }}"
+                                                       onclick="generateQRCodeForEquipment('{{ item.id }}', '{{ item.manufacturer }}', '{{ item.model }}', '{{ item.serial_number }}'); return false;">
+                                                        <i class="bi bi-qr-code text-info"></i> QR Code
+                                                    </a>
+                                                </li>
 
-                                            <button type="button" class="btn btn-xs btn-outline-info action-button qr-button qr-dashboard-btn"
-                                                data-id="{{ item.id }}"
-                                                data-manufacturer="{{ item.manufacturer }}"
-                                                data-model="{{ item.model }}"
-                                                data-serial="{{ item.serial_number }}">
-                                                <i class="bi bi-qr-code"></i> <span class="button-text">QR</span>
-                                            </button>
-                                        </div>
+                                                <!-- Check In/Out -->
+                                                {% if status and status.status == "Checked Out" %}
+                                                <li>
+                                                    <a class="dropdown-item py-1" href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}">
+                                                        <i class="bi bi-box-arrow-in-left text-success"></i> Check In
+                                                    </a>
+                                                </li>
+                                                {% else %}
+                                                <li>
+                                                    <a class="dropdown-item py-1" href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}">
+                                                        <i class="bi bi-box-arrow-right text-primary"></i> Check Out
+                                                    </a>
+                                                </li>
+                                                {% endif %}
 
-                                        <!-- Row 2: Actions buttons in a single row -->
-                                        <div class="action-row operation-row">
-                                            <!-- Check in/out button based on status -->
-                                            {% if status and status.status == "Checked Out" %}
-                                                <a href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}"
-                                                    class="btn btn-xs btn-success action-button op-button">
-                                                    <i class="bi bi-box-arrow-in-left"></i> <span class="button-text">In</span>
-                                                </a>
-                                            {% else %}
-                                                <a href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}"
-                                                    class="btn btn-xs btn-primary action-button op-button">
-                                                    <i class="bi bi-box-arrow-right"></i> <span class="button-text">Out</span>
-                                                </a>
-                                            {% endif %}
+                                                <!-- Ticket -->
+                                                <li>
+                                                    <a class="dropdown-item py-1" href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}">
+                                                        <i class="bi bi-ticket text-warning"></i> Create Ticket
+                                                    </a>
+                                                </li>
 
-                                            <!-- Ticket button -->
-                                            <a href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}"
-                                                class="btn btn-xs btn-warning action-button op-button">
-                                                <i class="bi bi-ticket"></i> <span class="button-text">Fix</span>
-                                            </a>
-
-                                            <!-- Transport button -->
-                                            <a href="{{ url_for('transport.create', equipment_id=item.id) }}"
-                                                class="btn btn-xs btn-info action-button op-button">
-                                                <i class="bi bi-truck"></i> <span class="button-text">Move</span>
-                                            </a>
-                                        </div>
+                                                <!-- Transport -->
+                                                <li>
+                                                    <a class="dropdown-item py-1" href="{{ url_for('transport.create', equipment_id=item.id) }}">
+                                                        <i class="bi bi-truck text-info"></i> Request Transport
+                                                    </a>
+                                                </li>
+                                            </ul>
                                     </div>
                                 </td>
                             </tr>
@@ -516,6 +545,10 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Load the QR print script and the debug script -->
+<script src="{{ url_for('static', filename='js/qr-debug.js') }}"></script>
+<script src="{{ url_for('static', filename='js/qr-print.js') }}?v={{ now.timestamp()|int }}"></script>
+
 <script>
     // Add QR functionality to the "View Details & QR" button
     document.addEventListener('DOMContentLoaded', function() {
@@ -548,11 +581,7 @@
             });
         });
     });
-</script>
-<!-- Load the debug script -->
-<script src="{{ url_for('static', filename='js/qr-debug.js') }}"></script>
 
-<script>
     // Equipment legend toggle functionality
     document.addEventListener('DOMContentLoaded', function() {
         const legendToggleBtn = document.querySelector('[data-bs-target="#equipLegendCollapse"]');
@@ -595,13 +624,40 @@
         }
     });
 
-    // Initialize event listeners for QR code buttons
+    // Initialize tooltips and event listeners
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Enhanced dropdown handling
+        const dropdownToggles = document.querySelectorAll('.equipment-table .dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                // Hide any tooltips when opening dropdown
+                const tooltipInstance = bootstrap.Tooltip.getInstance(this);
+                if (tooltipInstance) {
+                    tooltipInstance.hide();
+                }
+
+                // Make sure the parent row doesn't interfere
+                const row = this.closest('tr');
+                if (row) {
+                    row.style.position = 'relative';
+                    row.style.zIndex = '1000';
+                }
+            });
+        });
+
+        // Initialize QR code buttons
         const qrButtons = document.querySelectorAll('.qr-dashboard-btn');
         console.log('Found dashboard QR buttons:', qrButtons.length);
 
         qrButtons.forEach(button => {
             button.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent the default action
                 console.log('Dashboard QR button clicked via event listener');
                 const id = this.getAttribute('data-id');
                 const manufacturer = this.getAttribute('data-manufacturer');
@@ -758,58 +814,7 @@
             console.error('Error generating QR code:', error);
         });
     }
-    
-    // Function to print the QR code
-    function printQRCode() {
-        const printWindow = window.open('', '_blank');
-        const qrImage = document.getElementById('qrCodeImage').src;
-        const equipmentId = document.getElementById('qrCodeEquipmentId').textContent;
-        
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>QR Code - ${equipmentId}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        text-align: center;
-                        padding: 20px;
-                    }
-                    img {
-                        max-width: 300px;
-                        height: auto;
-                    }
-                    .container {
-                        display: inline-block;
-                        border: 1px solid #ccc;
-                        padding: 20px;
-                        margin: 10px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <img src="${qrImage}" alt="QR Code">
-                    <div>
-                        <p><strong>${equipmentId}</strong></p>
-                        <p>Mary Bird Perkins Cancer Center</p>
-                    </div>
-                </div>
-                <script>
-                    window.onload = function() {
-                        setTimeout(() => {
-                            window.print();
-                            setTimeout(() => {
-                                window.close();
-                            }, 100);
-                        }, 500);
-                    };
-                </script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
-    }
+
+    // printQRCode function is now in qr-print.js
 </script>
 {% endblock %}

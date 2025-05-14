@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendar - GearVue{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+<style>
+    #calendar {
+        height: 700px;
+        margin-bottom: 2rem;
+    }
+    
+    .calendar-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 1rem;
+    }
+    
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        margin-right: 5px;
+    }
+    
+    .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 600;
+    }
+    
+    .fc-event {
+        cursor: pointer;
+        border-radius: 4px;
+        border: none;
+        padding: 2px 4px;
+        font-size: 0.85rem;
+    }
+    
+    .fc-event-time {
+        font-weight: bold;
+    }
+    
+    .fc-list-day-cushion {
+        background-color: var(--bs-light) !important;
+    }
+    
+    /* Event types */
+    .event-calibration {
+        background-color: #dc3545 !important; /* Red for calibration deadlines */
+        border-color: #dc3545 !important;
+    }
+    
+    .event-checkout {
+        background-color: #0d6efd !important; /* Blue for checkout returns */
+        border-color: #0d6efd !important;
+    }
+    
+    .event-maintenance {
+        background-color: #fd7e14 !important; /* Orange for maintenance */
+        border-color: #fd7e14 !important;
+    }
+    
+    .event-inspection {
+        background-color: #198754 !important; /* Green for inspections */
+        border-color: #198754 !important;
+    }
+    
+    /* Modal styling */
+    .event-modal .modal-header {
+        display: flex;
+        align-items: center;
+    }
+    
+    .event-icon {
+        font-size: 1.5rem;
+        margin-right: 10px;
+    }
+    
+    .event-modal .badge {
+        font-size: 0.85rem;
+        margin-left: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Equipment Calendar</h1>
+        <p class="lead">View all upcoming deadlines in a unified calendar view</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ url_for('calendar.ical_feed') }}" class="btn btn-outline-primary">
+            <i class="bi bi-calendar-plus"></i> Subscribe to Calendar
+        </a>
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-filter"></i> Filter
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#" data-calendar-filter="all">All Events</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" data-calendar-filter="calibration">Calibration Deadlines</a></li>
+            <li><a class="dropdown-item" href="#" data-calendar-filter="checkout">Equipment Returns</a></li>
+            <li><a class="dropdown-item" href="#" data-calendar-filter="maintenance">Maintenance Tasks</a></li>
+            <li><a class="dropdown-item" href="#" data-calendar-filter="inspection">Inspections</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Event Legend</h5>
+                <button class="btn btn-sm btn-outline-secondary" id="toggleViewBtn">
+                    <i class="bi bi-grid-3x3"></i> Toggle View
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #dc3545;"></div>
+                        <span>Calibration Deadlines</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #0d6efd;"></div>
+                        <span>Equipment Returns</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fd7e14;"></div>
+                        <span>Maintenance Tasks</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #198754;"></div>
+                        <span>Inspections</span>
+                    </div>
+                </div>
+                
+                <div id="calendar"></div>
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Click on any event to see details and take action.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5>Upcoming Calibrations</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Equipment</th>
+                                <th>Due Date</th>
+                                <th>Days Left</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in upcoming_calibrations %}
+                            <tr class="{% if item.days_left < 0 %}table-danger{% elif item.days_left <= 30 %}table-warning{% endif %}">
+                                <td>
+                                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}">
+                                        {{ item.manufacturer }} {{ item.model }}
+                                    </a>
+                                </td>
+                                <td>{{ item.calibration_due_date }}</td>
+                                <td>
+                                    {% if item.days_left < 0 %}
+                                    <span class="badge bg-danger">{{ item.days_left|abs }} days overdue</span>
+                                    {% elif item.days_left <= 30 %}
+                                    <span class="badge bg-warning text-dark">{{ item.days_left }} days left</span>
+                                    {% else %}
+                                    <span class="badge bg-success">{{ item.days_left }} days left</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('ticket.create', equipment_id=item.id, ticket_type='calibration') }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-tools"></i> Request Calibration
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">No upcoming calibrations</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5>Pending Equipment Returns</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Equipment</th>
+                                <th>Checked Out By</th>
+                                <th>Due Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in equipment_returns %}
+                            <tr class="{% if item.days_left < 0 %}table-danger{% elif item.days_left <= 2 %}table-warning{% endif %}">
+                                <td>
+                                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}">
+                                        {{ item.manufacturer }} {{ item.model }}
+                                    </a>
+                                </td>
+                                <td>{{ item.checked_out_by }}</td>
+                                <td>
+                                    {% if item.days_left < 0 %}
+                                    <span class="badge bg-danger">{{ item.days_left|abs }} days overdue</span>
+                                    {% elif item.days_left <= 2 %}
+                                    <span class="badge bg-warning text-dark">{{ item.days_left }} days left</span>
+                                    {% else %}
+                                    <span class="badge bg-success">{{ item.days_left }} days left</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('checkout.check_in', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-box-arrow-in-left"></i> Check In
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">No pending equipment returns</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div class="modal fade event-modal" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="event-icon"><i class="bi bi-calendar-check"></i></span>
+                <h5 class="modal-title" id="eventTitle">Event Title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1"><strong>Equipment:</strong> <span id="eventEquipment"></span></p>
+                <p class="mb-1"><strong>Date:</strong> <span id="eventDate"></span></p>
+                <p class="mb-1"><strong>Status:</strong> <span id="eventStatus"></span></p>
+                <p class="mb-3" id="eventDetails"></p>
+                
+                <div id="eventActions" class="d-flex gap-2 mt-4">
+                    <!-- Action buttons will be inserted here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        
+        // Initialize FullCalendar
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+            },
+            buttonText: {
+                today: 'Today',
+                month: 'Month',
+                week: 'Week',
+                list: 'List'
+            },
+            themeSystem: 'bootstrap5',
+            height: 'auto',
+            eventTimeFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: 'short'
+            },
+            events: {{ calendar_events|safe }},
+            eventClick: function(info) {
+                showEventDetails(info.event);
+            }
+        });
+        
+        calendar.render();
+        
+        // Toggle between month and list view
+        document.getElementById('toggleViewBtn').addEventListener('click', function() {
+            const currentView = calendar.view.type;
+            if (currentView === 'dayGridMonth') {
+                calendar.changeView('listMonth');
+                this.innerHTML = '<i class="bi bi-calendar-month"></i> Month View';
+            } else {
+                calendar.changeView('dayGridMonth');
+                this.innerHTML = '<i class="bi bi-list"></i> List View';
+            }
+        });
+        
+        // Filter events by type
+        document.querySelectorAll('[data-calendar-filter]').forEach(element => {
+            element.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filterType = this.getAttribute('data-calendar-filter');
+                
+                // Remove all events
+                calendar.getEvents().forEach(event => event.remove());
+                
+                // Fetch and add filtered events
+                if (filterType === 'all') {
+                    // Add all events back
+                    const allEvents = {{ calendar_events|safe }};
+                    allEvents.forEach(eventData => {
+                        calendar.addEvent(eventData);
+                    });
+                } else {
+                    // Add only events of the selected type
+                    const filteredEvents = {{ calendar_events|safe }}.filter(event => 
+                        event.extendedProps.type === filterType
+                    );
+                    filteredEvents.forEach(eventData => {
+                        calendar.addEvent(eventData);
+                    });
+                }
+            });
+        });
+        
+        // Modal event details
+        function showEventDetails(event) {
+            const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+            
+            // Set modal content
+            document.getElementById('eventTitle').textContent = event.title;
+            document.getElementById('eventEquipment').textContent = event.extendedProps.equipment || 'N/A';
+            document.getElementById('eventDate').textContent = event.start.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Set event icon
+            const eventIcon = document.querySelector('.event-icon');
+            let iconClass = 'bi bi-calendar-check';
+            let badgeClass = 'bg-primary';
+            
+            switch(event.extendedProps.type) {
+                case 'calibration':
+                    iconClass = 'bi bi-tools';
+                    badgeClass = 'bg-danger';
+                    break;
+                case 'checkout':
+                    iconClass = 'bi bi-box-arrow-in-left';
+                    badgeClass = 'bg-primary';
+                    break;
+                case 'maintenance':
+                    iconClass = 'bi bi-wrench';
+                    badgeClass = 'bg-warning text-dark';
+                    break;
+                case 'inspection':
+                    iconClass = 'bi bi-clipboard-check';
+                    badgeClass = 'bg-success';
+                    break;
+            }
+            
+            eventIcon.innerHTML = `<i class="${iconClass}"></i>`;
+            
+            // Set status with badge
+            const eventStatus = document.getElementById('eventStatus');
+            eventStatus.innerHTML = `<span class="badge ${badgeClass}">${event.extendedProps.status || 'Upcoming'}</span>`;
+            
+            // Set details
+            document.getElementById('eventDetails').textContent = event.extendedProps.details || 'No additional details available.';
+            
+            // Set action buttons
+            const actionsContainer = document.getElementById('eventActions');
+            actionsContainer.innerHTML = '';
+            
+            if (event.extendedProps.equipmentId) {
+                // Add view details button
+                const viewBtn = document.createElement('a');
+                viewBtn.href = `/dashboard/equipment/${event.extendedProps.equipmentId}`;
+                viewBtn.className = 'btn btn-outline-primary';
+                viewBtn.innerHTML = '<i class="bi bi-eye"></i> View Equipment';
+                actionsContainer.appendChild(viewBtn);
+                
+                // Add action button based on event type
+                if (event.extendedProps.type === 'calibration') {
+                    const actionBtn = document.createElement('a');
+                    actionBtn.href = `/ticket/create?equipment_id=${event.extendedProps.equipmentId}&ticket_type=calibration`;
+                    actionBtn.className = 'btn btn-danger';
+                    actionBtn.innerHTML = '<i class="bi bi-tools"></i> Request Calibration';
+                    actionsContainer.appendChild(actionBtn);
+                } else if (event.extendedProps.type === 'checkout') {
+                    const actionBtn = document.createElement('a');
+                    actionBtn.href = `/checkout/check-in/${event.extendedProps.equipmentId}`;
+                    actionBtn.className = 'btn btn-primary';
+                    actionBtn.innerHTML = '<i class="bi bi-box-arrow-in-left"></i> Check In Equipment';
+                    actionsContainer.appendChild(actionBtn);
+                } else if (event.extendedProps.type === 'maintenance') {
+                    const actionBtn = document.createElement('a');
+                    actionBtn.href = `/ticket/create?equipment_id=${event.extendedProps.equipmentId}&ticket_type=maintenance`;
+                    actionBtn.className = 'btn btn-warning';
+                    actionBtn.innerHTML = '<i class="bi bi-wrench"></i> Schedule Maintenance';
+                    actionsContainer.appendChild(actionBtn);
+                }
+            }
+            
+            modal.show();
+        }
+    });
+</script>
+{% endblock %}

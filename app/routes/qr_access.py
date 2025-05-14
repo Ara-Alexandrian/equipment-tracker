@@ -310,7 +310,8 @@ def quick_ticket(equipment_id):
             )
             
             flash('Ticket created successfully', 'success')
-            return redirect(url_for('equipment.landing_page', equipment_id=equipment_id))
+            # Redirect to the equipment detail page where tickets are visible instead of landing page
+            return redirect(url_for('dashboard.equipment_detail', equipment_id=equipment_id))
     
     # Get only clinical physicists for dropdown - make a clean copy without passwords
     users = {}

@@ -1,0 +1,25 @@
+# Dockerfile for Equipment Tracker cron jobs
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy requirements and install dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create logs directory
+RUN mkdir -p logs
+
+# Set up cron job
+RUN apt-get update && apt-get -y install cron && apt-get clean
+
+# Add crontab file
+COPY cron_jobs/crontab /etc/cron.d/equipment-tracker-cron
+RUN chmod 0644 /etc/cron.d/equipment-tracker-cron
+RUN crontab /etc/cron.d/equipment-tracker-cron
+
+# Run the cron daemon in foreground
+CMD ["cron", "-f"]

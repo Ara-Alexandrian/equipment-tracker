@@ -1,0 +1,5 @@
+# Equipment Tracker Cron Jobs
+# Daily calibration check at 8:00 AM
+0 8 * * * cd /app && python calibration_notifier.py >> /app/logs/calibration_notifier.log 2>&1
+
+# Keep this last line for proper cron operation

@@ -74,9 +74,10 @@ def equipment_list():
 
             item_status = checkout_manager.get_equipment_status(item_id)
 
-            if status_filter == 'available' and (not item_status or item_status.get('status') != "Checked Out"):
+            # Handle status filter - item_status is expected to be a dictionary
+            if status_filter == 'available' and not item_status.get('status') == "Checked Out":
                 filtered_equipment.append(item)
-            elif status_filter == 'checked_out' and item_status and item_status.get('status') == "Checked Out":
+            elif status_filter == 'checked_out' and item_status.get('status') == "Checked Out":
                 filtered_equipment.append(item)
             elif status_filter == 'in_transport':
                 # Check if item is in transport
@@ -103,7 +104,11 @@ def equipment_list():
             if not item_id:
                 continue
 
+            # Get equipment condition
+            # Looking at equipment_conditions.json, conditions are stored as direct string values
             item_condition = ticket_manager.get_equipment_condition(item_id)
+
+            # Add the item to filtered list if condition matches
             if item_condition == condition_filter:
                 filtered_equipment.append(item)
         equipment = filtered_equipment

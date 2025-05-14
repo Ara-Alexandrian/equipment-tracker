@@ -177,6 +177,35 @@ body.dracula-mode a:not(.btn):hover {
   text-decoration: underline;
 }
 
+/* Nav tabs with better contrast for dracula mode */
+body.dracula-mode .nav-tabs {
+  border-bottom-color: #6272a4 !important;
+}
+
+body.dracula-mode .nav-tabs .nav-link {
+  color: #ffffff !important;
+  background-color: #4a4d68 !important;
+  border-color: #6272a4 !important;
+  margin-right: 3px !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  letter-spacing: 0.5px !important;
+}
+
+body.dracula-mode .nav-tabs .nav-link:hover {
+  background-color: #6272a4 !important;
+  border-color: #7284b6 !important;
+  color: #ffffff !important;
+}
+
+body.dracula-mode .nav-tabs .nav-link.active {
+  background-color: #ff79c6 !important;
+  color: #ffffff !important;
+  border-color: #ff79c6 !important;
+  font-weight: bold !important;
+  box-shadow: 0 0 8px rgba(255, 121, 198, 0.5) !important;
+}
+
 /* Buttons */
 body.dracula-mode .btn-outline-light {
   color: #f8f8f2 !important;

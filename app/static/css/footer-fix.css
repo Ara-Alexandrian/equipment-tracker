@@ -1,0 +1,24 @@
+/* Footer Fixes */
+footer.footer {
+    margin-top: 3rem;
+    padding: 1rem 0;
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+}
+
+/* Fix for Dark Mode */
+html.dark-mode footer.footer {
+    background-color: #1a1a1a;
+}
+
+/* Fix for Dracula Mode */
+html.dracula-mode footer.footer {
+    background-color: #282a36;
+}
+
+/* Hide any unwanted content after the closing HTML tag */
+html::after {
+    display: none !important;
+    visibility: hidden !important;
+    content: "" !important;
+}

@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-enhancements.css') }}?v={{ now.timestamp()|int }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout-fixed.css') }}?v={{ now.timestamp()|int }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nav-buttons.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer-fix.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compact-ui.css') }}?v={{ now.timestamp()|int }}">
 
     <!-- Immediate theme application script - runs before anything else -->
     <script>
@@ -70,14 +72,12 @@
     <!-- The theme classes are now applied by the unified theme switcher script -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid px-4">
-            <div class="mx-auto">
-            <!-- Centered brand/logo -->
-            <div class="d-flex justify-content-center">
-                <a class="navbar-brand text-center" href="{{ url_for('index') }}">
-                    <!-- Text-only until artist creates new logo -->
-                    <span class="brand-text">GearVue</span>
-                </a>
-            </div>
+            <!-- Brand/logo moved to the left -->
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <!-- Text-only until artist creates new logo -->
+                <span class="brand-text">GearVue</span>
+            </a>
+
             <!-- Navbar toggler (hamburger menu) -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>

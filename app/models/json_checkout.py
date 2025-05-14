@@ -120,13 +120,8 @@ class JsonCheckoutManager:
                 "email": "physicist@example.com",
                 "role": "physicist",
                 "password": "physicist123"
-            },
-            "user": {
-                "name": "Regular User",
-                "email": "user@example.com",
-                "role": "user",
-                "password": "user123"
             }
+            # Regular user role has been removed as per requirements
         }
         
         # Save default users
@@ -472,8 +467,8 @@ class JsonCheckoutManager:
         if username in self.users:
             return False
 
-        # Check if role is valid
-        if role not in ["admin", "physicist", "user"]:
+        # Check if role is valid - only admin and physicist roles are allowed
+        if role not in ["admin", "physicist"]:
             return False
 
         # Hash the password if it's not already hashed
@@ -553,7 +548,7 @@ class JsonCheckoutManager:
         if email is not None:
             user["email"] = email
 
-        if role is not None and role in ["admin", "physicist", "user"]:
+        if role is not None and role in ["admin", "physicist"]:
             user["role"] = role
 
         if password is not None and password.strip():

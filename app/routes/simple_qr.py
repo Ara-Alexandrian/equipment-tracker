@@ -10,6 +10,9 @@ def generate_qr_code(url, output_path, equipment_id="", manufacturer="", model="
     """
     Generate a QR code using the shell script without fallbacks
 
+    This is the canonical QR code generation function used throughout the application.
+    All other QR generation functions should use this one for consistency.
+
     Args:
         url: URL to encode in the QR code
         output_path: Path where to save the QR code
@@ -97,8 +100,8 @@ if __name__ == "__main__":
     test_url = "https://example.com/test"
     test_output = os.path.join(output_dir, f"test_qr_{int(time.time())}.png")
     
-    success, result = generate_simple_qr(
-        test_url, 
+    success, result = generate_qr_code(
+        test_url,
         test_output,
         equipment_id="TEST-1234",
         manufacturer="Test Mfr",

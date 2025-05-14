@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendar - Admin - GearVue{% endblock %}
+
+{% block head %}
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<style>
+    /* Calendar customizations */
+    .fc-day-today {
+        background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
+    }
+    
+    .calendar-container {
+        background-color: var(--bs-body-bg);
+        border-radius: 0.375rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        padding: 1rem;
+    }
+    
+    /* Event styling */
+    .fc-event {
+        border-radius: 3px;
+        padding: 2px 4px;
+        font-size: 0.8rem;
+        border: none;
+    }
+    
+    /* Event types */
+    .event-calibration-upcoming {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+    
+    .event-calibration-soon {
+        background-color: #ffc107 !important;
+        color: black !important;
+    }
+    
+    .event-calibration-overdue {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+    
+    .event-checkout {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+    
+    .event-expected-return {
+        background-color: #6f42c1 !important;
+        color: white !important;
+    }
+    
+    /* Filter options */
+    .calendar-filters {
+        margin-bottom: 1rem;
+    }
+    
+    .calendar-filters .form-check {
+        margin-right: 1rem;
+    }
+    
+    /* Legend */
+    .calendar-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 1rem;
+    }
+    
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        margin-right: 0.25rem;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Equipment Calendar</h1>
+        <p class="lead">View calibration deadlines and equipment checkouts</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="btn-group">
+            <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-tools"></i> Equipment Manager
+            </a>
+            <a href="{{ url_for('checkout.admin') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Admin
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar Control Panel -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Calendar Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Event Types</h6>
+                        <div class="calendar-filters d-flex flex-wrap">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="filter-calibration" checked>
+                                <label class="form-check-label" for="filter-calibration">Calibration Deadlines</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="filter-checkout" checked>
+                                <label class="form-check-label" for="filter-checkout">Equipment Checkouts</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="filter-return" checked>
+                                <label class="form-check-label" for="filter-return">Expected Returns</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Equipment Categories</h6>
+                        <div class="calendar-filters d-flex flex-wrap">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="filter-chambers" checked>
+                                <label class="form-check-label" for="filter-chambers">Chambers</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="filter-electrometers" checked>
+                                <label class="form-check-label" for="filter-electrometers">Electrometers</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="filter-survey-meters" checked>
+                                <label class="form-check-label" for="filter-survey-meters">Survey Meters</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Legend -->
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #28a745;"></div>
+                        <span>Calibration OK (>60 days)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #ffc107;"></div>
+                        <span>Calibration Soon (<60 days)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #dc3545;"></div>
+                        <span>Calibration Overdue</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #007bff;"></div>
+                        <span>Equipment Checkout</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #6f42c1;"></div>
+                        <span>Expected Return</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar View -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body calendar-container">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Detail Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalLabel">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="event-details">
+                    <div class="mb-3">
+                        <strong>Equipment:</strong> <span id="event-equipment"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Event Type:</strong> <span id="event-type"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Date:</strong> <span id="event-date"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Status:</strong> <span id="event-status"></span>
+                    </div>
+                    <div class="mb-3" id="event-user-container">
+                        <strong>User:</strong> <span id="event-user"></span>
+                    </div>
+                    <div class="mb-3" id="event-notes-container">
+                        <strong>Notes:</strong> <span id="event-notes"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="event-detail-link" href="#" class="btn btn-primary">
+                    View Equipment Details
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize calendar
+        const calendarEl = document.getElementById('calendar');
+        
+        if (!calendarEl) {
+            console.error('Calendar element not found');
+            return;
+        }
+        
+        // Initialize FullCalendar
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+            },
+            themeSystem: 'bootstrap5',
+            height: 'auto',
+            events: '/admin/calendar/events',
+            eventClick: function(info) {
+                showEventDetails(info.event);
+            },
+            loading: function(isLoading) {
+                // Show loading indicator
+                if (isLoading) {
+                    // You could add a loading spinner here
+                    console.log('Loading events...');
+                } else {
+                    console.log('Events loaded');
+                }
+            }
+        });
+        
+        calendar.render();
+        
+        // Event filters
+        const filterCalibration = document.getElementById('filter-calibration');
+        const filterCheckout = document.getElementById('filter-checkout');
+        const filterReturn = document.getElementById('filter-return');
+        const filterChambers = document.getElementById('filter-chambers');
+        const filterElectrometers = document.getElementById('filter-electrometers');
+        const filterSurveyMeters = document.getElementById('filter-survey-meters');
+        
+        function applyFilters() {
+            const events = calendar.getEvents();
+            
+            events.forEach(event => {
+                // Event type filtering
+                if (event.extendedProps.eventType === 'calibration' && !filterCalibration.checked) {
+                    event.setProp('display', 'none');
+                } else if (event.extendedProps.eventType === 'checkout' && !filterCheckout.checked) {
+                    event.setProp('display', 'none');
+                } else if (event.extendedProps.eventType === 'return' && !filterReturn.checked) {
+                    event.setProp('display', 'none');
+                }
+                // Category filtering
+                else if (event.extendedProps.category === 'Chamber' && !filterChambers.checked) {
+                    event.setProp('display', 'none');
+                } else if (event.extendedProps.category === 'Electrometer' && !filterElectrometers.checked) {
+                    event.setProp('display', 'none');
+                } else if (event.extendedProps.category === 'Survey Meter' && !filterSurveyMeters.checked) {
+                    event.setProp('display', 'none');
+                } else {
+                    event.setProp('display', 'auto');
+                }
+            });
+        }
+        
+        // Attach event listeners to filters
+        [filterCalibration, filterCheckout, filterReturn, 
+         filterChambers, filterElectrometers, filterSurveyMeters].forEach(filter => {
+            filter.addEventListener('change', applyFilters);
+        });
+        
+        // Function to show event details in modal
+        function showEventDetails(event) {
+            const props = event.extendedProps;
+            
+            // Set modal content
+            document.getElementById('event-equipment').textContent = `${props.manufacturer} ${props.model} (${props.serialNumber})`;
+            document.getElementById('event-type').textContent = getEventTypeDisplay(props.eventType);
+            document.getElementById('event-date').textContent = event.start.toLocaleDateString();
+            document.getElementById('event-status').textContent = props.status || 'N/A';
+            
+            // User information (only for checkouts)
+            const userContainer = document.getElementById('event-user-container');
+            if (props.user) {
+                document.getElementById('event-user').textContent = props.user;
+                userContainer.style.display = 'block';
+            } else {
+                userContainer.style.display = 'none';
+            }
+            
+            // Notes
+            const notesContainer = document.getElementById('event-notes-container');
+            if (props.notes) {
+                document.getElementById('event-notes').textContent = props.notes;
+                notesContainer.style.display = 'block';
+            } else {
+                notesContainer.style.display = 'none';
+            }
+            
+            // Set detail link
+            const detailLink = document.getElementById('event-detail-link');
+            detailLink.href = `/dashboard/equipment/${props.equipmentId}`;
+            
+            // Show modal
+            const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+            eventModal.show();
+        }
+        
+        // Helper function to get readable event type
+        function getEventTypeDisplay(eventType) {
+            switch(eventType) {
+                case 'calibration': return 'Calibration Due';
+                case 'checkout': return 'Equipment Checkout';
+                case 'return': return 'Expected Return';
+                default: return eventType;
+            }
+        }
+    });
+</script>
+{% endblock %}

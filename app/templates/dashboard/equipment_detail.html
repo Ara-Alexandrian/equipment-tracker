@@ -389,6 +389,8 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Load the QR print script -->
+<script src="{{ url_for('static', filename='js/qr-print.js') }}?v={{ now.timestamp()|int }}"></script>
 <script>
     // Function to generate QR codes for equipment in the list
     function generateQRCodeForEquipment(equipmentId, manufacturer, model, serialNumber) {
@@ -511,58 +513,7 @@
             console.error('Error generating QR code:', error);
         });
     }
-    
-    // Function to print the QR code
-    function printQRCode() {
-        const printWindow = window.open('', '_blank');
-        const qrImage = document.getElementById('qrCodeImage').src;
-        const equipmentId = document.getElementById('qrCodeEquipmentId').textContent;
-        
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>QR Code - ${equipmentId}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        text-align: center;
-                        padding: 20px;
-                    }
-                    img {
-                        max-width: 300px;
-                        height: auto;
-                    }
-                    .container {
-                        display: inline-block;
-                        border: 1px solid #ccc;
-                        padding: 20px;
-                        margin: 10px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <img src="${qrImage}" alt="QR Code">
-                    <div>
-                        <p><strong>${equipmentId}</strong></p>
-                        <p>Mary Bird Perkins Cancer Center</p>
-                    </div>
-                </div>
-                <script>
-                    window.onload = function() {
-                        setTimeout(() => {
-                            window.print();
-                            setTimeout(() => {
-                                window.close();
-                            }, 100);
-                        }, 500);
-                    };
-                </script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
-    }
+
+    // printQRCode function is now in qr-print.js
 </script>
 {% endblock %}

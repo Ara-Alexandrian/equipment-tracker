@@ -17,7 +17,7 @@
             <div class="row mb-4">
                 <div class="col-md-6">
                     <h5>Equipment Details</h5>
-                    <table class="table">
+                    <table class="table equipment-table">
                         <tbody>
                             <tr>
                                 <th style="width: 40%">Category</th>
@@ -35,7 +35,7 @@
                                 <th>Primary Location</th>
                                 <td>{{ equipment.location }}</td>
                             </tr>
-                            {% if status and status.checked_out %}
+                            {% if status and status.status == "Checked Out" %}
                             <tr>
                                 <th>Current Location</th>
                                 <td>{{ status.location }}</td>
@@ -54,68 +54,68 @@
                     <!-- Equipment operational condition (traffic light system) -->
                     <div class="mb-3">
                         <label class="form-label">Operational Status:</label>
-                        <div class="alert alert-{{ condition_class }}">
+                        <div class="status-card p-2 rounded {% if condition == 'normal' %}bg-success text-white{% elif condition == 'warning' %}bg-warning text-dark{% elif condition == 'critical' %}bg-danger text-white{% endif %}">
                             {% if condition == 'normal' %}
-                                <i class="bi bi-circle-fill text-success fs-4 me-2"></i> <strong>Normal</strong> - Fully Operational
+                                <i class="bi bi-circle-fill text-white fs-4 me-2"></i> <strong>Normal</strong> - Fully Operational
                             {% elif condition == 'warning' %}
-                                <i class="bi bi-exclamation-triangle-fill text-warning fs-4 me-2"></i> <strong>Warning</strong> - Needs Attention
+                                <i class="bi bi-exclamation-triangle-fill text-dark fs-4 me-2"></i> <strong>Warning</strong> - Needs Attention
                             {% elif condition == 'critical' %}
-                                <i class="bi bi-x-circle-fill text-danger fs-4 me-2"></i> <strong>Critical</strong> - Out of Service
+                                <i class="bi bi-x-circle-fill text-white fs-4 me-2"></i> <strong>Critical</strong> - Out of Service
                             {% endif %}
                         </div>
                     </div>
-                    
+
                     <!-- Checkout status -->
                     <div class="mb-3">
                         <label class="form-label">Checkout Status:</label>
-                        {% if status and status.checked_out %}
-                            <div class="alert alert-info">
-                                <i class="bi bi-box-arrow-right me-2"></i> <strong>Checked Out</strong> by 
+                        {% if status and status.status == "Checked Out" %}
+                            <div class="status-card bg-info text-white p-2 rounded">
+                                <i class="bi bi-box-arrow-right me-2"></i> <strong>Checked Out</strong> by
                                 {% set user_info = checkout_manager.get_user(status.checked_out_by) %}
                                 {% if user_info %}
                                     <strong>{{ user_info.name }}</strong>
-                                    <span class="text-muted">({{ status.checked_out_by }})</span>
+                                    <span class="text-white">({{ status.checked_out_by }})</span>
                                 {% else %}
                                     {{ status.checked_out_by }}
                                 {% endif %}
-                                {% if status.due_date %}
-                                    <br>Due back: {{ status.due_date }}
+                                {% if status.expected_return %}
+                                    <br>Due back: {{ status.expected_return[:10] }}
                                 {% endif %}
                             </div>
                         {% else %}
-                            <div class="alert alert-success">
+                            <div class="status-card bg-success text-white p-2 rounded">
                                 <i class="bi bi-box-arrow-in-left me-2"></i> <strong>Available</strong> - Ready for checkout
                             </div>
                         {% endif %}
                     </div>
-                    
+
                     <!-- Calibration status -->
                     <div class="mb-3">
                         <label class="form-label">Calibration:</label>
                         {% if equipment.calibration_status == 'overdue' %}
-                        <div class="alert alert-danger">
+                        <div class="status-card bg-danger text-white p-2 rounded">
                             <i class="bi bi-x-circle-fill me-2"></i> <strong>Overdue</strong>
                             {% if equipment.days_overdue %}
                                 by {{ equipment.days_overdue }} days
                             {% endif %}
                         </div>
                         {% elif equipment.calibration_status == 'due_soon' %}
-                        <div class="alert alert-warning">
+                        <div class="status-card bg-warning text-dark p-2 rounded">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Due Soon</strong>
                             {% if equipment.days_until_due %}
                                 ({{ equipment.days_until_due }} days remaining)
                             {% endif %}
                         </div>
                         {% elif 'due soon' in equipment.calibration_due_date|string|lower %}
-                        <div class="alert alert-warning">
+                        <div class="status-card bg-warning text-dark p-2 rounded">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Due Soon</strong>
                         </div>
                         {% elif 'overdue' in equipment.calibration_due_date|string|lower %}
-                        <div class="alert alert-danger">
+                        <div class="status-card bg-danger text-white p-2 rounded">
                             <i class="bi bi-x-circle-fill me-2"></i> <strong>Overdue</strong>
                         </div>
                         {% else %}
-                        <div class="alert alert-success">
+                        <div class="status-card bg-success text-white p-2 rounded">
                             <i class="bi bi-check-circle-fill me-2"></i> <strong>Up to Date</strong>
                         </div>
                         {% endif %}
@@ -132,7 +132,7 @@
                 <div class="col-md-6 mb-3">
                     {% if status and status.checked_out %}
                         <!-- Check in button -->
-                        <a href="{{ url_for('qr.quick_checkin', equipment_id=equipment.id) }}" class="btn btn-primary btn-lg w-100 p-4 shadow">
+                        <a href="{{ url_for('qr.quick_checkin', equipment_id=equipment.id) }}" class="btn btn-success btn-lg w-100 p-4 shadow">
                             <i class="bi bi-box-arrow-in-left fs-1 d-block mb-2"></i>
                             Check In Equipment
                         </a>

@@ -20,8 +20,8 @@
 </div>
 
 <div class="row">
-    <div class="col-md-12">
-        <div class="card">
+    <div class="col-md-8 mb-4">
+        <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Equipment Details</h5>
                 <!-- Delete Button - Opens Delete Modal -->
@@ -92,20 +92,58 @@
                         <label for="notes" class="form-label">Notes</label>
                         <textarea class="form-control" id="notes" name="notes" rows="3">{{ equipment.notes }}</textarea>
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <button type="button" class="btn btn-info" onclick="generateQRCode('{{ equipment.id }}', '{{ equipment.manufacturer }}', '{{ equipment.model }}', '{{ equipment.serial_number }}')">
-                                <i class="bi bi-qr-code"></i> Generate QR Code
-                            </button>
-                        </div>
-                        <div>
-                            <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Save Changes
-                            </button>
-                        </div>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QR Code Panel -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Equipment QR Code</h5>
+            </div>
+            <div class="card-body text-center pt-4">
+                <!-- QR Code loading -->
+                <div id="directQRLoading" class="mb-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading QR code...</p>
+                </div>
+                
+                <!-- QR Code error -->
+                <div id="directQRError" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span id="directQRErrorText">Error loading QR code</span>
+                </div>
+                
+                <!-- QR Code display -->
+                <div id="directQRDisplay" style="display: none;">
+                    <img id="directQRImage" src="" alt="QR Code" class="img-fluid mb-3" style="max-width: 250px; background-color: white; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px;">
+                    <p class="mb-2" id="directQREquipmentId">Equipment ID: {{ equipment.id }}</p>
+                    <p class="small text-muted mb-2" id="directQRDescription">Scan this QR code for quick access to equipment details.</p>
+                    <p class="small text-muted" id="directQRUrlDisplay" style="font-size: 0.8rem; word-break: break-all;"></p>
+                </div>
+                
+                <!-- QR Code buttons -->
+                <div class="d-grid gap-2 mt-3">
+                    <button type="button" class="btn btn-primary" id="directRegenerateQRBtn">
+                        <i class="bi bi-arrow-repeat"></i> Regenerate QR Code
+                    </button>
+                    <a id="directQRDownloadBtn" href="#" class="btn btn-outline-secondary" download="qr_code.png" style="display: none;">
+                        <i class="bi bi-download"></i> Download QR Code
+                    </a>
+                    <a id="directQRPrintBtn" href="#" class="btn btn-outline-secondary" onclick="printDirectQRCode()" style="display: none;">
+                        <i class="bi bi-printer"></i> Print QR Code
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -151,52 +189,17 @@
         </div>
     </div>
 </div>
-
-<!-- QR Code Modal -->
-<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="qrCodeModalLabel">Generated QR Code</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <div id="qrCodeLoading" class="mb-3">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p>Generating QR code...</p>
-                </div>
-                <div id="qrCodeError" class="alert alert-danger" style="display: none;">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    Error generating QR code. Please try again.
-                </div>
-                <div id="qrCodeDisplay" style="display: none;">
-                    <img id="qrCodeImage" src="" alt="Generated QR Code" class="img-fluid mb-3" style="max-width: 300px;">
-                    <div class="mt-2">
-                        <p class="mb-2"><strong id="qrCodeEquipmentId">Equipment ID: </strong></p>
-                        <p class="mb-2">Scan this QR code for quick access to equipment details, checkout, and maintenance.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a id="qrCodeDownloadBtn" href="#" class="btn btn-primary" download="qr_code.png" style="display: none;">
-                    <i class="bi bi-download"></i> Download QR Code
-                </a>
-                <a id="qrCodePrintBtn" href="#" class="btn btn-outline-primary" onclick="printQRCode()" style="display: none;">
-                    <i class="bi bi-printer"></i> Print
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    // Add debugging
+    console.log('Direct edit page loading for equipment ID: {{ equipment.id }}');
+    
     // Add CSS rule to ensure warning stays visible
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded - initializing direct edit page');
+        
         // Create style element
         const style = document.createElement('style');
         style.textContent = `
@@ -218,88 +221,131 @@
                 }
             });
         }
+        
+        // Initialize QR code display when page loads
+        setTimeout(function() {
+            console.log('Initializing QR code load');
+            loadQRCodeForDirectEdit('{{ equipment.id }}', '{{ equipment.manufacturer }}', '{{ equipment.model }}', '{{ equipment.serial_number }}');
+        }, 500); // Short delay to ensure DOM is ready
+        
+        // Initialize the regenerate button
+        const regenerateBtn = document.getElementById('directRegenerateQRBtn');
+        if (regenerateBtn) {
+            regenerateBtn.addEventListener('click', function() {
+                console.log('Regenerate button clicked');
+                regenerateQRCodeForDirectEdit('{{ equipment.id }}', '{{ equipment.manufacturer }}', '{{ equipment.model }}', '{{ equipment.serial_number }}');
+            });
+        }
     });
 
-    // Function to generate QR code for equipment
-    function generateQRCode(equipmentId, manufacturer, model, serialNumber) {
-        console.log("Generating QR code for:", { equipmentId, manufacturer, model, serialNumber });
-        
-        // Show the QR code modal
-        const qrModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
-        qrModal.show();
+    // Function to load QR code on initial page load
+    function loadQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber) {
+        console.log("Loading QR code for direct edit page:", equipmentId);
 
         // Show loading state
-        document.getElementById('qrCodeLoading').style.display = 'block';
-        document.getElementById('qrCodeError').style.display = 'none';
-        document.getElementById('qrCodeDisplay').style.display = 'none';
-        document.getElementById('qrCodeDownloadBtn').style.display = 'none';
-        document.getElementById('qrCodePrintBtn').style.display = 'none';
+        document.getElementById('directQRLoading').style.display = 'block';
+        document.getElementById('directQRError').style.display = 'none';
+        document.getElementById('directQRDisplay').style.display = 'none';
 
         // Validate required fields
-        if (!equipmentId || !manufacturer || !serialNumber) {
-            document.getElementById('qrCodeLoading').style.display = 'none';
-            document.getElementById('qrCodeError').style.display = 'block';
+        if (!equipmentId) {
+            document.getElementById('directQRLoading').style.display = 'none';
+            document.getElementById('directQRError').style.display = 'block';
+            document.getElementById('directQRErrorText').textContent = "Missing equipment ID";
             return;
         }
 
-        // First check if QR code already exists
+        // Construct the URL for the QR code
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Check if QR code exists
         fetch(`/admin/equipment/check-qr/${equipmentId}`)
         .then(response => {
+            console.log("QR check response status:", response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            if (data.status === 'success' && data.exists) {
-                // QR code already exists, just display it
-                displayExistingQRCode(data, equipmentId);
+            console.log("QR check response data:", data);
+            // Hide loading
+            document.getElementById('directQRLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                if (data.exists) {
+                    // QR code exists, display it
+                    document.getElementById('directQRDisplay').style.display = 'block';
+                    document.getElementById('directQRImage').src = data.qr_code_url;
+                    document.getElementById('directQRUrlDisplay').textContent = `When scanned, takes you to: ${qrUrl}`;
+
+                    // Set download link
+                    const downloadBtn = document.getElementById('directQRDownloadBtn');
+                    downloadBtn.href = data.qr_code_url;
+                    downloadBtn.download = `qr_code_${equipmentId}.png`;
+                    downloadBtn.style.display = 'block';
+
+                    // Show print button
+                    document.getElementById('directQRPrintBtn').style.display = 'block';
+                } else {
+                    // QR code doesn't exist, generate one
+                    console.log("QR code doesn't exist, generating new one");
+                    generateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber, false);
+                }
             } else {
-                // QR code doesn't exist, generate a new one
-                generateNewQRCode(equipmentId, manufacturer, model, serialNumber);
+                // Show error
+                document.getElementById('directQRError').style.display = 'block';
+                document.getElementById('directQRErrorText').textContent = data.message || 'Failed to check QR code';
             }
         })
         .catch(error => {
-            // If check fails for any reason, try to generate a new one
             console.error('Error checking QR code:', error);
-            generateNewQRCode(equipmentId, manufacturer, model, serialNumber);
+            // Try to generate a new QR code
+            generateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber, false);
         });
     }
 
-    // Function to display an existing QR code
-    function displayExistingQRCode(data, equipmentId) {
-        // Hide loading, show QR code
-        document.getElementById('qrCodeLoading').style.display = 'none';
-
-        document.getElementById('qrCodeDisplay').style.display = 'block';
-        document.getElementById('qrCodeImage').src = data.qr_code_url;
-        document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${equipmentId}`;
-
-        // Set download link
-        const downloadBtn = document.getElementById('qrCodeDownloadBtn');
-        downloadBtn.href = data.qr_code_url;
-        downloadBtn.download = `qr_code_${equipmentId}.png`;
-        downloadBtn.style.display = 'inline-block';
-
-        // Show print button
-        document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+    // Function to regenerate QR code
+    function regenerateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber) {
+        // Generate with force regenerate flag
+        generateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber, true);
     }
 
-    // Function to generate a new QR code
-    function generateNewQRCode(equipmentId, manufacturer, model, serialNumber) {
-        // Construct the URL for the QR code - direct to the equipment detail page
+    // Function to generate or regenerate QR code
+    function generateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber, forceRegenerate = false) {
+        console.log("Generating QR code for direct edit page:", equipmentId, "Force regenerate:", forceRegenerate);
+
+        // Show loading state
+        document.getElementById('directQRLoading').style.display = 'block';
+        document.getElementById('directQRError').style.display = 'none';
+        document.getElementById('directQRDisplay').style.display = 'none';
+
+        // Validate required fields
+        if (!equipmentId) {
+            document.getElementById('directQRLoading').style.display = 'none';
+            document.getElementById('directQRError').style.display = 'block';
+            document.getElementById('directQRErrorText').textContent = "Missing equipment ID";
+            return;
+        }
+
+        // Construct the URL for the QR code
         const baseUrl = window.location.origin;
         const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
 
-        // Make AJAX request to generate the QR code
+        // Prepare request data
         const requestData = {
             url: qrUrl,
             equipment_id: equipmentId,
             manufacturer: manufacturer,
             model: model,
-            serial: serialNumber
+            serial: serialNumber,
+            force_regenerate: forceRegenerate
         };
 
+        console.log("Sending QR generation request:", requestData);
+        
+        // Make request to generate QR code
         fetch('/admin/equipment/generate-qr', {
             method: 'POST',
             headers: {
@@ -308,93 +354,123 @@
             body: JSON.stringify(requestData),
         })
         .then(response => {
+            console.log("QR generation response status:", response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            // Hide loading, show QR code
-            document.getElementById('qrCodeLoading').style.display = 'none';
+            console.log("QR generation response data:", data);
+            // Hide loading
+            document.getElementById('directQRLoading').style.display = 'none';
 
             if (data.status === 'success') {
-                document.getElementById('qrCodeDisplay').style.display = 'block';
-                document.getElementById('qrCodeImage').src = data.qr_code_url;
-                document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${equipmentId}`;
+                // Show QR code
+                document.getElementById('directQRDisplay').style.display = 'block';
+                document.getElementById('directQRImage').src = data.qr_code_url;
+                document.getElementById('directQRUrlDisplay').textContent = `When scanned, takes you to: ${qrUrl}`;
 
                 // Set download link
-                const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+                const downloadBtn = document.getElementById('directQRDownloadBtn');
                 downloadBtn.href = data.qr_code_url;
                 downloadBtn.download = `qr_code_${equipmentId}.png`;
-                downloadBtn.style.display = 'inline-block';
+                downloadBtn.style.display = 'block';
 
                 // Show print button
-                document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+                document.getElementById('directQRPrintBtn').style.display = 'block';
+
+                // Show regeneration message if applicable
+                if (forceRegenerate) {
+                    // Check for existing message
+                    const existingMessage = document.querySelector('#directQRDisplay .alert');
+                    if (existingMessage) {
+                        existingMessage.remove();
+                    }
+
+                    // Add regenerate message
+                    const regenerateMsg = document.createElement('div');
+                    regenerateMsg.className = 'alert alert-info mt-2 mb-3';
+                    regenerateMsg.innerHTML = '<i class="bi bi-arrow-repeat"></i> QR code has been regenerated.';
+
+                    // Add after QR image
+                    const qrImage = document.getElementById('directQRImage');
+                    qrImage.parentNode.insertBefore(regenerateMsg, qrImage.nextSibling);
+                }
             } else {
-                document.getElementById('qrCodeError').textContent = data.message || 'Failed to generate QR code';
-                document.getElementById('qrCodeError').style.display = 'block';
+                // Show error
+                document.getElementById('directQRError').style.display = 'block';
+                document.getElementById('directQRErrorText').textContent = data.message || 'Failed to generate QR code';
             }
         })
         .catch(error => {
             // Show error
-            document.getElementById('qrCodeLoading').style.display = 'none';
-            document.getElementById('qrCodeError').textContent = `Error: ${error.message}`;
-            document.getElementById('qrCodeError').style.display = 'block';
             console.error('Error generating QR code:', error);
+            document.getElementById('directQRLoading').style.display = 'none';
+            document.getElementById('directQRError').style.display = 'block';
+            document.getElementById('directQRErrorText').textContent = `Error: ${error.message}`;
         });
     }
-    
-    // Function to print the QR code
-    function printQRCode() {
-        const printWindow = window.open('', '_blank');
-        const qrImage = document.getElementById('qrCodeImage').src;
-        const equipmentId = document.getElementById('qrCodeEquipmentId').textContent;
+
+    // Function to print QR code
+    function printDirectQRCode() {
+        const qrImage = document.getElementById('directQRImage').src;
+        const equipmentId = document.getElementById('directQREquipmentId').textContent;
         
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>QR Code - ${equipmentId}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        text-align: center;
-                        padding: 20px;
-                    }
-                    img {
-                        max-width: 300px;
-                        height: auto;
-                    }
-                    .container {
-                        display: inline-block;
-                        border: 1px solid #ccc;
-                        padding: 20px;
-                        margin: 10px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <img src="${qrImage}" alt="QR Code">
-                    <div>
-                        <p><strong>${equipmentId}</strong></p>
-                        <p>Mary Bird Perkins Cancer Center</p>
-                    </div>
-                </div>
-                <script>
-                    window.onload = function() {
-                        setTimeout(() => {
-                            window.print();
-                            setTimeout(() => {
-                                window.close();
-                            }, 100);
-                        }, 500);
-                    };
-                </script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
+        // Create print window
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            console.error("Failed to open print window. Popup might be blocked.");
+            alert("Failed to open print window. Please allow popups for this site.");
+            return;
+        }
+        
+        // Create print content with simpler template and error handling
+        try {
+            printWindow.document.write('<!DOCTYPE html>');
+            printWindow.document.write('<html>');
+            printWindow.document.write('<head>');
+            printWindow.document.write('<title>QR Code - ' + equipmentId + '</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write('body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }');
+            printWindow.document.write('img { max-width: 300px; height: auto; }');
+            printWindow.document.write('.container { display: inline-block; border: 1px solid #ccc; padding: 20px; margin: 10px; }');
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head>');
+            printWindow.document.write('<body>');
+            printWindow.document.write('<div class="container">');
+            printWindow.document.write('<img src="' + qrImage + '" alt="QR Code">');
+            printWindow.document.write('<div>');
+            printWindow.document.write('<p><strong>' + equipmentId + '</strong></p>');
+            printWindow.document.write('<p>Mary Bird Perkins Cancer Center</p>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('<script>');
+            printWindow.document.write('window.onload = function() {');
+            printWindow.document.write('  setTimeout(function() {');
+            printWindow.document.write('    window.print();');
+            printWindow.document.write('    setTimeout(function() { window.close(); }, 100);');
+            printWindow.document.write('  }, 500);');
+            printWindow.document.write('};');
+            printWindow.document.write('<\/script>');
+            printWindow.document.write('</body>');
+            printWindow.document.write('</html>');
+            
+            // Close document
+            printWindow.document.close();
+        } catch (error) {
+            console.error("Error creating print window:", error);
+            if (printWindow) {
+                printWindow.close();
+            }
+            alert("Error creating print window: " + error.message);
+        }
+    }
+
+    // Legacy function for backward compatibility (for the Generate QR Code button)
+    function generateQRCode(equipmentId, manufacturer, model, serialNumber) {
+        // Just call our new function
+        regenerateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber);
     }
 </script>
 {% endblock %}

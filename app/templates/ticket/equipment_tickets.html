@@ -28,16 +28,17 @@
             <div class="card-body p-0">
                 {% if tickets|length > 0 %}
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover equipment-table mb-0">
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th class="col-id">ID</th>
                                 <th>Title</th>
                                 <th>Status</th>
                                 <th>Priority</th>
                                 <th>Type</th>
                                 <th>Created By</th>
                                 <th>Date</th>
+                                <th class="col-actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -88,6 +89,21 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ ticket.created_at.strftime('%Y-%m-%d') if ticket.created_at else 'Unknown' }}</td>
+                                <td>
+                                    <a href="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" class="btn btn-sm btn-outline-primary action-button">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    {% if ticket.status != ticket_status.RESOLVED and ticket.status != ticket_status.CLOSED %}
+                                        {% if (ticket.assigned_to and ticket.assigned_to == user.username) or user.role in ['admin', 'physicist'] or not ticket.assigned_to %}
+                                        <form action="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" method="POST" class="d-inline ms-1">
+                                            <input type="hidden" name="action" value="resolve_ticket">
+                                            <button type="submit" class="btn btn-sm btn-outline-success action-button">
+                                                <i class="bi bi-check-circle"></i> Resolve
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -138,7 +154,7 @@
                 <!-- Checkout Status -->
                 <div class="mb-3">
                     <h6>Checkout Status</h6>
-                    {% if status and status.checked_out %}
+                    {% if status and status.status == "Checked Out" %}
                     <div class="alert alert-info">
                         <i class="bi bi-box-arrow-right me-2"></i>
                         <strong>Checked Out</strong> by 
@@ -149,8 +165,8 @@
                         {% else %}
                             {{ status.checked_out_by }}
                         {% endif %}
-                        {% if status.due_date %}
-                            <br>Due back: {{ status.due_date }}
+                        {% if status.expected_return %}
+                            <br>Due back: {{ status.expected_return[:10] }}
                         {% endif %}
                     </div>
                     {% else %}

@@ -20,43 +20,43 @@
       "email_enabled": true,
       "calibration_due_days": 30
     },
-    "updated_by": "aalexandrian",
-    "updated_at": "2025-05-11T10:29:24.812118"
+    "updated_by": "admin",
+    "updated_at": "2025-05-12T00:27:36.340866"
   },
   "echorniak": {
     "name": "Ericka Chorniak",
     "email": "echorniak@marybird.com",
-    "role": "physicist",
-    "password": "scrypt:32768:8:1$4Eg0yOKiopnKi4Sd$03820bcecb7dfc5873006a29bc482f32e61791c10849ae38c9a243e349e533fbfb403b84a823e681a78668449f9cf0b6059bcef28f8055198d58d62f25a59dd5",
+    "role": "admin",
+    "password": "scrypt:32768:8:1$ri061IbB4nVGo6gL$4371c67f7ae030d446d5ff7551c3f39b23c4a5415e1bec2c3959b760d3bc6d3371355c455cbc48c407c269e16171f17314e9e2e2267238edeed9618b828d8f2e",
     "notification_preferences": {
       "email_enabled": true,
       "calibration_due_days": 30
     },
     "updated_by": "admin",
-    "updated_at": "2025-05-11T10:29:57.654475"
+    "updated_at": "2025-05-12T00:27:10.872090"
   },
   "astam": {
     "name": "Angela Stam",
     "email": "astam@marybird.com",
-    "role": "physicist",
-    "password": "scrypt:32768:8:1$OdbEwXAb85JqDqPj$71901f6612a7fbb37fea62d410517dc939b4b48e3017a8f6083af71a34946beda8e8a673ab649a79f5fc738aff503f82c794a8a71a043bdce789264b87a23777",
+    "role": "admin",
+    "password": "scrypt:32768:8:1$SsUzF4o7QSLHcfHq$6742d6d3f8ce6abcf32622e7152f35ef4bd64609c599f0be0bf298c70ec4240ff135afcbacc737c8518c8ac9c117148e2d6464d6f74b72959cbb15cfcefb78f1",
     "notification_preferences": {
       "email_enabled": true,
       "calibration_due_days": 30
     },
     "updated_by": "admin",
-    "updated_at": "2025-05-11T10:29:53.193723"
+    "updated_at": "2025-05-12T00:27:00.023416"
   },
   "amcguffey": {
     "name": "Andrew McGuffey",
     "email": "amcguffey@marybird.com",
     "role": "physicist",
-    "password": "scrypt:32768:8:1$ifLP0b81ry3aXH4t$87c249f671f291492cab37acb1798e99f32151752f03fffab9a4d230600fe54737673c8903b14bc192c549dd22439ea7f0b3d3cd9fcde43c3b712784a98bfa42",
+    "password": "scrypt:32768:8:1$3QkWaNQ6EL1yJ6QG$aa118f086acc26a551deb749b4e00578b0eb1d338d37e4a563e6b9565a6e6efe0c23dd86d75807f314acd8557a196c79704b233cde778f8af14b5108a0a7984b",
     "notification_preferences": {
       "email_enabled": true,
       "calibration_due_days": 30
     },
     "updated_by": "admin",
-    "updated_at": "2025-05-11T10:29:44.717192"
+    "updated_at": "2025-05-12T00:27:31.868529"
   }
 }
