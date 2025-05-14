@@ -50,8 +50,10 @@ def equipment_list():
     category = request.args.get('category')
     location = request.args.get('location')
     search_query = request.args.get('q')
+    status_filter = request.args.get('status')
+    condition_filter = request.args.get('condition')
 
-    # Filter equipment based on parameters
+    # Start with all equipment or appropriate filter
     if category:
         equipment = equipment_manager.get_equipment_by_category(category)
     elif location:
@@ -60,6 +62,33 @@ def equipment_list():
         equipment = equipment_manager.search_equipment(search_query)
     else:
         equipment = equipment_manager.get_all_equipment()
+
+    # Apply status filter if provided
+    if status_filter:
+        filtered_equipment = []
+        for item in equipment:
+            item_status = checkout_manager.get_equipment_status(item.id)
+
+            if status_filter == 'available' and (not item_status or item_status.status != "Checked Out"):
+                filtered_equipment.append(item)
+            elif status_filter == 'checked_out' and item_status and item_status.status == "Checked Out":
+                filtered_equipment.append(item)
+            elif status_filter == 'in_transport':
+                # Check if item is in transport
+                for req in transport_manager.get_pending_transport_requests():
+                    if req.equipment_id == item.id and req.status not in ['completed', 'cancelled']:
+                        filtered_equipment.append(item)
+                        break
+        equipment = filtered_equipment
+
+    # Apply condition filter if provided
+    if condition_filter:
+        filtered_equipment = []
+        for item in equipment:
+            item_condition = ticket_manager.get_equipment_condition(item.id)
+            if item_condition == condition_filter:
+                filtered_equipment.append(item)
+        equipment = filtered_equipment
 
     # Get unique locations and manufacturers for filters
     locations = equipment_manager.get_unique_locations()
@@ -74,6 +103,8 @@ def equipment_list():
         selected_category=category,
         selected_location=location,
         search_query=search_query,
+        status_filter=status_filter,
+        condition_filter=condition_filter,
         checkout_manager=checkout_manager,
         ticket_manager=ticket_manager,
         transport_requests=transport_requests
