@@ -73,6 +73,7 @@
         display: flex;
         align-items: center;
         margin-right: 1rem;
+        margin-bottom: 0.5rem;
     }
     
     .legend-color {
@@ -80,6 +81,101 @@
         height: 16px;
         margin-right: 0.25rem;
         border-radius: 3px;
+    }
+
+    /* Calendar header styling */
+    .fc-header-toolbar {
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Day header cells */
+    .fc-col-header-cell {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6 !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 0 !important;
+        text-transform: uppercase;
+        font-size: 0.875rem !important;
+    }
+    
+    /* Make all days same height */
+    .fc-daygrid-day {
+        height: 120px !important;
+    }
+    
+    /* Day numbers */
+    .fc-daygrid-day-top {
+        padding-top: 0.25rem !important;
+        padding-right: 0.5rem !important;
+    }
+    
+    .fc-daygrid-day-number {
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Grid lines and borders */
+    .fc-theme-standard td, 
+    .fc-theme-standard th {
+        border: 1px solid #dee2e6 !important;
+    }
+    
+    /* Weekend days */
+    .fc-day-sat, .fc-day-sun {
+        background-color: #f8f9fa;
+    }
+    
+    /* Better buttons */
+    .fc-button-primary {
+        background-color: var(--bs-primary) !important;
+        border-color: var(--bs-primary) !important;
+        box-shadow: none !important;
+        font-weight: 500 !important;
+        text-transform: uppercase !important;
+        font-size: 0.75rem !important;
+        padding: 0.375rem 0.75rem !important;
+    }
+    
+    .fc-button-primary:not(:disabled):hover {
+        background-color: var(--bs-primary-dark, #0056b3) !important;
+        border-color: var(--bs-primary-dark, #0056b3) !important;
+    }
+    
+    .fc-button-active {
+        background-color: var(--bs-primary-dark, #0056b3) !important;
+        border-color: var(--bs-primary-dark, #0056b3) !important;
+    }
+    
+    /* Improve alignment of button groups */
+    .fc-toolbar-chunk {
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    /* Make sure Saturday is aligned with the rest */
+    .fc-day-sat .fc-daygrid-day-top {
+        justify-content: flex-end !important;
+    }
+    
+    /* Make the calendar responsive */
+    @media (max-width: 768px) {
+        .fc-toolbar {
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+        }
+        
+        .fc-toolbar-chunk {
+            justify-content: center !important;
+        }
+        
+        .fc-toolbar-title {
+            font-size: 1.25rem !important;
+        }
     }
 </style>
 {% endblock %}
@@ -105,15 +201,15 @@
 <!-- Calendar Control Panel -->
 <div class="row mb-4">
     <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
                 <h5 class="mb-0">Calendar Settings</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <h6>Event Types</h6>
-                        <div class="calendar-filters d-flex flex-wrap">
+                        <h6 class="border-bottom pb-2 mb-3">Event Types</h6>
+                        <div class="calendar-filters d-flex flex-wrap gap-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="filter-calibration" checked>
                                 <label class="form-check-label" for="filter-calibration">Calibration Deadlines</label>
@@ -129,8 +225,8 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <h6>Equipment Categories</h6>
-                        <div class="calendar-filters d-flex flex-wrap">
+                        <h6 class="border-bottom pb-2 mb-3">Equipment Categories</h6>
+                        <div class="calendar-filters d-flex flex-wrap gap-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="filter-chambers" checked>
                                 <label class="form-check-label" for="filter-chambers">Chambers</label>
@@ -150,7 +246,7 @@
                 <hr>
                 
                 <!-- Legend -->
-                <div class="calendar-legend">
+                <div class="calendar-legend mt-3">
                     <div class="legend-item">
                         <div class="legend-color" style="background-color: #28a745;"></div>
                         <span>Calibration OK (>60 days)</span>
@@ -180,8 +276,8 @@
 <!-- Calendar View -->
 <div class="row">
     <div class="col-md-12">
-        <div class="card">
-            <div class="card-body calendar-container">
+        <div class="card shadow">
+            <div class="card-body calendar-container p-md-4">
                 <div id="calendar"></div>
             </div>
         </div>
@@ -265,6 +361,23 @@
                 } else {
                     console.log('Events loaded');
                 }
+            },
+            // Improved day header formatting
+            dayHeaderFormat: { weekday: 'short' },
+            // Fix Saturday alignment
+            dayHeaderClassNames: function(arg) {
+                if (arg.date.getDay() === 6) { // Saturday
+                    return ['saturday-header'];
+                }
+                return [];
+            },
+            // Ensure consistent day cell height
+            dayCellClassNames: function(arg) {
+                const classes = [];
+                if (arg.date.getDay() === 0 || arg.date.getDay() === 6) {
+                    classes.push('weekend-day');
+                }
+                return classes;
             }
         });
         
