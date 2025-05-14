@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tab-fixes.css') }}?v={{ now.timestamp()|int }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-enhancements.css') }}?v={{ now.timestamp()|int }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout-fixed.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav-buttons.css') }}?v={{ now.timestamp()|int }}">
 
     <!-- Immediate theme application script - runs before anything else -->
     <script>
@@ -70,13 +71,14 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid px-4">
             <div class="mx-auto">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <!-- Light mode logo (transparent) - hidden in dark mode -->
-                <img src="{{ url_for('static', filename='img/gearvue-notext-transparent.png') }}" alt="GearVue Logo" height="30" class="d-inline-block align-text-top me-2 light-mode-logo">
-                <!-- Dark mode logo (non-transparent) - hidden in light mode -->
-                <img src="{{ url_for('static', filename='img/gearvue-notext.png') }}" alt="GearVue Logo" height="30" class="d-inline-block align-text-top me-2 dark-mode-logo d-none">
-                GearVue
-            </a>
+            <!-- Centered brand/logo -->
+            <div class="d-flex justify-content-center">
+                <a class="navbar-brand text-center" href="{{ url_for('index') }}">
+                    <!-- Text-only until artist creates new logo -->
+                    <span class="brand-text">GearVue</span>
+                </a>
+            </div>
+            <!-- Navbar toggler (hamburger menu) -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -189,15 +191,27 @@
                         <button class="btn btn-outline-light" type="submit">Search</button>
                     </form>
                     
-                    <div class="ms-2 me-3">
+                    <div class="ms-2 me-3 d-flex align-items-center">
+                        <!-- Size toggle button - directly toggles layout sizes -->
+                        <button
+                            id="size-toggle-btn"
+                            type="button"
+                            class="btn btn-outline-light btn-sm me-2 nav-icon-btn"
+                            title="Toggle layout size"
+                            style="cursor: pointer !important; z-index: 999 !important; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                            onclick="toggleLayoutSize()"
+                        >
+                            <i class="bi bi-grid-3x3-gap"></i>
+                        </button>
+
                         <!-- Theme toggle button - controlled by theme-unified.js -->
                         <button
                             id="theme-btn"
                             type="button"
-                            class="btn btn-outline-light theme-toggle-btn"
+                            class="btn btn-outline-light btn-sm theme-toggle-btn nav-icon-btn"
                             title="Toggle theme (Light/Dark/Dracula)"
                             onclick="cycleTheme(event);"
-                            style="cursor: pointer !important; z-index: 999 !important;"
+                            style="cursor: pointer !important; z-index: 999 !important; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;"
                         >
                             <!-- Icon will be set by the theme-unified.js script based on current theme -->
                             <i id="theme-icon" class="bi bi-sun-fill"></i>
@@ -360,6 +374,220 @@
 
     <!-- Layout controls -->
     <script src="{{ url_for('static', filename='js/layout-fixed.js') }}?v={{ now.timestamp()|int }}"></script>
+
+    <!-- Direct layout size toggle function -->
+    <script>
+        // Direct layout size toggle function - independent from layout-fixed.js
+        function toggleLayoutSize() {
+            console.log('Layout size toggle activated');
+
+            // Get current body classes to determine current size
+            const body = document.body;
+
+            // Get reference to the layout-fixed.js constants
+            const STORAGE_KEY = 'gearVueLayoutSettings';
+
+            // Define layout classes directly here
+            const layoutSizes = {
+                small: 'container-width-small',
+                standard: 'container-width-standard',
+                wide: 'container-width-wide',
+                full: 'container-width-full'
+            };
+
+            // Define display names
+            const sizeNames = {
+                small: 'Small',
+                standard: 'Medium',
+                wide: 'Large',
+                full: 'Extra Large'
+            };
+
+            // Check current size
+            const hasSmall = body.classList.contains(layoutSizes.small);
+            const hasStandard = body.classList.contains(layoutSizes.standard);
+            const hasWide = body.classList.contains(layoutSizes.wide);
+            const hasFull = body.classList.contains(layoutSizes.full);
+
+            // Log current state for debugging
+            console.log('Current classes:', {
+                small: hasSmall,
+                standard: hasStandard,
+                wide: hasWide,
+                full: hasFull,
+                allClasses: body.className
+            });
+
+            // Remove all size classes from body
+            for (const key in layoutSizes) {
+                body.classList.remove(layoutSizes[key]);
+            }
+
+            // Determine next size to apply
+            let nextSize;
+            if (hasSmall) {
+                nextSize = 'standard'; // Small -> Medium
+            } else if (hasStandard) {
+                nextSize = 'wide';     // Medium -> Large
+            } else if (hasWide) {
+                nextSize = 'full';     // Large -> XL
+            } else if (hasFull) {
+                nextSize = 'small';    // XL -> Small
+            } else {
+                // If no class found (initial state), start with Small
+                nextSize = 'small';
+            }
+
+            console.log('Applying new size:', nextSize);
+
+            // Apply the new size class with stronger enforcement
+            body.classList.add(layoutSizes[nextSize]);
+
+            // Also apply style attribute for stronger enforcement
+            let maxWidth;
+            if (nextSize === 'small') {
+                maxWidth = '1200px';
+            } else if (nextSize === 'standard') {
+                maxWidth = '1550px';
+            } else if (nextSize === 'wide') {
+                maxWidth = '1800px';
+            } else if (nextSize === 'full') {
+                maxWidth = '2100px';
+            }
+
+            // Apply to body
+            body.style.maxWidth = maxWidth;
+
+            // Force the centering with !important styling
+            body.style.cssText += `
+                max-width: ${maxWidth} !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            `;
+
+            // Set data attribute (for layout-fixed.js)
+            body.setAttribute('data-layout-width', nextSize);
+
+            // Save to localStorage
+            try {
+                let settings = {};
+                const storedSettings = localStorage.getItem(STORAGE_KEY);
+                if (storedSettings) {
+                    try {
+                        settings = JSON.parse(storedSettings);
+                    } catch (e) {
+                        console.error('Failed to parse stored settings:', e);
+                    }
+                }
+
+                settings.width = nextSize;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+                console.log('Saved settings to localStorage:', settings);
+            } catch (e) {
+                console.error('Failed to save settings:', e);
+            }
+
+            // Show a simple notification with the size
+            const sizeDisplay = document.createElement('div');
+            sizeDisplay.id = 'size-change-notification';
+            sizeDisplay.style.cssText = `
+                position: fixed;
+                top: 60px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: bold;
+                z-index: 9999;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                font-size: 14px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+
+            // Show width in px
+            sizeDisplay.innerHTML = `
+                <i class="bi bi-arrows-angle-expand me-1"></i>
+                ${maxWidth} (${sizeNames[nextSize]})
+            `;
+
+            // Remove any existing notifications
+            const existingNotification = document.getElementById('size-change-notification');
+            if (existingNotification) {
+                existingNotification.parentNode.removeChild(existingNotification);
+            }
+
+            // Add to body and fade in
+            document.body.appendChild(sizeDisplay);
+            setTimeout(() => {
+                sizeDisplay.style.opacity = '1';
+
+                // Fade out and remove after delay
+                setTimeout(() => {
+                    sizeDisplay.style.opacity = '0';
+                    setTimeout(() => {
+                        if (sizeDisplay.parentNode) {
+                            sizeDisplay.parentNode.removeChild(sizeDisplay);
+                        }
+                    }, 300);
+                }, 1500);
+            }, 10);
+
+            // Apply CSS fixes to ensure proper display
+            fixCentering();
+
+            // Update button tooltip
+            const sizeBtn = document.getElementById('size-toggle-btn');
+            if (sizeBtn) {
+                sizeBtn.setAttribute('title', `Layout Size: ${sizeNames[nextSize]}`);
+
+                // Visual feedback - flash button
+                sizeBtn.classList.add('active');
+                setTimeout(() => {
+                    sizeBtn.classList.remove('active');
+                }, 300);
+            }
+
+            console.log('Layout size changed to:', nextSize);
+            return false; // Prevent default behavior
+        }
+
+        // Comprehensive fix for centering and sizing issues
+        function fixCentering() {
+            // Fix HTML and body tags
+            document.documentElement.style.overflowX = 'hidden';
+            document.documentElement.style.width = '100%';
+            document.body.style.overflowX = 'hidden';
+
+            // Get current max-width from body style
+            const bodyMaxWidth = document.body.style.maxWidth;
+            console.log('Body max-width is:', bodyMaxWidth);
+
+            // Apply centering to body - it needs to be centered in the viewport
+            document.body.style.marginLeft = 'auto';
+            document.body.style.marginRight = 'auto';
+
+            // Reset container-fluid width to match body width
+            document.querySelectorAll('.container-fluid').forEach(container => {
+                // Skip navbar and footer containers
+                if (container.closest('nav') || container.closest('footer')) {
+                    return;
+                }
+
+                // Apply proper centering and width constraints
+                container.classList.add('mx-auto');
+                container.style.width = '100%';
+                container.style.maxWidth = 'inherit'; // Inherit from body
+            });
+
+            // Force the layout to update (sometimes needed for Safari/Chrome)
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Force a reflow
+            document.body.style.display = '';
+        }
+    </script>
 
     {% block scripts %}{% endblock %}
 </body>
