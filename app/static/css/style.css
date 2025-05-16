@@ -1,5 +1,109 @@
 /* Custom styles for Equipment Tracker */
 
+/* Default logo visibility for light mode */
+.light-mode-logo {
+    display: inline-block;
+}
+
+.dark-mode-logo {
+    display: none;
+}
+
+/* Dashboard logo container with metallic circular frame and acrylic glass effect */
+.dashboard-logo-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Metallic frame effect */
+    background: linear-gradient(145deg, #e2e2e2, #f0f0f0);
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.6), /* Reduced inner glow */
+        0 4px 12px rgba(0, 0, 0, 0.2), /* Reduced outer shadow */
+        0 0 0 4px rgba(210, 210, 210, 0.8),
+        0 0 0 6px rgba(180, 180, 180, 0.5);
+
+    /* Create the reflection/highlight effect on the metallic border */
+    padding: 0;
+
+    /* Acrylic glass effect with slight blur */
+    backdrop-filter: blur(5px);
+
+    /* Animation for subtle floating effect */
+    animation: float 5s ease-in-out infinite; /* Slower animation */
+    transform-style: preserve-3d;
+}
+
+
+/* The inner glass-like effect */
+.dashboard-logo-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 51%, rgba(255, 255, 255, 0.05) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Metallic ring shine effect */
+.dashboard-logo-container::after {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 40%;
+    height: 40%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Logo wrapper for precise positioning */
+.dashboard-logo-container .logo-wrapper {
+    position: relative;
+    width: 75%;
+    height: 75%;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+}
+
+/* The actual logo inside the container with circular clipping */
+.dashboard-logo-container .dashboard-logo {
+    width: 165%;  /* Oversized to focus on just the logo part */
+    height: 165%;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));  /* Reduced shadow for subtler effect */
+    clip-path: circle(36% at 55% 50%);  /* Circular clip focused on just the gear */
+    transform: translate(-20%, 0);  /* Adjust position to center the gear in the clip */
+}
+
+/* Floating animation - more subtle */
+@keyframes float {
+    0% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-3px) rotate(0.5deg); /* Reduced movement */
+    }
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+}
+
 /* Theme transition */
 body {
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -58,18 +162,103 @@ body {
     margin-right: 10px !important;
 }
 
+/* Force navbar to align everything to the left with no auto-centering */
+.container-fluid {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Ensure the navbar contents are left-aligned */
+.navbar > .container-fluid {
+    justify-content: flex-start !important;
+    max-width: 100% !important;
+}
+
+/* Override the body centering */
+body.centered-content {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    max-width: 100% !important;
+}
+
+/* Force navbar elements to the left */
+.navbar {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    padding-left: 15px !important;
+}
+
 .dropdown-menu {
     z-index: 11;
 }
 
-/* Logo styling */
-.navbar-brand img {
-    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
-    transition: transform 0.3s ease;
+/* Navbar logo styling */
+/* Container for navbar logo */
+.navbar-logo-container {
+    height: 24px;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: transparent;
+    vertical-align: middle;
+    margin-right: 5px;
+    margin-bottom: 2px;
 }
 
-.navbar-brand:hover img {
+/* The actual logo without circular clipping */
+.navbar-logo {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    position: relative;
+    background-color: transparent;
+}
+
+/* Force logo to the left */
+.navbar-brand.ms-0 {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.navbar-brand:hover .navbar-logo-container {
     transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Remove underline effect on navbar brand text */
+.navbar-brand:hover {
+    text-decoration: none !important;
+}
+
+.navbar-brand:hover .brand-text {
+    text-decoration: none !important;
+}
+
+/* Footer logo styling */
+.footer-logo-container {
+    height: 30px;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: transparent;
+}
+
+.footer-logo {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    position: relative;
+    background-color: transparent;
 }
 
 .dashboard-logo {

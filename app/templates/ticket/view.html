@@ -97,7 +97,13 @@
                                 </tr>
                                 <tr>
                                     <th>Created At</th>
-                                    <td>{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else 'Unknown' }}</td>
+                                    <td>
+                                        {% if ticket.created_at is string %}
+                                            {{ ticket.created_at }}
+                                        {% else %}
+                                            {{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else 'Unknown' }}
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>Assigned To</th>
@@ -136,14 +142,26 @@
                             <li class="list-group-item">
                                 <i class="bi bi-plus-circle text-success me-2"></i>
                                 <strong>Created</strong>
-                                <div class="text-muted small">{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else 'Unknown' }}</div>
+                                <div class="text-muted small">
+                                    {% if ticket.created_at is string %}
+                                        {{ ticket.created_at }}
+                                    {% else %}
+                                        {{ ticket.created_at.strftime('%Y-%m-%d %H:%M') if ticket.created_at else 'Unknown' }}
+                                    {% endif %}
+                                </div>
                             </li>
                             
                             {% if ticket.updated_at and ticket.updated_at != ticket.created_at %}
                             <li class="list-group-item">
                                 <i class="bi bi-pencil text-primary me-2"></i>
                                 <strong>Last Updated</strong>
-                                <div class="text-muted small">{{ ticket.updated_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                <div class="text-muted small">
+                                    {% if ticket.updated_at is string %}
+                                        {{ ticket.updated_at }}
+                                    {% else %}
+                                        {{ ticket.updated_at.strftime('%Y-%m-%d %H:%M') if ticket.updated_at else 'Unknown' }}
+                                    {% endif %}
+                                </div>
                             </li>
                             {% endif %}
                             
@@ -151,7 +169,13 @@
                             <li class="list-group-item">
                                 <i class="bi bi-check-circle text-success me-2"></i>
                                 <strong>Resolved</strong>
-                                <div class="text-muted small">{{ ticket.resolved_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                <div class="text-muted small">
+                                    {% if ticket.resolved_at is string %}
+                                        {{ ticket.resolved_at }}
+                                    {% else %}
+                                        {{ ticket.resolved_at.strftime('%Y-%m-%d %H:%M') if ticket.resolved_at else 'Unknown date' }}
+                                    {% endif %}
+                                </div>
                             </li>
                             {% endif %}
                             
@@ -159,7 +183,13 @@
                             <li class="list-group-item">
                                 <i class="bi bi-x-circle text-secondary me-2"></i>
                                 <strong>Closed</strong>
-                                <div class="text-muted small">{{ ticket.closed_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                <div class="text-muted small">
+                                    {% if ticket.closed_at is string %}
+                                        {{ ticket.closed_at }}
+                                    {% else %}
+                                        {{ ticket.closed_at.strftime('%Y-%m-%d %H:%M') if ticket.closed_at else 'Unknown' }}
+                                    {% endif %}
+                                </div>
                             </li>
                             {% endif %}
                         </ul>
@@ -168,6 +198,32 @@
             </div>
         </div>
         
+        <!-- Resolution Button Section (for authorized users) -->
+        {% if ticket.status != ticket_status.RESOLVED and ticket.status != ticket_status.CLOSED %}
+            {% if user and ((ticket.assigned_to and ticket.assigned_to == user.username) or user.role in ['admin', 'physicist'] or not ticket.assigned_to) %}
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h5>Has this issue been resolved?</h5>
+                    <p class="text-muted">
+                        {% if ticket.assigned_to and ticket.assigned_to == user.username %}
+                            As the assigned user, you can mark this ticket as resolved.
+                        {% elif not ticket.assigned_to %}
+                            This ticket is unassigned. You can mark it as resolved if you've fixed the issue.
+                        {% else %}
+                            As an admin/physicist, you can override and mark this ticket as resolved.
+                        {% endif %}
+                    </p>
+                    <form action="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="action" value="resolve_ticket">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Mark as Resolved
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+
         <!-- Comments Section -->
         <div class="card mb-4">
             <div class="card-header">
@@ -196,7 +252,11 @@
                                             {% endif %}
                                             <span class="text-muted small ms-2">
                                                 {% if comment.created_at %}
-                                                    {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                                    {% if comment.created_at is string %}
+                                                        {{ comment.created_at }}
+                                                    {% else %}
+                                                        {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                                    {% endif %}
                                                 {% else %}
                                                     Unknown time
                                                 {% endif %}
@@ -242,23 +302,53 @@
                 <h5 class="mb-0">Equipment</h5>
             </div>
             <div class="card-body">
-                <h6>{{ equipment.manufacturer }} {{ equipment.model }}</h6>
-                <p>{{ equipment.category }} - {{ equipment.equipment_type }}</p>
+                <h6>
+                    {% if equipment is mapping %}
+                        {{ equipment.get('manufacturer', 'Unknown') }} {{ equipment.get('model', 'Unknown') }}
+                    {% else %}
+                        {{ equipment.manufacturer }} {{ equipment.model }}
+                    {% endif %}
+                </h6>
+                <p>
+                    {% if equipment is mapping %}
+                        {{ equipment.get('category', 'Unknown') }} - {{ equipment.get('equipment_type', 'Unknown') }}
+                    {% else %}
+                        {{ equipment.category }} - {{ equipment.equipment_type }}
+                    {% endif %}
+                </p>
                 <div class="mb-2">
                     <small class="text-muted">Serial Number:</small>
-                    <div>{{ equipment.serial_number }}</div>
+                    <div>
+                        {% if equipment is mapping %}
+                            {{ equipment.get('serial_number', 'Unknown') }}
+                        {% else %}
+                            {{ equipment.serial_number }}
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="mb-2">
                     <small class="text-muted">Location:</small>
-                    <div>{{ equipment.location }}</div>
+                    <div>
+                        {% if equipment is mapping %}
+                            {{ equipment.get('location', 'Unknown') }}
+                        {% else %}
+                            {{ equipment.location }}
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="mb-3">
                     <small class="text-muted">ID:</small>
-                    <div><code>{{ equipment.id }}</code></div>
+                    <div><code>
+                        {% if equipment is mapping %}
+                            {{ equipment.get('id', 'Unknown') }}
+                        {% else %}
+                            {{ equipment.id }}
+                        {% endif %}
+                    </code></div>
                 </div>
                 
                 <div class="d-grid gap-2">
-                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-primary btn-sm">
+                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=equipment.id if not equipment is mapping else equipment.get('id')) }}" class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-info-circle"></i> View Equipment Details
                     </a>
                 </div>
@@ -266,7 +356,7 @@
         </div>
         
         <!-- Admin Actions -->
-        {% if user and user.role in ['admin', 'physicist'] %}
+        {% if user and user.role is defined and user.role in ['admin', 'physicist'] %}
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">Admin Actions</h5>

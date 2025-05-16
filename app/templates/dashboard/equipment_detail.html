@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ equipment.category }} - {{ equipment.serial_number }} - Equipment Tracker{% endblock %}
+{% block title %}{{ equipment.category }} - {{ equipment.serial_number }} - GearVue{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
@@ -9,14 +9,35 @@
         <p class="lead">{{ equipment.category }} - {{ equipment.equipment_type }}</p>
     </div>
     <div class="col-md-4 text-end">
-        <a href="{{ url_for('dashboard.equipment_list') }}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left"></i> Back to List
-        </a>
+        <div class="mb-2">
+            {% set status = checkout_manager.get_equipment_status(equipment.id) %}
+            {% if status and status.status == "Checked Out" %}
+                <a href="{{ url_for('qr.quick_checkin', equipment_id=equipment.id) }}" class="btn btn-success me-2">
+                    <i class="bi bi-box-arrow-in-left"></i> Check In
+                </a>
+            {% else %}
+                <a href="{{ url_for('qr.quick_checkout', equipment_id=equipment.id) }}" class="btn btn-primary me-2">
+                    <i class="bi bi-box-arrow-right"></i> Check Out
+                </a>
+            {% endif %}
+            <a href="{{ url_for('ticket.create_ticket', equipment_id=equipment.id) }}" class="btn btn-warning">
+                <i class="bi bi-ticket-detailed"></i> Create Ticket
+            </a>
+        </div>
+        <div>
+            <a href="{{ url_for('dashboard.equipment_list') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+            <button type="button" class="btn btn-outline-info" onclick="generateQRCodeForEquipment('{{ equipment.id }}', '{{ equipment.manufacturer }}', '{{ equipment.model }}', '{{ equipment.serial_number }}')">
+                <i class="bi bi-qr-code"></i> Show QR
+            </button>
+        </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-8">
+    <!-- Left Column -->
+    <div class="col-md-7">
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">Equipment Details</h5>
@@ -45,8 +66,19 @@
                             <td>{{ equipment.serial_number }}</td>
                         </tr>
                         <tr>
-                            <th>Location</th>
+                            <th>Primary Location</th>
                             <td>{{ equipment.location }}</td>
+                        </tr>
+                        <tr>
+                            <th>Current Location</th>
+                            <td>
+                                {% set status = checkout_manager.get_equipment_status(equipment.id) %}
+                                {% if status and status.checked_out and status.location %}
+                                    {{ status.location }} <span class="badge bg-info">Checked Out</span>
+                                {% else %}
+                                    <span class="text-muted">---</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <th>Calibration Due Date</th>
@@ -67,7 +99,9 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    
+    <!-- Right Column -->
+    <div class="col-md-5">
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">Status</h5>
@@ -79,38 +113,229 @@
                 </div>
                 
                 <div class="mb-3">
+                    <h6>Operational Status</h6>
+                    {% set condition = ticket_manager.get_equipment_condition(equipment.id) %}
+                    {% if condition == 'normal' %}
+                    <div class="status-card bg-success text-white p-2 rounded">
+                        <i class="bi bi-circle-fill text-white me-2"></i>
+                        <strong>Normal</strong> - Fully Operational
+                    </div>
+                    {% elif condition == 'warning' %}
+                    <div class="status-card bg-warning text-dark p-2 rounded">
+                        <i class="bi bi-exclamation-triangle-fill text-dark me-2"></i>
+                        <strong>Warning</strong> - Needs Attention
+                    </div>
+                    {% elif condition == 'critical' %}
+                    <div class="status-card bg-danger text-white p-2 rounded">
+                        <i class="bi bi-x-circle-fill text-white me-2"></i>
+                        <strong>Critical</strong> - Out of Service
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
                     <h6>Calibration Status</h6>
                     {% if equipment.calibration_status == 'overdue' %}
-                    <div class="alert alert-danger">
-                        <i class="bi bi-x-circle-fill"></i> Overdue
+                    <div class="status-card bg-danger text-white p-2 rounded">
+                        <i class="bi bi-x-circle-fill me-2"></i> Overdue
                         {% if equipment.days_overdue %}
                             by {{ equipment.days_overdue }} days
                         {% endif %}
                     </div>
                     {% elif equipment.calibration_status == 'due_soon' %}
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle-fill"></i> Due Soon
+                    <div class="status-card bg-warning text-dark p-2 rounded">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Due Soon
                         {% if equipment.days_until_due %}
                             ({{ equipment.days_until_due }} days remaining)
                         {% endif %}
                     </div>
                     {% elif 'due soon' in equipment.calibration_due_date|string|lower %}
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle-fill"></i> Due Soon
+                    <div class="status-card bg-warning text-dark p-2 rounded">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Due Soon
                     </div>
                     {% elif 'overdue' in equipment.calibration_due_date|string|lower %}
-                    <div class="alert alert-danger">
-                        <i class="bi bi-x-circle-fill"></i> Overdue
+                    <div class="status-card bg-danger text-white p-2 rounded">
+                        <i class="bi bi-x-circle-fill me-2"></i> Overdue
                     </div>
                     {% else %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill"></i> Up to Date
+                    <div class="status-card bg-success text-white p-2 rounded">
+                        <i class="bi bi-check-circle-fill me-2"></i> Up to Date
                     </div>
                     {% endif %}
                 </div>
+                
+                <div class="mb-3">
+                    <h6>What is Raw Data?</h6>
+                    <p class="text-muted small">The Raw Data section shows the original data imported from Excel spreadsheets or other sources, helping to trace information back to its origin for verification purposes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Full Width Content Area -->
+<div class="row">
+    <div class="col-12">
+        <!-- Checkout History (Full Width) -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Checkout History</h5>
+            </div>
+            <div class="card-body">
+                {% if history %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%">Timestamp</th>
+                                <th style="width: 20%">Status Change</th>
+                                <th style="width: 25%">Location Change</th>
+                                <th style="width: 15%">User</th>
+                                <th style="width: 25%">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                            <tr>
+                                <td>{{ entry.timestamp|friendly_datetime }}</td>
+                                <td>
+                                    {% if entry.previous_status != entry.new_status %}
+                                    <span class="badge bg-secondary">{{ entry.previous_status }}</span>
+                                    <i class="bi bi-arrow-right"></i>
+                                    <span class="badge {% if entry.new_status == 'In Storage' %}bg-success{% elif entry.new_status == 'Checked Out' %}bg-primary{% elif entry.new_status == 'In Calibration' %}bg-info{% elif entry.new_status == 'Under Repair' %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ entry.new_status }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted">No change</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.previous_location != entry.new_location %}
+                                    <strong>{{ entry.previous_location }}</strong>
+                                    <i class="bi bi-arrow-right"></i>
+                                    <strong>{{ entry.new_location }}</strong>
+                                    {% else %}
+                                    <span class="text-muted">No change</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set user_info = checkout_manager.get_user(entry.user) %}
+                                    {% if user_info %}
+                                        <strong>{{ user_info.name }}</strong>
+                                        <br><small class="text-muted">{{ entry.user }}</small>
+                                    {% else %}
+                                        {{ entry.user }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ entry.notes }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle-fill"></i> No checkout history found for this equipment.
+                </div>
+                {% endif %}
             </div>
         </div>
         
+        <!-- Tickets (Full Width) -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Equipment Tickets</h5>
+                <a href="{{ url_for('ticket.equipment_tickets', equipment_id=equipment.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-list-ul"></i> View All Tickets
+                </a>
+            </div>
+            <div class="card-body">
+                {% if tickets %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%">ID</th>
+                                <th style="width: 20%">Title</th>
+                                <th style="width: 10%">Type</th>
+                                <th style="width: 10%">Priority</th>
+                                <th style="width: 10%">Status</th>
+                                <th style="width: 15%">Created By</th>
+                                <th style="width: 12%">Created</th>
+                                <th style="width: 15%">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in tickets %}
+                            <tr>
+                                <td>{{ ticket.id[:8] }}</td>
+                                <td>{{ ticket.title }}</td>
+                                <td>
+                                    {% if ticket.ticket_type == 'issue' %}
+                                        <span class="badge bg-danger">Issue</span>
+                                    {% elif ticket.ticket_type == 'request' %}
+                                        <span class="badge bg-primary">Request</span>
+                                    {% elif ticket.ticket_type == 'maintenance' %}
+                                        <span class="badge bg-warning">Maintenance</span>
+                                    {% elif ticket.ticket_type == 'calibration' %}
+                                        <span class="badge bg-info">Calibration</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ticket.priority == 'low' %}
+                                        <span class="badge bg-secondary">Low</span>
+                                    {% elif ticket.priority == 'medium' %}
+                                        <span class="badge bg-info">Medium</span>
+                                    {% elif ticket.priority == 'high' %}
+                                        <span class="badge bg-warning">High</span>
+                                    {% elif ticket.priority == 'critical' %}
+                                        <span class="badge bg-danger">Critical</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ticket.status == 'open' %}
+                                        <span class="badge bg-info">Open</span>
+                                    {% elif ticket.status == 'in_progress' %}
+                                        <span class="badge bg-primary">In Progress</span>
+                                    {% elif ticket.status == 'resolved' %}
+                                        <span class="badge bg-success">Resolved</span>
+                                    {% elif ticket.status == 'closed' %}
+                                        <span class="badge bg-secondary">Closed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set creator = checkout_manager.get_user(ticket.created_by) %}
+                                    {% if creator %}
+                                        <span data-bs-toggle="tooltip" title="{{ ticket.created_by }}">{{ creator.name }}</span>
+                                    {% else %}
+                                        {{ ticket.created_by }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ ticket.created_at|friendly_datetime if ticket.created_at else 'Unknown' }}</td>
+                                <td>
+                                    <a href="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i> No tickets found for this equipment.
+                </div>
+                <div class="mt-3">
+                    <a href="{{ url_for('ticket.create_ticket', equipment_id=equipment.id) }}" class="btn btn-warning">
+                        <i class="bi bi-ticket-detailed"></i> Create New Ticket
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Raw Data (Full Width) -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">Raw Data</h5>
@@ -121,4 +346,174 @@
         </div>
     </div>
 </div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">Generated QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCodeLoading" class="mb-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Generating QR code...</p>
+                </div>
+                <div id="qrCodeError" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Error generating QR code. Please try again.
+                </div>
+                <div id="qrCodeDisplay" style="display: none;">
+                    <img id="qrCodeImage" src="" alt="Generated QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+                    <div class="mt-2">
+                        <p class="mb-2"><strong id="qrCodeEquipmentId">Equipment ID: </strong></p>
+                        <p class="mb-2">Scan this QR code for quick access to equipment details, checkout, and maintenance.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="qrCodeDownloadBtn" href="#" class="btn btn-primary" download="qr_code.png" style="display: none;">
+                    <i class="bi bi-download"></i> Download QR Code
+                </a>
+                <a id="qrCodePrintBtn" href="#" class="btn btn-outline-primary" onclick="printQRCode()" style="display: none;">
+                    <i class="bi bi-printer"></i> Print
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Load the QR print script -->
+<script src="{{ url_for('static', filename='js/qr-print.js') }}?v={{ now.timestamp()|int }}"></script>
+<script>
+    // Function to generate QR codes for equipment in the list
+    function generateQRCodeForEquipment(equipmentId, manufacturer, model, serialNumber) {
+        // Show the QR code modal
+        const qrModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+        qrModal.show();
+
+        // Show loading state
+        document.getElementById('qrCodeLoading').style.display = 'block';
+        document.getElementById('qrCodeError').style.display = 'none';
+        document.getElementById('qrCodeDisplay').style.display = 'none';
+        document.getElementById('qrCodeDownloadBtn').style.display = 'none';
+        document.getElementById('qrCodePrintBtn').style.display = 'none';
+
+        // Validate required fields
+        if (!equipmentId || !manufacturer || !serialNumber) {
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').style.display = 'block';
+            return;
+        }
+
+        // First check if QR code already exists
+        fetch(`/admin/equipment/check-qr/${equipmentId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success' && data.exists) {
+                // QR code already exists, just display it
+                displayExistingQRCode(data);
+            } else {
+                // QR code doesn't exist, generate a new one
+                generateNewQRCode(equipmentId, manufacturer, model, serialNumber);
+            }
+        })
+        .catch(error => {
+            // If check fails for any reason, try to generate a new one
+            console.error('Error checking QR code:', error);
+            generateNewQRCode(equipmentId, manufacturer, model, serialNumber);
+        });
+    }
+
+    // Function to display an existing QR code
+    function displayExistingQRCode(data) {
+        // Hide loading, show QR code
+        document.getElementById('qrCodeLoading').style.display = 'none';
+
+        document.getElementById('qrCodeDisplay').style.display = 'block';
+        document.getElementById('qrCodeImage').src = data.qr_code_url;
+        document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${data.equipment_id}`;
+
+        // Set download link
+        const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+        downloadBtn.href = data.qr_code_url;
+        downloadBtn.download = `qr_code_${data.equipment_id}.png`;
+        downloadBtn.style.display = 'inline-block';
+
+        // Show print button
+        document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+    }
+
+    // Function to generate a new QR code
+    function generateNewQRCode(equipmentId, manufacturer, model, serialNumber) {
+        // Construct the URL for the QR code - direct to the equipment detail page
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Make AJAX request to generate the QR code
+        const requestData = {
+            url: qrUrl,
+            equipment_id: equipmentId,
+            manufacturer: manufacturer,
+            model: model,
+            serial: serialNumber
+        };
+
+        fetch('/admin/equipment/generate-qr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide loading, show QR code
+            document.getElementById('qrCodeLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                document.getElementById('qrCodeDisplay').style.display = 'block';
+                document.getElementById('qrCodeImage').src = data.qr_code_url;
+                document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${equipmentId}`;
+
+                // Set download link
+                const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+                downloadBtn.href = data.qr_code_url;
+                downloadBtn.download = `qr_code_${equipmentId}.png`;
+                downloadBtn.style.display = 'inline-block';
+
+                // Show print button
+                document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('qrCodeError').textContent = data.message || 'Failed to generate QR code';
+                document.getElementById('qrCodeError').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            // Show error
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = `Error: ${error.message}`;
+            document.getElementById('qrCodeError').style.display = 'block';
+            console.error('Error generating QR code:', error);
+        });
+    }
+
+    // printQRCode function is now in qr-print.js
+</script>
 {% endblock %}

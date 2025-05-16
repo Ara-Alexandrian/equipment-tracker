@@ -1,0 +1,48 @@
+{
+  "categories": [
+    "Chamber",
+    "Electrometer",
+    "Survey Meter",
+    "Water Tank"
+  ],
+  "equipment_types": {
+    "Chamber": [
+      "ionization chamber",
+      "parallel plate chamber",
+      "cylindrical chamber",
+      "farmer chamber"
+    ],
+    "Electrometer": [
+      "standard electrometer",
+      "reference class electrometer",
+      "portable electrometer"
+    ],
+    "Survey Meter": [
+      "geiger counter",
+      "area monitor",
+      "portable survey meter",
+      "neutron detector"
+    ],
+    "Water Tank": []
+  },
+  "manufacturers": [
+    "CNMC",
+    "PTW",
+    "IBA",
+    "Standard Imaging",
+    "Keithley",
+    "Ludlum",
+    "Fluke",
+    "Mirion"
+  ],
+  "locations": [
+    "Essen (BR)",
+    "Picardy (BRG)",
+    "Houma (HOU)",
+    "Gonzales (GNZ)",
+    "Natchez (NAT)",
+    "Covington (CV)",
+    "Hammond (HAM)",
+    "Womans (WH)"
+  ]
+}

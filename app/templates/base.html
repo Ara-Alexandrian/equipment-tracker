@@ -2,38 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Equipment Tracker{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#212529">
+    <title>{% block title %}GearVue{% endblock %}</title>
     <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-override.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dracula-mode.css') }}">
-    {% block head %}{% endblock %}
-    
-    <!-- Theme switcher functionality now in external JS file -->
-    <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
-</head>
-<body id="equipment-tracker-body">
-    <!-- Apply the theme class from localStorage to the body element when it loads -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-mode.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-override.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dracula-mode.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sweet-dracula-mode.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pastel-mode.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tab-fixes.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-enhancements.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout-fixed.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav-buttons.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer-fix.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compact-ui.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar-fixes.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar-strict-grid.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer-contrast-fix.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout-fixes.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-icon-fixes.css') }}?v={{ now.timestamp()|int }}">
+
+    <!-- Immediate theme application script - runs before anything else -->
     <script>
-        // Immediately apply theme to body when it loads
+        // Apply theme immediately to prevent flash of unstyled content
         (function() {
-            const theme = localStorage.getItem('theme') || 'light';
+            var theme = localStorage.getItem('theme') || 'light';
+            console.log('Immediate theme application:', theme);
+
             if (theme === 'dark') {
-                document.body.classList.add('dark-mode');
-            } else if (theme === 'dracula') {
-                document.body.classList.add('dracula-mode');
+                document.documentElement.classList.add('dark-mode');
             }
+            else if (theme === 'dracula') {
+                document.documentElement.classList.add('dracula-mode');
+            }
+            else if (theme === 'sweet-dracula') {
+                document.documentElement.classList.add('sweet-dracula-mode');
+            }
+            else if (theme === 'pastel') {
+                document.documentElement.classList.add('pastel-mode');
+            }
+
+            // Also set up the icon once DOM is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                var themeBtn = document.getElementById('theme-btn');
+                if (themeBtn) {
+                    if (theme === 'dark') {
+                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-moon-stars-fill"></i>';
+                    } else if (theme === 'dracula') {
+                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/dracula-icon.svg" alt="Dracula Theme" class="theme-icon-image" />';
+                    } else if (theme === 'sweet-dracula') {
+                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/sweet-dracula-icon.svg" alt="Sweet Dracula Theme" class="theme-icon-image" />';
+                    } else if (theme === 'pastel') {
+                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-palette-fill"></i>';
+                    } else {
+                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-sun-fill"></i>';
+                    }
+                }
+            });
         })();
     </script>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                Equipment Tracker
+
+    {% block head %}{% endblock %}
+
+    <!-- Theme switcher (with cache busting) -->
+    <script src="{{ url_for('static', filename='js/theme-unified.js') }}?v={{ now.timestamp()|int }}"></script>
+</head>
+<body id="gearvue-body" class="container-width-standard">
+    <!-- The theme classes are now applied by the unified theme switcher script -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-0 mx-0">
+        <div class="container-fluid px-0 mx-0" style="justify-content: flex-start !important; max-width: 100% !important;">
+            <!-- Brand/logo forced to the left with no centering -->
+            <a class="navbar-brand ms-0 ps-2" href="{{ url_for('index') }}" style="margin-left: 0 !important; padding-left: 8px !important; display: flex; align-items: center;">
+                <!-- JPG with transparent background -->
+                <div class="navbar-logo-container">
+                    <img src="{{ url_for('static', filename='img/GearVue-Transparentbackground.jpg') }}" alt="GearVue" class="navbar-logo">
+                </div>
+                <span class="brand-text" style="font-weight: 500; margin-left: 4px;">GearVue</span>
             </a>
+
+            <!-- Navbar toggler (hamburger menu) -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -84,18 +137,58 @@
                             {% endif %}
                         </ul>
                     </li>
-                    
-                    <!-- Admin section -->
-                    {% if user and user.role in ['admin', 'physicist'] %}
+
+                    <!-- Transport section -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if '/checkout/admin' in request.path or '/reports' in request.path %}active{% endif %}" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle {% if '/transport' in request.path and not '/qr/transport' in request.path %}active{% endif %}" href="#" id="transportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Transport
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="transportDropdown">
+                            <li><a class="dropdown-item {% if request.path == url_for('transport.index') %}active{% endif %}" href="{{ url_for('transport.index') }}">Transport Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.equipment_list') }}">
+                                <i class="bi bi-plus-circle"></i> Create Transport Request
+                                <small class="d-block text-muted">(Choose equipment first)</small>
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('transport.completed') }}">Completed Requests</a></li>
+                            {% if user and user.role in ['admin', 'physicist'] %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('transport.index') }}#coordinator">Requests I'm Coordinating</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    
+                    <!-- Admin section - Admin only -->
+                    {% if user and user.role == 'admin' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/checkout/admin' in request.path or '/reports' in request.path or '/admin' in request.path %}active{% endif %}" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Administration
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('checkout.admin') }}">Admin Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.equipment_management') }}">Equipment Management</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.calendar') }}">Equipment Calendar</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('checkout.manage_users') }}">Manage Users</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.settings') }}">System Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">Generate Reports</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- Physicist Tools - Shown only to physicists -->
+                    {% if user and user.role == 'physicist' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/reports' in request.path or '/admin/calendar' in request.path %}active{% endif %}" href="#" id="physicistDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Physicist Tools
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="physicistDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.calendar') }}">Equipment Calendar</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">Generate Reports</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('ticket.list_tickets', status='open') }}">Open Tickets</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('ticket.list_tickets', assigned_to=user.username) }}">My Assigned Tickets</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.calibration_overview') }}">Calibration Status</a></li>
                         </ul>
                     </li>
                     {% endif %}
@@ -106,17 +199,28 @@
                         <button class="btn btn-outline-light" type="submit">Search</button>
                     </form>
                     
-                    <div class="ms-2 me-3">
-                        <!-- Theme toggle with direct JS call -->
-                        <button 
-                            id="theme-btn" 
-                            type="button" 
-                            class="btn btn-outline-light theme-toggle-btn" 
-                            title="Toggle theme (Light/Dark/Dracula)" 
-                            onclick="return cycleTheme(event);"
-                            style="cursor: pointer !important; z-index: 999 !important;"
+                    <div class="ms-2 me-3 d-flex align-items-center">
+                        <!-- Size toggle button - directly toggles layout sizes -->
+                        <button
+                            id="size-toggle-btn"
+                            type="button"
+                            class="btn btn-outline-light btn-sm me-2 nav-icon-btn theme-toggle-btn"
+                            title="Toggle layout size"
+                            onclick="toggleLayoutSize()"
                         >
-                            <i class="bi bi-moon-stars-fill"></i>
+                            <i class="bi bi-grid-3x3-gap" id="size-icon"></i>
+                        </button>
+
+                        <!-- Theme toggle button - controlled by theme-unified.js -->
+                        <button
+                            id="theme-btn"
+                            type="button"
+                            class="btn btn-outline-light btn-sm theme-toggle-btn nav-icon-btn"
+                            title="Toggle theme (Light/Dark/Dracula)"
+                            onclick="cycleTheme(event);"
+                        >
+                            <!-- Icon will be set by the theme-unified.js script based on current theme -->
+                            <i id="theme-icon" class="bi bi-sun-fill"></i>
                         </button>
                     </div>
                     
@@ -144,40 +248,354 @@
                     {% endif %}
                 </div>
             </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container my-4">
-        {% for category, message in get_flashed_messages(with_categories=true) %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
+    <div class="container-fluid my-4 px-4">
+        <div class="mx-auto">
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
 
-
-        {% block content %}{% endblock %}
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container">
+        <div class="container-fluid px-4">
+            <div class="mx-auto">
             <div class="row align-items-center">
                 <div class="col-md-1 d-none d-md-block">
-                    <img src="{{ url_for('static', filename='img/Equipment Tracker.png') }}" alt="Equipment Tracker Logo" height="50">
+                    <!-- JPG with transparent background -->
+                    <div class="footer-logo-container">
+                        <img src="{{ url_for('static', filename='img/GearVue-Transparentbackground.jpg') }}" alt="GearVue Logo" class="footer-logo">
+                    </div>
                 </div>
                 <div class="col-md-5">
-                    <h5>Equipment Tracker</h5>
+                    <h5>GearVue</h5>
                     <p>A tool for tracking and managing equipment inventory and calibration.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0">Version 1.2.0 - "Advanced Calibration"</p>
+                    <p class="mb-0">Version 1.2.0 - "GearVue Advanced Equipment Tracker"</p>
                     <p>&copy; {{ now.year }} Mary Bird Perkins Cancer Center</p>
-                    <p class="small mb-0">For assistance contact: <a href="mailto:aalexandrian@marybird.com?subject=Equipment%20Tracker%20Support%20Request&body=Hello,%0A%0AI%20need%20assistance%20with%20the%20Equipment%20Tracker%20application.%0A%0ADetails%20of%20my%20issue:%0A-%20%0A%0AEquipment%20ID%20(if%20applicable):%20%0ALocation:%20%0A%0AThank%20you,%0A" class="text-light">aalexandrian@marybird.com</a></p>
+                    <p class="small mb-0">For assistance contact: <a href="mailto:aalexandrian@marybird.com?subject=GearVue%20Support%20Request&body=Hello,%0A%0AI%20need%20assistance%20with%20the%20GearVue%20application.%0A%0ADetails%20of%20my%20issue:%0A-%20%0A%0AEquipment%20ID%20(if%20applicable):%20%0ALocation:%20%0A%0AThank%20you,%0A" class="footer-contact-link">aalexandrian@marybird.com</a></p>
                 </div>
+            </div>
             </div>
         </div>
     </footer>
 
+    <!-- Add jQuery before Bootstrap to ensure proper JavaScript functionality -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Immediate fix for container layout centering -->
+    <script>
+        // Fix container centering on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure all container-fluid elements have mx-auto wrappers
+            const containers = document.querySelectorAll('.container-fluid');
+            containers.forEach(container => {
+                // Skip if already has mx-auto direct child
+                if (container.querySelector(':scope > .mx-auto')) {
+                    return;
+                }
+
+                // Create wrapper if needed
+                if (container.children.length > 0) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'mx-auto';
+
+                    // Move all children to wrapper
+                    while (container.firstChild) {
+                        wrapper.appendChild(container.firstChild);
+                    }
+
+                    // Add wrapper to container
+                    container.appendChild(wrapper);
+                }
+            });
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v={{ now.timestamp()|int }}"></script>
+    <script src="{{ url_for('static', filename='js/table-enhancements.js') }}?v={{ now.timestamp()|int }}"></script>
+    <script src="{{ url_for('static', filename='js/modal-fixes.js') }}?v={{ now.timestamp()|int }}"></script>
+
+    <!-- Final theme check script - ensures theme is applied at the end -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Refresh theme from localStorage
+            var theme = localStorage.getItem('theme') || 'light';
+            console.log('Final theme check:', theme);
+
+            // Force apply theme again
+            if (typeof applyTheme === 'function') {
+                applyTheme(theme);
+
+                // Also ensure the icon is updated
+                if (typeof updateThemeButtonIcon === 'function') {
+                    updateThemeButtonIcon(theme);
+                }
+            } else {
+                // Fallback if applyTheme isn't available
+                document.documentElement.classList.remove('dark-mode', 'dracula-mode', 'sweet-dracula-mode', 'pastel-mode');
+                document.body.classList.remove('dark-mode', 'dracula-mode', 'sweet-dracula-mode', 'pastel-mode');
+
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark-mode');
+                    document.body.classList.add('dark-mode');
+                }
+                else if (theme === 'dracula') {
+                    document.documentElement.classList.add('dracula-mode');
+                    document.body.classList.add('dracula-mode');
+                }
+                else if (theme === 'sweet-dracula') {
+                    document.documentElement.classList.add('sweet-dracula-mode');
+                    document.body.classList.add('sweet-dracula-mode');
+                }
+                else if (theme === 'pastel') {
+                    document.documentElement.classList.add('pastel-mode');
+                    document.body.classList.add('pastel-mode');
+                }
+
+                // Manual icon update for the theme button
+                var themeBtn = document.getElementById('theme-btn');
+                if (themeBtn) {
+                    if (theme === 'dark') {
+                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-moon-stars-fill"></i>';
+                    } else if (theme === 'dracula') {
+                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/dracula-icon.svg" alt="Dracula Theme" class="theme-icon-image" />';
+                    } else if (theme === 'sweet-dracula') {
+                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/sweet-dracula-icon.svg" alt="Sweet Dracula Theme" class="theme-icon-image" />';
+                    } else if (theme === 'pastel') {
+                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-palette-fill"></i>';
+                    } else {
+                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-sun-fill"></i>';
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Layout controls -->
+    <script src="{{ url_for('static', filename='js/layout-fixed.js') }}?v={{ now.timestamp()|int }}"></script>
+
+    <!-- Direct layout size toggle function -->
+    <script>
+        // Direct layout size toggle function - independent from layout-fixed.js
+        function toggleLayoutSize() {
+            console.log('Layout size toggle activated');
+
+            // Get current body classes to determine current size
+            const body = document.body;
+
+            // Get reference to the layout-fixed.js constants
+            const STORAGE_KEY = 'gearVueLayoutSettings';
+
+            // Define layout classes directly here
+            const layoutSizes = {
+                small: 'container-width-small',
+                standard: 'container-width-standard',
+                wide: 'container-width-wide',
+                full: 'container-width-full'
+            };
+
+            // Define display names
+            const sizeNames = {
+                small: 'Small',
+                standard: 'Medium',
+                wide: 'Large',
+                full: 'Extra Large'
+            };
+
+            // Check current size
+            const hasSmall = body.classList.contains(layoutSizes.small);
+            const hasStandard = body.classList.contains(layoutSizes.standard);
+            const hasWide = body.classList.contains(layoutSizes.wide);
+            const hasFull = body.classList.contains(layoutSizes.full);
+
+            // Log current state for debugging
+            console.log('Current classes:', {
+                small: hasSmall,
+                standard: hasStandard,
+                wide: hasWide,
+                full: hasFull,
+                allClasses: body.className
+            });
+
+            // Remove all size classes from body
+            for (const key in layoutSizes) {
+                body.classList.remove(layoutSizes[key]);
+            }
+
+            // Determine next size to apply
+            let nextSize;
+            if (hasSmall) {
+                nextSize = 'standard'; // Small -> Medium
+            } else if (hasStandard) {
+                nextSize = 'wide';     // Medium -> Large
+            } else if (hasWide) {
+                nextSize = 'full';     // Large -> XL
+            } else if (hasFull) {
+                nextSize = 'small';    // XL -> Small
+            } else {
+                // If no class found (initial state), start with Small
+                nextSize = 'small';
+            }
+
+            console.log('Applying new size:', nextSize);
+
+            // Apply the new size class with stronger enforcement
+            body.classList.add(layoutSizes[nextSize]);
+
+            // Also apply style attribute for stronger enforcement
+            let maxWidth;
+            if (nextSize === 'small') {
+                maxWidth = '1200px';
+            } else if (nextSize === 'standard') {
+                maxWidth = '1550px';
+            } else if (nextSize === 'wide') {
+                maxWidth = '1800px';
+            } else if (nextSize === 'full') {
+                maxWidth = '2100px';
+            }
+
+            // Apply to body
+            body.style.maxWidth = maxWidth;
+
+            // Force the centering with !important styling
+            body.style.cssText += `
+                max-width: ${maxWidth} !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            `;
+
+            // Set data attribute (for layout-fixed.js)
+            body.setAttribute('data-layout-width', nextSize);
+
+            // Save to localStorage
+            try {
+                let settings = {};
+                const storedSettings = localStorage.getItem(STORAGE_KEY);
+                if (storedSettings) {
+                    try {
+                        settings = JSON.parse(storedSettings);
+                    } catch (e) {
+                        console.error('Failed to parse stored settings:', e);
+                    }
+                }
+
+                settings.width = nextSize;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+                console.log('Saved settings to localStorage:', settings);
+            } catch (e) {
+                console.error('Failed to save settings:', e);
+            }
+
+            // Show a simple notification with the size
+            const sizeDisplay = document.createElement('div');
+            sizeDisplay.id = 'size-change-notification';
+            sizeDisplay.style.cssText = `
+                position: fixed;
+                top: 60px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: bold;
+                z-index: 9999;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                font-size: 14px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+
+            // Show width in px
+            sizeDisplay.innerHTML = `
+                <i class="bi bi-arrows-angle-expand me-1"></i>
+                ${maxWidth} (${sizeNames[nextSize]})
+            `;
+
+            // Remove any existing notifications
+            const existingNotification = document.getElementById('size-change-notification');
+            if (existingNotification) {
+                existingNotification.parentNode.removeChild(existingNotification);
+            }
+
+            // Add to body and fade in
+            document.body.appendChild(sizeDisplay);
+            setTimeout(() => {
+                sizeDisplay.style.opacity = '1';
+
+                // Fade out and remove after delay
+                setTimeout(() => {
+                    sizeDisplay.style.opacity = '0';
+                    setTimeout(() => {
+                        if (sizeDisplay.parentNode) {
+                            sizeDisplay.parentNode.removeChild(sizeDisplay);
+                        }
+                    }, 300);
+                }, 1500);
+            }, 10);
+
+            // Apply CSS fixes to ensure proper display
+            fixCentering();
+
+            // Update button tooltip
+            const sizeBtn = document.getElementById('size-toggle-btn');
+            if (sizeBtn) {
+                sizeBtn.setAttribute('title', `Layout Size: ${sizeNames[nextSize]}`);
+
+                // Visual feedback - flash button
+                sizeBtn.classList.add('active');
+                setTimeout(() => {
+                    sizeBtn.classList.remove('active');
+                }, 300);
+            }
+
+            console.log('Layout size changed to:', nextSize);
+            return false; // Prevent default behavior
+        }
+
+        // Comprehensive fix for centering and sizing issues
+        function fixCentering() {
+            // Fix HTML and body tags
+            document.documentElement.style.overflowX = 'hidden';
+            document.documentElement.style.width = '100%';
+            document.body.style.overflowX = 'hidden';
+
+            // Get current max-width from body style
+            const bodyMaxWidth = document.body.style.maxWidth;
+            console.log('Body max-width is:', bodyMaxWidth);
+
+            // Apply centering to body - it needs to be centered in the viewport
+            document.body.style.marginLeft = 'auto';
+            document.body.style.marginRight = 'auto';
+
+            // Reset container-fluid width to match body width
+            document.querySelectorAll('.container-fluid').forEach(container => {
+                // Skip navbar and footer containers
+                if (container.closest('nav') || container.closest('footer')) {
+                    return;
+                }
+
+                // Apply proper centering and width constraints
+                container.classList.add('mx-auto');
+                container.style.width = '100%';
+                container.style.maxWidth = 'inherit'; // Inherit from body
+            });
+
+            // Force the layout to update (sometimes needed for Safari/Chrome)
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Force a reflow
+            document.body.style.display = '';
+        }
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

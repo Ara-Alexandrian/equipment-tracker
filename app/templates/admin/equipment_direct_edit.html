@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
 
-{% block title %}Direct Equipment Edit - Admin - Equipment Tracker{% endblock %}
+{% block title %}Edit Equipment - {{ equipment.id }} - GearVue{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
         <h1>Edit Equipment</h1>
-        <p class="lead">Editing equipment: {{ equipment.id }}</p>
+        <p class="lead">Update equipment details for {{ equipment.manufacturer }} {{ equipment.model }}</p>
     </div>
     <div class="col-md-4 text-end">
         <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-outline-secondary">
@@ -16,130 +20,457 @@
 </div>
 
 <div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5>Edit Equipment Details</h5>
+    <div class="col-md-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Equipment Details</h5>
+                <!-- Delete Button - Opens Delete Modal -->
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteEquipmentModal">
+                    <i class="bi bi-trash"></i> Delete Equipment
+                </button>
             </div>
             <div class="card-body">
-                <form action="{{ url_for('admin.update_equipment_direct', equipment_id=equipment.id) }}" method="POST">
+                <form action="{{ url_for('admin.update_equipment_direct', equipment_id=equipment.id|default(equipment_id)) }}" method="POST">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="edit_id" class="form-label">Equipment ID</label>
-                            <input type="text" class="form-control" id="edit_id" name="equipment_id" value="{{ equipment.id }}" readonly>
+                            <label for="equipment_id" class="form-label">Equipment ID</label>
+                            <input type="text" class="form-control" id="equipment_id" value="{{ equipment.id|default('') }}" readonly>
+                            <div class="form-text">Equipment ID cannot be changed</div>
                         </div>
                         <div class="col-md-6">
-                            <label for="edit_category" class="form-label">Category*</label>
-                            <select class="form-select" id="edit_category" name="category" required>
-                                <option value="Chamber" {% if equipment.category == 'Chamber' %}selected{% endif %}>Chamber</option>
-                                <option value="Electrometer" {% if equipment.category == 'Electrometer' %}selected{% endif %}>Electrometer</option>
-                                <option value="Survey Meter" {% if equipment.category == 'Survey Meter' %}selected{% endif %}>Survey Meter</option>
+                            <label for="category" class="form-label">Category*</label>
+                            <select class="form-select" id="category" name="category" required>
+                                {% for category in standard_categories %}
+                                <option value="{{ category }}" {% if equipment.category == category %}selected{% endif %}>{{ category }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="edit_equipment_type" class="form-label">Equipment Type*</label>
-                            <input type="text" class="form-control" id="edit_equipment_type" name="equipment_type" value="{{ equipment.equipment_type }}" required>
+                            <label for="equipment_type" class="form-label">Equipment Type*</label>
+                            <select class="form-select" id="equipment_type" name="equipment_type" required>
+                                {% for type in standard_equipment_types %}
+                                <option value="{{ type }}" {% if equipment.equipment_type == type %}selected{% endif %}>{{ type }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="edit_manufacturer" class="form-label">Manufacturer*</label>
-                            <input type="text" class="form-control" id="edit_manufacturer" name="manufacturer" value="{{ equipment.manufacturer }}" required>
+                            <label for="manufacturer" class="form-label">Manufacturer*</label>
+                            <select class="form-select" id="manufacturer" name="manufacturer" required>
+                                {% for manufacturer in standard_manufacturers %}
+                                <option value="{{ manufacturer }}" {% if equipment.manufacturer == manufacturer %}selected{% endif %}>{{ manufacturer }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="edit_model" class="form-label">Model*</label>
-                            <input type="text" class="form-control" id="edit_model" name="model" value="{{ equipment.model }}" required>
+                            <label for="model" class="form-label">Model*</label>
+                            <input type="text" class="form-control" id="model" name="model" value="{{ equipment.model|default('') }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="edit_serial_number" class="form-label">Serial Number*</label>
-                            <input type="text" class="form-control" id="edit_serial_number" name="serial_number" value="{{ equipment.serial_number }}" required>
+                            <label for="serial_number" class="form-label">Serial Number*</label>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number" value="{{ equipment.serial_number|default('') }}" required>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="edit_location" class="form-label">Location*</label>
-                            <input type="text" class="form-control" id="edit_location" name="location" value="{{ equipment.location }}" required>
+                            <label for="location" class="form-label">Location*</label>
+                            <select class="form-select" id="location" name="location" required>
+                                {% for location in standard_locations %}
+                                <option value="{{ location }}" {% if equipment.location == location %}selected{% endif %}>{{ location }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="edit_calibration_due_date" class="form-label">Calibration Due Date*</label>
-                            <input type="text" class="form-control" id="edit_calibration_due_date" name="calibration_due_date" value="{{ equipment.calibration_due_date }}" required>
+                            <label for="calibration_due_date" class="form-label">Calibration Due Date*</label>
+                            <input type="text" class="form-control" id="calibration_due_date" name="calibration_due_date" value="{{ equipment.calibration_due_date|default('') }}" required>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_notes" class="form-label">Notes</label>
-                        <textarea class="form-control" id="edit_notes" name="notes" rows="3">{{ equipment.notes }}</textarea>
+                    <div class="mb-4">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ equipment.notes|default('') }}</textarea>
                     </div>
-                    
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-secondary">
-                            <i class="bi bi-x-circle"></i> Cancel
-                        </a>
-                        <div>
-                            <a href="{{ url_for('admin.generate_qr_direct', equipment_id=equipment.id) }}" class="btn btn-info me-2">
-                                <i class="bi bi-qr-code"></i> Generate QR Code
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Save Changes
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- QR Code Display (if available) -->
-                    <div class="mt-4 text-center border p-3">
-                        <h5><i class="bi bi-qr-code"></i> Equipment QR Code</h5>
-                        {% set qr_filename = "qr_" + equipment.id %}
-                        {% set qr_img_path = url_for('static', filename='qrcodes/test_qr.png') %}
-
-                        <p class="mb-3">
-                            QR code links to: <a href="{{ url_for('qr.equipment_detail', equipment_id=equipment.id, _external=True) }}" target="_blank">{{ url_for('qr.equipment_detail', equipment_id=equipment.id, _external=True) }}</a>
-                        </p>
-
-                        <div>
-                            <img src="{{ qr_img_path }}" alt="Equipment QR Code" style="max-width: 200px; border: 1px solid #ddd; padding: 10px;">
-                        </div>
-
-                        <div class="mt-3">
-                            <a href="{{ url_for('admin.generate_qr_direct', equipment_id=equipment.id) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-arrow-repeat"></i> Regenerate QR Code
-                            </a>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
-                                <i class="bi bi-printer"></i> Print
-                            </button>
-                        </div>
-
-                        <p class="text-muted mt-2"><small>Scan this QR code with a mobile device to access the equipment landing page, where users can check in/out equipment and submit tickets.</small></p>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Current Data Debug -->
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
+    
+    <!-- QR Code Panel -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
             <div class="card-header">
-                <h5>Current Data</h5>
+                <h5 class="mb-0">Equipment QR Code</h5>
             </div>
-            <div class="card-body">
-                <div class="alert alert-info mb-3">
-                    <strong>Equipment Values:</strong><br>
-                    ID: {{ equipment.id }}<br>
-                    Category: {{ equipment.category }}<br>
-                    Type: {{ equipment.equipment_type }}<br>
-                    Manufacturer: {{ equipment.manufacturer }}<br>
-                    Model: {{ equipment.model }}<br>
-                    Serial: {{ equipment.serial_number }}<br>
-                    Location: {{ equipment.location }}<br>
-                    Calibration: {{ equipment.calibration_due_date }}<br>
-                    Notes: {{ equipment.notes }}
+            <div class="card-body text-center pt-4">
+                <!-- QR Code loading -->
+                <div id="directQRLoading" class="mb-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading QR code...</p>
                 </div>
-                <pre id="equipment-data">{{ equipment|tojson(indent=2) }}</pre>
+                
+                <!-- QR Code error -->
+                <div id="directQRError" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span id="directQRErrorText">Error loading QR code</span>
+                </div>
+                
+                <!-- QR Code display -->
+                <div id="directQRDisplay" style="display: none;">
+                    <img id="directQRImage" src="" alt="QR Code" class="img-fluid mb-3" style="max-width: 250px; background-color: white; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px;">
+                    <p class="mb-2" id="directQREquipmentId">Equipment ID: {{ equipment.id }}</p>
+                    <p class="small text-muted mb-2" id="directQRDescription">Scan this QR code for quick access to equipment details.</p>
+                    <p class="small text-muted" id="directQRUrlDisplay" style="font-size: 0.8rem; word-break: break-all;"></p>
+                </div>
+                
+                <!-- QR Code buttons -->
+                <div class="d-grid gap-2 mt-3">
+                    <button type="button" class="btn btn-primary" id="directRegenerateQRBtn">
+                        <i class="bi bi-arrow-repeat"></i> Regenerate QR Code
+                    </button>
+                    <a id="directQRDownloadBtn" href="#" class="btn btn-outline-secondary" download="qr_code.png" style="display: none;">
+                        <i class="bi bi-download"></i> Download QR Code
+                    </a>
+                    <a id="directQRPrintBtn" href="#" class="btn btn-outline-secondary" onclick="printDirectQRCode()" style="display: none;">
+                        <i class="bi bi-printer"></i> Print QR Code
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Delete Equipment Confirmation Modal -->
+<div class="modal fade" id="deleteEquipmentModal" tabindex="-1" aria-labelledby="deleteEquipmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteEquipmentModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this equipment?</p>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>ID:</strong> {{ equipment.id|default(equipment_id) }}</p>
+                        <p><strong>Equipment:</strong> {{ equipment.manufacturer|default('') }} {{ equipment.model|default('') }}</p>
+                        <p><strong>Serial Number:</strong> {{ equipment.serial_number|default('') }}</p>
+                    </div>
+                </div>
+                <div class="alert alert-warning" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
+                    <h6 class="alert-heading">Cascade Deletion Warning</h6>
+                    <p><i class="bi bi-exclamation-triangle"></i> The following related data will also be deleted:</p>
+                    <ul>
+                        <li>All tickets associated with this equipment</li>
+                        <li>All QR codes generated for this equipment</li>
+                        <li>All checkout history records for this equipment</li>
+                        <li>Current equipment status and condition data</li>
+                    </ul>
+                </div>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteEquipmentForm" action="/admin/equipment/delete/{{ equipment.id|default(equipment_id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete Equipment & Related Data
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add debugging
+    console.log('Direct edit page loading for equipment ID: {{ equipment.id }}');
+    
+    // Add CSS rule to ensure warning stays visible
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded - initializing direct edit page');
+        
+        // Create style element
+        const style = document.createElement('style');
+        style.textContent = `
+            .modal-body .alert-warning {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Make sure warning stays visible when modal is shown
+        const deleteModal = document.getElementById('deleteEquipmentModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('shown.bs.modal', function() {
+                const warningElement = document.querySelector('.modal-body .alert-warning');
+                if (warningElement) {
+                    warningElement.setAttribute('style', 'display: block !important; opacity: 1 !important; visibility: visible !important;');
+                }
+            });
+        }
+        
+        // Initialize QR code display when page loads
+        setTimeout(function() {
+            console.log('Initializing QR code load');
+            loadQRCodeForDirectEdit('{{ equipment.id|default(equipment_id) }}', '{{ equipment.manufacturer|default('') }}', '{{ equipment.model|default('') }}', '{{ equipment.serial_number|default('') }}');
+        }, 500); // Short delay to ensure DOM is ready
+        
+        // Initialize the regenerate button
+        const regenerateBtn = document.getElementById('directRegenerateQRBtn');
+        if (regenerateBtn) {
+            regenerateBtn.addEventListener('click', function() {
+                console.log('Regenerate button clicked');
+                regenerateQRCodeForDirectEdit('{{ equipment.id|default(equipment_id) }}', '{{ equipment.manufacturer|default('') }}', '{{ equipment.model|default('') }}', '{{ equipment.serial_number|default('') }}');
+            });
+        }
+    });
+
+    // Function to load QR code on initial page load
+    function loadQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber) {
+        console.log("Loading QR code for direct edit page:", equipmentId);
+
+        // Show loading state
+        document.getElementById('directQRLoading').style.display = 'block';
+        document.getElementById('directQRError').style.display = 'none';
+        document.getElementById('directQRDisplay').style.display = 'none';
+
+        // Validate required fields
+        if (!equipmentId) {
+            document.getElementById('directQRLoading').style.display = 'none';
+            document.getElementById('directQRError').style.display = 'block';
+            document.getElementById('directQRErrorText').textContent = "Missing equipment ID";
+            return;
+        }
+
+        // Construct the URL for the QR code
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Check if QR code exists
+        fetch(`/admin/equipment/check-qr/${equipmentId}`)
+        .then(response => {
+            console.log("QR check response status:", response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("QR check response data:", data);
+            // Hide loading
+            document.getElementById('directQRLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                if (data.exists) {
+                    // QR code exists, display it
+                    document.getElementById('directQRDisplay').style.display = 'block';
+                    document.getElementById('directQRImage').src = data.qr_code_url;
+                    document.getElementById('directQRUrlDisplay').textContent = `When scanned, takes you to: ${qrUrl}`;
+
+                    // Set download link
+                    const downloadBtn = document.getElementById('directQRDownloadBtn');
+                    downloadBtn.href = data.qr_code_url;
+                    downloadBtn.download = `qr_code_${equipmentId}.png`;
+                    downloadBtn.style.display = 'block';
+
+                    // Show print button
+                    document.getElementById('directQRPrintBtn').style.display = 'block';
+                } else {
+                    // QR code doesn't exist, generate one
+                    console.log("QR code doesn't exist, generating new one");
+                    generateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber, false);
+                }
+            } else {
+                // Show error
+                document.getElementById('directQRError').style.display = 'block';
+                document.getElementById('directQRErrorText').textContent = data.message || 'Failed to check QR code';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking QR code:', error);
+            // Try to generate a new QR code
+            generateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber, false);
+        });
+    }
+
+    // Function to regenerate QR code
+    function regenerateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber) {
+        // Generate with force regenerate flag
+        generateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber, true);
+    }
+
+    // Function to generate or regenerate QR code
+    function generateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber, forceRegenerate = false) {
+        console.log("Generating QR code for direct edit page:", equipmentId, "Force regenerate:", forceRegenerate);
+
+        // Show loading state
+        document.getElementById('directQRLoading').style.display = 'block';
+        document.getElementById('directQRError').style.display = 'none';
+        document.getElementById('directQRDisplay').style.display = 'none';
+
+        // Validate required fields
+        if (!equipmentId) {
+            document.getElementById('directQRLoading').style.display = 'none';
+            document.getElementById('directQRError').style.display = 'block';
+            document.getElementById('directQRErrorText').textContent = "Missing equipment ID";
+            return;
+        }
+
+        // Construct the URL for the QR code
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Prepare request data
+        const requestData = {
+            url: qrUrl,
+            equipment_id: equipmentId,
+            manufacturer: manufacturer,
+            model: model,
+            serial: serialNumber,
+            force_regenerate: forceRegenerate
+        };
+
+        console.log("Sending QR generation request:", requestData);
+        
+        // Make request to generate QR code
+        fetch('/admin/equipment/generate-qr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => {
+            console.log("QR generation response status:", response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("QR generation response data:", data);
+            // Hide loading
+            document.getElementById('directQRLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                // Show QR code
+                document.getElementById('directQRDisplay').style.display = 'block';
+                document.getElementById('directQRImage').src = data.qr_code_url;
+                document.getElementById('directQRUrlDisplay').textContent = `When scanned, takes you to: ${qrUrl}`;
+
+                // Set download link
+                const downloadBtn = document.getElementById('directQRDownloadBtn');
+                downloadBtn.href = data.qr_code_url;
+                downloadBtn.download = `qr_code_${equipmentId}.png`;
+                downloadBtn.style.display = 'block';
+
+                // Show print button
+                document.getElementById('directQRPrintBtn').style.display = 'block';
+
+                // Show regeneration message if applicable
+                if (forceRegenerate) {
+                    // Check for existing message
+                    const existingMessage = document.querySelector('#directQRDisplay .alert');
+                    if (existingMessage) {
+                        existingMessage.remove();
+                    }
+
+                    // Add regenerate message
+                    const regenerateMsg = document.createElement('div');
+                    regenerateMsg.className = 'alert alert-info mt-2 mb-3';
+                    regenerateMsg.innerHTML = '<i class="bi bi-arrow-repeat"></i> QR code has been regenerated.';
+
+                    // Add after QR image
+                    const qrImage = document.getElementById('directQRImage');
+                    qrImage.parentNode.insertBefore(regenerateMsg, qrImage.nextSibling);
+                }
+            } else {
+                // Show error
+                document.getElementById('directQRError').style.display = 'block';
+                document.getElementById('directQRErrorText').textContent = data.message || 'Failed to generate QR code';
+            }
+        })
+        .catch(error => {
+            // Show error
+            console.error('Error generating QR code:', error);
+            document.getElementById('directQRLoading').style.display = 'none';
+            document.getElementById('directQRError').style.display = 'block';
+            document.getElementById('directQRErrorText').textContent = `Error: ${error.message}`;
+        });
+    }
+
+    // Function to print QR code
+    function printDirectQRCode() {
+        const qrImage = document.getElementById('directQRImage').src;
+        const equipmentId = document.getElementById('directQREquipmentId').textContent;
+        
+        // Create print window
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            console.error("Failed to open print window. Popup might be blocked.");
+            alert("Failed to open print window. Please allow popups for this site.");
+            return;
+        }
+        
+        // Create print content with simpler template and error handling
+        try {
+            printWindow.document.write('<!DOCTYPE html>');
+            printWindow.document.write('<html>');
+            printWindow.document.write('<head>');
+            printWindow.document.write('<title>QR Code - ' + equipmentId + '</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write('body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }');
+            printWindow.document.write('img { max-width: 300px; height: auto; }');
+            printWindow.document.write('.container { display: inline-block; border: 1px solid #ccc; padding: 20px; margin: 10px; }');
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head>');
+            printWindow.document.write('<body>');
+            printWindow.document.write('<div class="container">');
+            printWindow.document.write('<img src="' + qrImage + '" alt="QR Code">');
+            printWindow.document.write('<div>');
+            printWindow.document.write('<p><strong>' + equipmentId + '</strong></p>');
+            printWindow.document.write('<p>Mary Bird Perkins Cancer Center</p>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('<script>');
+            printWindow.document.write('window.onload = function() {');
+            printWindow.document.write('  setTimeout(function() {');
+            printWindow.document.write('    window.print();');
+            printWindow.document.write('    setTimeout(function() { window.close(); }, 100);');
+            printWindow.document.write('  }, 500);');
+            printWindow.document.write('};');
+            printWindow.document.write('<\/script>');
+            printWindow.document.write('</body>');
+            printWindow.document.write('</html>');
+            
+            // Close document
+            printWindow.document.close();
+        } catch (error) {
+            console.error("Error creating print window:", error);
+            if (printWindow) {
+                printWindow.close();
+            }
+            alert("Error creating print window: " + error.message);
+        }
+    }
+
+    // Legacy function for backward compatibility (for the Generate QR Code button)
+    function generateQRCode(equipmentId, manufacturer, model, serialNumber) {
+        // Just call our new function
+        regenerateQRCodeForDirectEdit(equipmentId, manufacturer, model, serialNumber);
+    }
+</script>
 {% endblock %}

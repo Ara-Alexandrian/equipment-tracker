@@ -13,6 +13,35 @@ bp = Blueprint('qr', __name__, url_prefix='/qr')
 # Initialize ticket manager
 ticket_manager = TicketManager()
 
+@bp.route('/equipment/<string:equipment_id>')
+def equipment_detail(equipment_id):
+    """View equipment details from QR code without login"""
+    # Get equipment details
+    equipment = equipment_manager.get_equipment_by_id(equipment_id)
+
+    if not equipment:
+        flash('Equipment not found', 'error')
+        return redirect(url_for('equipment.landing_page'))
+
+    # Get checkout status
+    status = checkout_manager.get_equipment_status(equipment_id)
+
+    # Get tickets for this equipment
+    tickets = ticket_manager.get_tickets_by_equipment(equipment_id)
+
+    # Get current condition
+    condition = ticket_manager.get_equipment_condition(equipment_id)
+
+    # QR scanner landing page provides quick access to all functions
+    return render_template(
+        'equipment/landing.html',
+        equipment=equipment,
+        status=status,
+        tickets=tickets,
+        condition=condition,
+        checkout_manager=checkout_manager
+    )
+
 @bp.route('/checkout/<string:equipment_id>', methods=['GET', 'POST'])
 @csrf.exempt
 def quick_checkout(equipment_id):
@@ -54,13 +83,15 @@ def quick_checkout(equipment_id):
             flash('Please provide your name or initials', 'danger')
             locations = equipment_manager.get_unique_locations()
 
-            # Get all users for dropdown - make a clean copy without passwords
+            # Get only clinical physicists for dropdown - make a clean copy without passwords
             users = {}
             for username, info in checkout_manager.users.items():
-                user_info = info.copy()
-                if 'password' in user_info:
-                    user_info.pop('password')
-                users[username] = user_info
+                # Only include users with physicist role
+                if info.get('role') == 'physicist':
+                    user_info = info.copy()
+                    if 'password' in user_info:
+                        user_info.pop('password')
+                    users[username] = user_info
 
             return render_template(
                 'checkout/quick_check_out.html',
@@ -86,13 +117,15 @@ def quick_checkout(equipment_id):
     # Get all locations for dropdown
     locations = equipment_manager.get_unique_locations()
     
-    # Get all users for dropdown - make a clean copy without passwords
+    # Get only clinical physicists for dropdown - make a clean copy without passwords
     users = {}
     for username, info in checkout_manager.users.items():
-        user_info = info.copy()
-        if 'password' in user_info:
-            user_info.pop('password')
-        users[username] = user_info
+        # Only include users with physicist role
+        if info.get('role') == 'physicist':
+            user_info = info.copy()
+            if 'password' in user_info:
+                user_info.pop('password')
+            users[username] = user_info
 
     return render_template(
         'checkout/quick_check_out.html',
@@ -143,13 +176,15 @@ def quick_checkin(equipment_id):
             flash('Please provide your name or initials', 'danger')
             locations = equipment_manager.get_unique_locations()
 
-            # Get all users for dropdown - make a clean copy without passwords
+            # Get only clinical physicists for dropdown - make a clean copy without passwords
             users = {}
             for username, info in checkout_manager.users.items():
-                user_info = info.copy()
-                if 'password' in user_info:
-                    user_info.pop('password')
-                users[username] = user_info
+                # Only include users with physicist role
+                if info.get('role') == 'physicist':
+                    user_info = info.copy()
+                    if 'password' in user_info:
+                        user_info.pop('password')
+                    users[username] = user_info
 
             return render_template(
                 'checkout/quick_check_in.html',
@@ -174,13 +209,15 @@ def quick_checkin(equipment_id):
     # Get all locations for dropdown
     locations = equipment_manager.get_unique_locations()
     
-    # Get all users for dropdown - make a clean copy without passwords
+    # Get only clinical physicists for dropdown - make a clean copy without passwords
     users = {}
     for username, info in checkout_manager.users.items():
-        user_info = info.copy()
-        if 'password' in user_info:
-            user_info.pop('password')
-        users[username] = user_info
+        # Only include users with physicist role
+        if info.get('role') == 'physicist':
+            user_info = info.copy()
+            if 'password' in user_info:
+                user_info.pop('password')
+            users[username] = user_info
 
     return render_template(
         'checkout/quick_check_in.html',
@@ -228,13 +265,15 @@ def quick_ticket(equipment_id):
             created_by = creator_name
         else:
             flash('Please provide your name or initials', 'danger')
-            # Get all users for dropdown - make a clean copy without passwords
+            # Get only clinical physicists for dropdown - make a clean copy without passwords
             users = {}
             for username, info in checkout_manager.users.items():
-                user_info = info.copy()
-                if 'password' in user_info:
-                    user_info.pop('password')
-                users[username] = user_info
+                # Only include users with physicist role
+                if info.get('role') == 'physicist':
+                    user_info = info.copy()
+                    if 'password' in user_info:
+                        user_info.pop('password')
+                    users[username] = user_info
 
             return render_template(
                 'ticket/quick_create.html',
@@ -271,15 +310,18 @@ def quick_ticket(equipment_id):
             )
             
             flash('Ticket created successfully', 'success')
-            return redirect(url_for('equipment.landing_page', equipment_id=equipment_id))
+            # Redirect to the equipment detail page where tickets are visible instead of landing page
+            return redirect(url_for('dashboard.equipment_detail', equipment_id=equipment_id))
     
-    # Get all users for dropdown - make a clean copy without passwords
+    # Get only clinical physicists for dropdown - make a clean copy without passwords
     users = {}
     for username, info in checkout_manager.users.items():
-        user_info = info.copy()
-        if 'password' in user_info:
-            user_info.pop('password')
-        users[username] = user_info
+        # Only include users with physicist role
+        if info.get('role') == 'physicist':
+            user_info = info.copy()
+            if 'password' in user_info:
+                user_info.pop('password')
+            users[username] = user_info
 
     return render_template(
         'ticket/quick_create.html',

@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Equipment Checkout - Equipment Tracker{% endblock %}
+{% block title %}Equipment Checkout - GearVue{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
@@ -20,160 +24,328 @@
     </div>
 </div>
 
+<!-- Status Cards -->
 <div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Currently Checked Out</h5>
-                <span class="badge bg-primary rounded-pill">{{ checked_out|length }}</span>
-            </div>
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
-                {% if checked_out %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Location</th>
-                                <th>Checked Out By</th>
-                                <th>Expected Return</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in checked_out %}
-                            <tr>
-                                <td>{{ item.id }}</td>
-                                <td>{{ item.location }}</td>
-                                <td>{{ item.checked_out_by }}</td>
-                                <td>{{ item.expected_return }}</td>
-                                <td>
-                                    <a href="{{ url_for('checkout.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Currently Checked Out</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ checked_out|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-box-arrow-right fs-2 text-primary"></i>
+                    </div>
                 </div>
-                {% else %}
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle-fill"></i> No equipment is currently checked out.
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
-    
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Overdue Equipment</h5>
-                <span class="badge bg-danger rounded-pill">{{ overdue|length }}</span>
-            </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-left-danger shadow h-100 py-2">
             <div class="card-body">
-                {% if overdue %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Location</th>
-                                <th>Checked Out By</th>
-                                <th>Days Overdue</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in overdue %}
-                            <tr>
-                                <td>{{ item.id }}</td>
-                                <td>{{ item.location }}</td>
-                                <td>{{ item.checked_out_by }}</td>
-                                <td class="text-danger fw-bold">{{ item.days_overdue }}</td>
-                                <td>
-                                    <a href="{{ url_for('checkout.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Overdue</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ overdue|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fs-2 text-danger"></i>
+                    </div>
                 </div>
-                {% else %}
-                <div class="alert alert-success mb-0">
-                    <i class="bi bi-check-circle-fill"></i> No equipment is currently overdue.
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">In Calibration</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ checked_out|selectattr('status', 'equalto', 'In Calibration')|list|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-tools fs-2 text-warning"></i>
+                    </div>
                 </div>
-                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">In Storage</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ checked_out|selectattr('status', 'equalto', 'In Storage')|list|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-archive fs-2 text-success"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Recent Activity</h5>
-                <a href="{{ url_for('checkout.history') }}" class="btn btn-sm btn-outline-primary">
-                    View All
-                </a>
+<!-- Equipment Management Tabs -->
+<div class="card mb-4">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" id="checkoutTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="checked-out-tab" data-bs-toggle="tab" data-bs-target="#checked-out" type="button" role="tab" aria-controls="checked-out" aria-selected="true">
+                    Checked Out Equipment
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="overdue-tab" data-bs-toggle="tab" data-bs-target="#overdue" type="button" role="tab" aria-controls="overdue" aria-selected="false">
+                    Overdue Equipment
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="recent-tab" data-bs-toggle="tab" data-bs-target="#recent" type="button" role="tab" aria-controls="recent" aria-selected="false">
+                    Recent Activity
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <!-- Filters and Legend Row -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" id="equipmentSearchInput" class="form-control" placeholder="Search equipment...">
+                </div>
             </div>
-            <div class="card-body">
-                {% if history %}
+            <div class="col-md-6 text-end">
+                <button class="btn btn-sm btn-outline-secondary legend-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#legendCollapse" aria-expanded="false" aria-controls="legendCollapse">
+                    <i class="bi bi-info-circle"></i> Show Legend
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Legend -->
+        <div class="collapse mb-3" id="legendCollapse">
+            <div class="card card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2">Equipment Status</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-primary me-2" style="min-width:80px;">Checked Out</span>
+                            <span class="text-muted">Equipment currently in use at a different location</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-warning me-2" style="min-width:80px;">Calibration</span>
+                            <span class="text-muted">Equipment sent for calibration</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-success me-2" style="min-width:80px;">In Storage</span>
+                            <span class="text-muted">Equipment available in its default location</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2">Due Status</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-success me-2" style="min-width:80px;">On Time</span>
+                            <span class="text-muted">Equipment expected to be returned on time</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-warning me-2" style="min-width:80px;">Due Soon</span>
+                            <span class="text-muted">Equipment due to be returned within 2 days</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-danger me-2" style="min-width:80px;">Overdue</span>
+                            <span class="text-muted">Equipment past its expected return date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="checkoutTabsContent">
+            <!-- Checked Out Equipment Tab -->
+            <div class="tab-pane fade show active" id="checked-out" role="tabpanel" aria-labelledby="checked-out-tab">
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+                    <table class="table table-hover table-striped checked-out-table" id="checked-out-table">
+                        <thead class="table-dark">
                             <tr>
-                                <th>Time</th>
-                                <th>Equipment ID</th>
-                                <th>Action</th>
-                                <th>User</th>
-                                <th>Details</th>
+                                <th class="col-id">Equipment ID</th>
+                                <th class="col-location">Current Location</th>
+                                <th class="col-user">Checked Out By</th>
+                                <th class="col-date">Expected Return</th>
+                                <th class="col-date">Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for entry in history %}
-                            <tr>
-                                <td>{{ entry.timestamp }}</td>
-                                <td>
-                                    <a href="{{ url_for('checkout.equipment_detail', equipment_id=entry.equipment_id) }}">
-                                        {{ entry.equipment_id }}
-                                    </a>
-                                </td>
-                                <td>
-                                    {% if entry.previous_status != entry.new_status %}
-                                        Status changed from <strong>{{ entry.previous_status }}</strong> to <strong>{{ entry.new_status }}</strong>
-                                    {% elif entry.previous_location != entry.new_location %}
-                                        Location changed from <strong>{{ entry.previous_location }}</strong> to <strong>{{ entry.new_location }}</strong>
-                                    {% else %}
-                                        Updated
-                                    {% endif %}
-                                </td>
-                                <td>{{ entry.user }}</td>
-                                <td>
-                                    {% if entry.notes %}
-                                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ entry.notes }}">
-                                        <i class="bi bi-info-circle"></i> Notes
-                                    </button>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
+                            {% if checked_out %}
+                                {% for item in checked_out %}
+                                <tr>
+                                    <td class="col-id" title="{{ item.id }}">{{ item.id }}</td>
+                                    <td class="col-location">{{ item.location }}</td>
+                                    <td class="col-user">{{ item.checked_out_by }}</td>
+                                    <td class="col-date">
+                                        {% if item.expected_return %}
+                                            {{ item.expected_return|datetime('%Y-%m-%d') }}
+                                            {% set days_left = ((item.expected_return|from_iso_date - now).days) %}
+                                            {% if days_left < 0 %}
+                                                <span class="badge bg-danger">{{ days_left|abs }} day(s) overdue</span>
+                                            {% elif days_left < 2 %}
+                                                <span class="badge bg-warning">{{ days_left }} day(s) left</span>
+                                            {% else %}
+                                                <span class="badge bg-success">{{ days_left }} day(s) left</span>
+                                            {% endif %}
+                                        {% else %}
+                                            No date set
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">Checked Out</span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('checkout.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No equipment is currently checked out.</td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
-                {% else %}
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle-fill"></i> No recent activity found.
+            </div>
+            
+            <!-- Overdue Equipment Tab -->
+            <div class="tab-pane fade" id="overdue" role="tabpanel" aria-labelledby="overdue-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped overdue-table" id="overdue-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="col-id">Equipment ID</th>
+                                <th class="col-location">Current Location</th>
+                                <th class="col-user">Checked Out By</th>
+                                <th class="col-date">Expected Return</th>
+                                <th class="col-date">Days Overdue</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if overdue %}
+                                {% for item in overdue %}
+                                <tr>
+                                    <td class="col-id" title="{{ item.id }}">{{ item.id }}</td>
+                                    <td class="col-location">{{ item.location }}</td>
+                                    <td class="col-user">{{ item.checked_out_by }}</td>
+                                    <td class="col-date">{{ item.expected_return|datetime('%Y-%m-%d') }}</td>
+                                    <td class="col-date text-danger fw-bold">{{ item.days_overdue }}</td>
+                                    <td>
+                                        <a href="{{ url_for('checkout.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No equipment is currently overdue.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
                 </div>
-                {% endif %}
+            </div>
+            
+            <!-- Recent Activity Tab -->
+            <div class="tab-pane fade" id="recent" role="tabpanel" aria-labelledby="recent-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped activity-table" id="activity-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="col-time">Time</th>
+                                <th class="col-equipment-id">Equipment ID</th>
+                                <th class="col-action">Action</th>
+                                <th class="col-user">User</th>
+                                <th class="col-details">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if history %}
+                                {% for entry in history %}
+                                <tr>
+                                    <td class="col-time">{{ entry.timestamp|datetime('%Y-%m-%d %H:%M') }}</td>
+                                    <td class="col-equipment-id">
+                                        <a href="{{ url_for('checkout.equipment_detail', equipment_id=entry.equipment_id) }}">
+                                            {{ entry.equipment_id }}
+                                        </a>
+                                    </td>
+                                    <td class="col-action">
+                                        {% if entry.previous_status != entry.new_status %}
+                                            {% if entry.new_status == "Checked Out" %}
+                                                <span class="badge bg-primary">Checked Out</span>
+                                            {% elif entry.new_status == "In Storage" %}
+                                                <span class="badge bg-success">Returned</span>
+                                            {% elif entry.new_status == "In Calibration" %}
+                                                <span class="badge bg-warning">In Calibration</span>
+                                            {% elif entry.new_status == "Under Repair" %}
+                                                <span class="badge bg-info">Under Repair</span>
+                                            {% elif entry.new_status == "Out of Service" %}
+                                                <span class="badge bg-secondary">Out of Service</span>
+                                            {% else %}
+                                                Status changed to <strong>{{ entry.new_status }}</strong>
+                                            {% endif %}
+                                        {% elif entry.previous_location != entry.new_location %}
+                                            Location changed to <strong>{{ entry.new_location }}</strong>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Updated</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="col-user">{{ entry.user }}</td>
+                                    <td class="col-details">
+                                        {% if entry.notes %}
+                                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ entry.notes }}">
+                                            <i class="bi bi-info-circle"></i> Notes
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No recent activity found.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .border-left-primary { border-left: 4px solid #4e73df; }
+    .border-left-success { border-left: 4px solid #1cc88a; }
+    .border-left-warning { border-left: 4px solid #f6c23e; }
+    .border-left-danger { border-left: 4px solid #e74a3b; }
+    
+    /* Hover effect for status cards */
+    .card.border-left-primary:hover,
+    .card.border-left-success:hover,
+    .card.border-left-warning:hover,
+    .card.border-left-danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+</style>
 {% endblock %}
 
 {% block scripts %}
@@ -182,6 +354,39 @@
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
+    });
+
+    // Equipment search functionality
+    document.getElementById('equipmentSearchInput').addEventListener('keyup', function() {
+        var searchText = this.value.toLowerCase();
+        
+        // Get all tables
+        var tables = ['checked-out-table', 'overdue-table', 'activity-table'];
+        
+        // Apply search to visible table
+        tables.forEach(function(tableId) {
+            var table = document.getElementById(tableId);
+            if (!table) return;
+            
+            var rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(function(row) {
+                var match = false;
+                var cells = row.querySelectorAll('td');
+                
+                cells.forEach(function(cell) {
+                    if (cell.textContent.toLowerCase().indexOf(searchText) > -1) {
+                        match = true;
+                    }
+                });
+                
+                if (match) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

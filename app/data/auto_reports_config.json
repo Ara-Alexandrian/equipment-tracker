@@ -1,0 +1,84 @@
+{
+  "enabled": true,
+  "schedules": {
+    "daily": {
+      "enabled": true,
+      "time": "08:00",
+      "reports": [
+        "calibration"
+      ],
+      "formats": [
+        "pdf"
+      ],
+      "email_distribution": true
+    },
+    "weekly": {
+      "enabled": true,
+      "day": "Monday",
+      "time": "09:00",
+      "reports": [
+        "inventory",
+        "checkout",
+        "calibration"
+      ],
+      "formats": [
+        "pdf",
+        "csv"
+      ],
+      "email_distribution": true
+    },
+    "monthly": {
+      "enabled": true,
+      "day": 1,
+      "time": "07:00",
+      "reports": [
+        "inventory",
+        "checkout",
+        "calibration",
+        "maintenance"
+      ],
+      "formats": [
+        "pdf",
+        "csv",
+        "excel"
+      ],
+      "email_distribution": true
+    },
+    "custom": {
+      "enabled": false,
+      "cron": "0 12 * * *",
+      "reports": [
+        "custom"
+      ],
+      "formats": [
+        "pdf"
+      ],
+      "email_distribution": true
+    }
+  },
+  "email": {
+    "enabled": true,
+    "recipients": {
+      "daily": [
+        "physicists"
+      ],
+      "weekly": [
+        "physicists",
+        "admin"
+      ],
+      "monthly": [
+        "physicists",
+        "admin",
+        "management"
+      ]
+    },
+    "subject_prefix": "[GearVue] ",
+    "body_template": "Attached is the automatically generated {report_type} report for {date_range}."
+  },
+  "storage": {
+    "enabled": true,
+    "path": "reports/auto",
+    "retention_days": 90,
+    "organize_by_type": true
+  }
+}

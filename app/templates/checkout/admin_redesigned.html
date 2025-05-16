@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - GearVue{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+<style>
+    /* Dashboard stats and cards */
+    .stats-card {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    
+    .stats-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-card {
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        height: calc(100% - 1.5rem);
+    }
+    
+    /* Action buttons */
+    .action-btn {
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        height: 100%;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+    
+    .action-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .action-text {
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    /* Alert counter */
+    .alert-counter {
+        font-size: 0.9rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 50%;
+        margin-left: 0.5rem;
+    }
+    
+    /* Equipment status badges and colors */
+    .badge-status {
+        padding: 0.4rem 0.7rem;
+        border-radius: 50px;
+        font-weight: normal;
+    }
+    
+    /* Recent activity styling */
+    .activity-item {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(var(--bs-border-color-rgb), 0.3);
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: var(--bs-secondary);
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--bs-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h1 class="mb-1">Admin Dashboard</h1>
+        <p class="lead text-muted mb-0">Welcome back, {{ session.user.name }}!</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('checkout.manage_users') }}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-people"></i> Manage Users
+        </a>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-columns-gap"></i> Main Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Equipment Status Overview -->
+<div class="row mb-4">
+    {% for status, count in status_counts.items() %}
+    <div class="col-md-4 mb-3">
+        <div class="card stats-card h-100 {% if status == 'Checked Out' %}border-primary{% elif status == 'In Storage' %}border-success{% elif status == 'In Calibration' %}border-info{% elif status == 'Under Repair' %}border-warning{% elif status == 'Out of Service' %}border-danger{% endif %}">
+            <div class="card-body text-center">
+                <div class="stats-icon {% if status == 'Checked Out' %}text-primary{% elif status == 'In Storage' %}text-success{% elif status == 'In Calibration' %}text-info{% elif status == 'Under Repair' %}text-warning{% elif status == 'Out of Service' %}text-danger{% endif %}">
+                    <i class="bi {% if status == 'Checked Out' %}bi-box-arrow-right{% elif status == 'In Storage' %}bi-archive{% elif status == 'In Calibration' %}bi-tools{% elif status == 'Under Repair' %}bi-wrench{% elif status == 'Out of Service' %}bi-exclamation-triangle{% endif %}"></i>
+                </div>
+                <h2 class="display-4 mb-0">{{ count }}</h2>
+                <p class="text-muted mb-2">{{ status }} Items</p>
+                <a href="{{ url_for('dashboard.equipment_list') }}" class="btn btn-sm {% if status == 'Checked Out' %}btn-primary{% elif status == 'In Storage' %}btn-success{% elif status == 'In Calibration' %}btn-info{% elif status == 'Under Repair' %}btn-warning{% elif status == 'Out of Service' %}btn-danger{% endif %}">
+                    View Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Quick Actions and System Stats -->
+<div class="row mb-4">
+    <!-- Quick Actions -->
+    <div class="col-md-8">
+        <div class="card admin-card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Equipment Management -->
+                    <div class="col-md-4 col-sm-6">
+                        <a href="{{ url_for('admin.equipment_management') }}" class="action-btn bg-light">
+                            <i class="bi bi-tools action-icon text-primary"></i>
+                            <span class="action-text">Equipment Management</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Calendar -->
+                    <div class="col-md-4 col-sm-6">
+                        <a href="{{ url_for('admin.calendar') }}" class="action-btn bg-light">
+                            <i class="bi bi-calendar3 action-icon text-success"></i>
+                            <span class="action-text">Equipment Calendar</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Reports -->
+                    <div class="col-md-4 col-sm-6">
+                        <a href="{{ url_for('admin.reports') }}" class="action-btn bg-light">
+                            <i class="bi bi-file-earmark-pdf action-icon text-danger"></i>
+                            <span class="action-text">Generate Reports</span>
+                        </a>
+                    </div>
+                    
+                    <!-- User Management -->
+                    <div class="col-md-4 col-sm-6">
+                        <a href="{{ url_for('checkout.manage_users') }}" class="action-btn bg-light">
+                            <i class="bi bi-people action-icon text-info"></i>
+                            <span class="action-text">Manage Users</span>
+                        </a>
+                    </div>
+                    
+                    <!-- System Settings -->
+                    <div class="col-md-4 col-sm-6">
+                        <a href="{{ url_for('admin.settings') }}" class="action-btn bg-light">
+                            <i class="bi bi-gear action-icon text-warning"></i>
+                            <span class="action-text">System Settings</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Locations -->
+                    <div class="col-md-4 col-sm-6">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#locationModal" class="action-btn bg-light">
+                            <i class="bi bi-geo-alt action-icon text-secondary"></i>
+                            <span class="action-text">Manage Locations</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Stats -->
+    <div class="col-md-4">
+        <div class="card admin-card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> System Stats</h5>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Total Users
+                        <span class="badge bg-primary rounded-pill">{{ users|length }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Administrators
+                        <span class="badge bg-danger rounded-pill">{{ users.values()|selectattr('role', 'equalto', 'admin')|list|length }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Physicists
+                        <span class="badge bg-warning text-dark rounded-pill">{{ users.values()|selectattr('role', 'equalto', 'physicist')|list|length }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Regular Users
+                        <span class="badge bg-info rounded-pill">{{ users.values()|selectattr('role', 'equalto', 'user')|list|length }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Total Equipment
+                        <span class="badge bg-success rounded-pill">{{ status_counts.values()|sum }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card admin-card">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-activity"></i> Recent Activity</h5>
+                <a href="{{ url_for('checkout.notification_history') }}" class="btn btn-sm btn-light">
+                    <i class="bi bi-clock-history"></i> View All
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <!-- Left Column -->
+                    <div class="col-md-6">
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="user-avatar bg-primary">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Equipment Checkout</div>
+                                <div>Chamber-CNMC-123456 checked out by echorniak</div>
+                                <div class="activity-time">
+                                    <i class="bi bi-clock"></i> Today, 4:13 PM
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="user-avatar bg-warning">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Calibration Alert</div>
+                                <div>3 items due for calibration this month</div>
+                                <div class="activity-time">
+                                    <i class="bi bi-clock"></i> Yesterday, 9:15 AM
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="user-avatar bg-danger">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Maintenance Ticket Created</div>
+                                <div>Chamber-PTW-333222 marked for repair</div>
+                                <div class="activity-time">
+                                    <i class="bi bi-clock"></i> May 2, 2:45 PM
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="user-avatar bg-secondary">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Equipment Updated</div>
+                                <div>Location changed for Chamber-STD-111222</div>
+                                <div class="activity-time">
+                                    <i class="bi bi-clock"></i> May 1, 11:30 AM
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-6">
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="user-avatar bg-success">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Equipment Return</div>
+                                <div>Chamber-PTW-987654 returned by admin</div>
+                                <div class="activity-time">
+                                    <i class="bi bi-clock"></i> Today, 10:30 AM
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="user-avatar bg-info">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">New User Added</div>
+                                <div>User "astam" added by admin</div>
+                                <div class="activity-time">
+                                    <i class="bi bi-clock"></i> Yesterday, 8:45 AM
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="user-avatar bg-primary">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">System Backup</div>
+                                <div>Automatic backup completed successfully</div>
+                                <div class="activity-time">
+                                    <i class="bi bi-clock"></i> May 2, 12:00 AM
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex align-items-center">
+                            <div class="user-avatar bg-warning">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Notification Sent</div>
+                                <div>Calibration reminder sent to 2 users</div>
+                                <div class="activity-time">
+                                    <i class="bi bi-clock"></i> May 1, 9:00 AM
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('checkout.notification_history') }}" class="btn btn-sm btn-outline-success">View Complete Activity History</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Location Modal -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="locationModalLabel">Manage Locations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This feature is coming soon. You will be able to add, edit, and remove locations used for equipment tracking.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calibration Modal -->
+<div class="modal fade" id="calibrationModal" tabindex="-1" aria-labelledby="calibrationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="calibrationModalLabel">Calibration Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This feature is coming soon. You will be able to configure calibration intervals and notification preferences for different equipment types.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

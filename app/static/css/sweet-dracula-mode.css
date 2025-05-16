@@ -1,0 +1,493 @@
+/* 
+ * Sweet Dracula Mode Styles for Equipment Tracker
+ * This file contains all Sweet Dracula theme specific styles
+ * Based on the popular Dracula theme but with softer, sweeter tones
+ */
+
+/* Base Sweet Dracula mode body and background */
+:root.sweet-dracula-mode,
+html.sweet-dracula-mode,
+body.sweet-dracula-mode,
+.sweet-dracula-mode {
+  --bs-body-bg: #2b2a3d !important;
+  --bs-body-color: #f5efff !important;
+  --bs-card-bg: #3c3652 !important;
+  --bs-card-border-color: #675f89 !important;
+  --bs-navbar-active-color: #ff92df !important;
+  --bs-table-color: #f5efff !important;
+  --bs-table-border-color: #675f89 !important;
+  --bs-table-striped-bg: rgba(68, 71, 90, 0.5) !important;
+  
+  background-color: #2b2a3d !important;
+  color: #f5efff !important;
+}
+
+/* Strengthen selector for body in Sweet Dracula mode */
+html[class*="sweet-dracula-mode"],
+body[class*="sweet-dracula-mode"] {
+  background-color: #2b2a3d !important;
+  color: #f5efff !important;
+}
+
+/* Direct element targeting for key components when Sweet Dracula mode is active */
+html.sweet-dracula-mode body, 
+body.sweet-dracula-mode {
+  background-color: #2b2a3d !important;
+  color: #f5efff !important;
+}
+
+/* Ensure the entire page gets the Sweet Dracula background even if classes are missing */
+html.sweet-dracula-mode {
+  background-color: #2b2a3d !important;
+}
+
+/* Navbar adjustments */
+body.sweet-dracula-mode .navbar,
+body.sweet-dracula-mode .navbar-dark {
+  background-color: #3c3652 !important;
+  border-bottom: 1px solid #675f89 !important;
+}
+
+body.sweet-dracula-mode .navbar-dark .navbar-nav .nav-link {
+  color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .navbar-dark .navbar-nav .nav-link:hover,
+body.sweet-dracula-mode .navbar-dark .navbar-nav .nav-link:focus,
+body.sweet-dracula-mode .navbar-dark .navbar-nav .nav-link.active {
+  color: #ff92df !important;
+}
+
+/* Card adjustments */
+body.sweet-dracula-mode .card:not(.bg-primary):not(.bg-success):not(.bg-info):not(.bg-warning):not(.bg-danger) {
+  background-color: #3c3652 !important;
+  border-color: #675f89 !important;
+  color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .card-header {
+  background-color: #34304a !important;
+  border-color: #675f89 !important;
+  color: #a2bbe8 !important;
+}
+
+/* Accent colors for cards */
+body.sweet-dracula-mode .card.bg-primary {
+  background-color: #c7a0ff !important;
+  border-color: #675f89 !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .card.bg-success {
+  background-color: #9df2bd !important;
+  border-color: #675f89 !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .card.bg-info {
+  background-color: #a2bbe8 !important;
+  border-color: #675f89 !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .card.bg-warning {
+  background-color: #ffca95 !important;
+  border-color: #675f89 !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .card.bg-danger {
+  background-color: #ff92b1 !important;
+  border-color: #675f89 !important;
+  color: #2b2a3d !important;
+}
+
+/* Table adjustments */
+body.sweet-dracula-mode .table {
+  color: #f5efff !important;
+  border-color: #675f89 !important;
+}
+
+body.sweet-dracula-mode .table th,
+body.sweet-dracula-mode .table td {
+  border-color: #675f89 !important;
+}
+
+body.sweet-dracula-mode .table thead th {
+  background-color: #3c3652 !important;
+  color: #ff92df !important;
+}
+
+body.sweet-dracula-mode .table-hover tbody tr:hover {
+  background-color: rgba(199, 160, 255, 0.15) !important;
+  color: #f5efff !important;
+}
+
+/* Form controls */
+body.sweet-dracula-mode .form-control,
+body.sweet-dracula-mode .form-select {
+  background-color: #3c3652 !important;
+  border-color: #675f89 !important;
+  color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .form-control:focus,
+body.sweet-dracula-mode .form-select:focus {
+  box-shadow: 0 0 0 0.25rem rgba(199, 160, 255, 0.25) !important;
+  border-color: #c7a0ff !important;
+}
+
+/* Dropdowns */
+body.sweet-dracula-mode .dropdown-menu {
+  background-color: #3c3652 !important;
+  border-color: #675f89 !important;
+}
+
+body.sweet-dracula-mode .dropdown-item {
+  color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .dropdown-item:hover {
+  background-color: #4f4866 !important;
+  color: #ffffff !important;
+}
+
+body.sweet-dracula-mode .dropdown-item.active {
+  background-color: #c7a0ff !important;
+  color: #2b2a3d !important;
+  font-weight: bold;
+}
+
+/* Footer */
+body.sweet-dracula-mode footer,
+body.sweet-dracula-mode .footer {
+  background-color: #3c3652 !important;
+  border-top: 1px solid #675f89 !important;
+}
+
+/* Text colors */
+body.sweet-dracula-mode .text-muted {
+  color: #d0c8ec !important;
+}
+
+/* Links */
+body.sweet-dracula-mode a:not(.btn) {
+  color: #a2bbe8 !important;
+}
+
+body.sweet-dracula-mode a:not(.btn):hover {
+  color: #ff92df !important;
+  text-decoration: underline;
+}
+
+/* Remove underline from navbar brand in sweet-dracula mode */
+body.sweet-dracula-mode .navbar-brand:hover,
+body.sweet-dracula-mode .navbar-brand:hover .brand-text {
+  text-decoration: none !important;
+}
+
+/* Nav tabs with better contrast for sweet-dracula mode */
+body.sweet-dracula-mode .nav-tabs {
+  border-bottom-color: #675f89 !important;
+}
+
+body.sweet-dracula-mode .nav-tabs .nav-link {
+  color: #ffffff !important;
+  background-color: #483d66 !important;
+  border-color: #675f89 !important;
+  margin-right: 3px !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  letter-spacing: 0.5px !important;
+}
+
+body.sweet-dracula-mode .nav-tabs .nav-link:hover {
+  background-color: #5e5579 !important;
+  border-color: #786ca0 !important;
+  color: #ffffff !important;
+}
+
+body.sweet-dracula-mode .nav-tabs .nav-link.active {
+  background-color: #c7a0ff !important;
+  color: #2b2a3d !important;
+  border-color: #c7a0ff !important;
+  font-weight: bold !important;
+  box-shadow: 0 0 8px rgba(199, 160, 255, 0.5) !important;
+}
+
+/* Buttons */
+body.sweet-dracula-mode .btn-outline-light {
+  color: #f5efff !important;
+  border-color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .btn-outline-light:hover {
+  background-color: #f5efff !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .btn-outline-primary {
+  color: #c7a0ff !important;
+  border-color: #c7a0ff !important;
+}
+
+body.sweet-dracula-mode .btn-outline-primary:hover {
+  background-color: #c7a0ff !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .btn-primary {
+  background-color: #c7a0ff !important;
+  border-color: #a378ff !important;
+  color: #2b2a3d !important;
+}
+
+/* Alert styles */
+body.sweet-dracula-mode .alert {
+  background-color: #3c3652 !important;
+  border-color: #675f89 !important;
+  color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .alert-success {
+  background-color: rgba(157, 242, 189, 0.2) !important;
+  border-color: #9df2bd !important;
+  color: #9df2bd !important;
+}
+
+body.sweet-dracula-mode .alert-danger {
+  background-color: rgba(255, 146, 177, 0.2) !important;
+  border-color: #ff92b1 !important;
+  color: #ff92b1 !important;
+}
+
+body.sweet-dracula-mode .alert-warning {
+  background-color: rgba(255, 202, 149, 0.2) !important;
+  border-color: #ffca95 !important;
+  color: #ffca95 !important;
+}
+
+body.sweet-dracula-mode .alert-info {
+  background-color: rgba(162, 187, 232, 0.2) !important;
+  border-color: #a2bbe8 !important;
+  color: #a2bbe8 !important;
+}
+
+/* Badges */
+body.sweet-dracula-mode .badge.bg-success {
+  background-color: #9df2bd !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .badge.bg-danger {
+  background-color: #ff92b1 !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .badge.bg-warning {
+  background-color: #ffca95 !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .badge.bg-info {
+  background-color: #a2bbe8 !important;
+  color: #2b2a3d !important;
+}
+
+body.sweet-dracula-mode .badge.bg-primary {
+  background-color: #c7a0ff !important;
+  color: #2b2a3d !important;
+}
+
+/* Code blocks */
+body.sweet-dracula-mode pre, 
+body.sweet-dracula-mode code {
+  background-color: #3c3652 !important;
+  color: #d0c8ec !important;
+  border-color: #675f89 !important;
+}
+
+/* Sweet Dracula theme toggle button enhancement */
+body.sweet-dracula-mode #theme-btn {
+  box-shadow: 0 0 5px rgba(255, 146, 223, 0.7) !important;
+}
+
+/* Sweet Dracula mode navbar and footer logos - enhance visibility */
+body.sweet-dracula-mode .navbar-logo,
+body.sweet-dracula-mode .footer-logo {
+  filter: brightness(1.4) contrast(1.0);
+  mix-blend-mode: color-dodge;
+  background-color: transparent !important;
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><filter id="a"><feGaussianBlur stdDeviation="0.8" /></filter><circle cx="50%" cy="50%" r="50%" filter="url(%23a)"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><filter id="a"><feGaussianBlur stdDeviation="0.8" /></filter><circle cx="50%" cy="50%" r="50%" filter="url(%23a)"/></svg>');
+}
+
+/* Sweet Dracula mode dashboard logo - maintain original colors */
+body.sweet-dracula-mode .dashboard-logo-container img.dashboard-logo {
+  filter: brightness(1.4) contrast(1.0);
+  mix-blend-mode: color-dodge;
+}
+
+/* Filter items */
+body.sweet-dracula-mode .filter-item:hover {
+  background-color: #4f4866 !important;
+}
+
+body.sweet-dracula-mode .filter-item.active {
+  background-color: #5e5579 !important;
+  font-weight: bold;
+}
+
+/* Network visualization tooltips */
+body.sweet-dracula-mode .tooltip {
+  background-color: rgba(60, 54, 82, 0.98) !important;
+  border-color: #675f89 !important;
+  color: #f5efff !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.sweet-dracula-mode .tooltip-title {
+  border-color: #675f89 !important;
+  color: #fff !important;
+}
+
+body.sweet-dracula-mode .tooltip-label {
+  color: #d0c8ec !important;
+}
+
+/* Status indicators with softer colors */
+body.sweet-dracula-mode .status-ok {
+  background-color: #9df2bd !important;
+}
+
+body.sweet-dracula-mode .status-warning {
+  background-color: #ffca95 !important;
+}
+
+body.sweet-dracula-mode .status-danger {
+  background-color: #ff92b1 !important;
+}
+
+/* Improved dropdown menu appearance */
+body.sweet-dracula-mode .navbar-nav .dropdown-menu {
+  padding: 8px;
+  min-width: 220px;
+}
+
+body.sweet-dracula-mode .navbar-nav .dropdown-menu .dropdown-item {
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin-bottom: 2px;
+  transition: all 0.2s ease;
+}
+
+body.sweet-dracula-mode .navbar-nav .nav-link.active {
+  background-color: rgba(255, 146, 223, 0.15);
+  border-radius: 4px;
+}
+
+/* Visual dashboard charts */
+body.sweet-dracula-mode .network-container {
+  background-color: #3c3652 !important;
+  border-color: #675f89 !important;
+}
+
+body.sweet-dracula-mode .chart-container svg text {
+  fill: #f5efff !important;
+}
+
+body.sweet-dracula-mode .chart-container svg line,
+body.sweet-dracula-mode .chart-container svg path.domain {
+  stroke: #675f89 !important;
+}
+
+/* Modal styles */
+body.sweet-dracula-mode .modal-content {
+  background-color: #3c3652 !important;
+  border-color: #675f89 !important;
+  color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .modal-header {
+  border-color: #675f89 !important;
+}
+
+body.sweet-dracula-mode .modal-footer {
+  border-color: #675f89 !important;
+}
+
+/* Bootstrap components */
+body.sweet-dracula-mode .accordion {
+  --bs-accordion-bg: #3c3652 !important;
+  --bs-accordion-border-color: #675f89 !important;
+  --bs-accordion-color: #f5efff !important;
+  --bs-accordion-btn-color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .list-group {
+  --bs-list-group-bg: #3c3652 !important;
+  --bs-list-group-border-color: #675f89 !important;
+  --bs-list-group-color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .list-group-item {
+  background-color: #3c3652 !important;
+  border-color: #675f89 !important;
+  color: #f5efff !important;
+}
+
+body.sweet-dracula-mode .list-group-item.active {
+  background-color: #c7a0ff !important;
+  border-color: #c7a0ff !important;
+  color: #2b2a3d !important;
+}
+
+/* Focus-visible outlines */
+body.sweet-dracula-mode :focus-visible {
+  outline-color: #ff92df !important;
+}
+
+/* Logo visibility for sweet-dracula mode */
+body.sweet-dracula-mode .light-mode-logo {
+  display: none !important;
+}
+
+body.sweet-dracula-mode .dark-mode-logo {
+  display: inline-block !important;
+}
+
+/* Sweet Dracula mode specific styling for the logo container */
+body.sweet-dracula-mode .dashboard-logo-container {
+  background: linear-gradient(145deg, #2b2a3d, #3c3652);
+  box-shadow:
+    inset 0 0 15px rgba(199, 160, 255, 0.3),
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    0 0 0 4px rgba(154, 147, 209, 0.4),
+    0 0 0 6px rgba(103, 95, 137, 0.5);
+}
+
+/* Sweet Dracula mode glassy effect with softer purple hues */
+body.sweet-dracula-mode .dashboard-logo-container::before {
+  background: linear-gradient(135deg, rgba(199, 160, 255, 0.25) 0%, rgba(103, 95, 137, 0.05) 50%, rgba(43, 42, 61, 0) 51%, rgba(103, 95, 137, 0.05) 100%);
+}
+
+/* Sweet Dracula mode metallic shine effect with softer tones */
+body.sweet-dracula-mode .dashboard-logo-container::after {
+  background: linear-gradient(135deg, rgba(255, 146, 223, 0.25) 0%, rgba(103, 95, 137, 0) 70%);
+  width: 45%;
+  height: 45%;
+}
+
+/* Sweet Dracula mode logo glow effect */
+body.sweet-dracula-mode .dashboard-logo-container img.dashboard-logo {
+  filter: drop-shadow(0 0 8px rgba(199, 160, 255, 0.5)) brightness(1.4) contrast(1.2) hue-rotate(310deg);
+  mix-blend-mode: multiply;
+}
+
+/* Sweet Dracula mode navbar and footer logos - enhance visibility */
+body.sweet-dracula-mode .navbar-logo,
+body.sweet-dracula-mode .footer-logo {
+  filter: brightness(1.4) contrast(1.2) hue-rotate(310deg);
+  mix-blend-mode: multiply;
+  background-color: transparent !important;
+}

@@ -1,17 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Equipment Management - Admin - Equipment Tracker{% endblock %}
+{% block title %}Equipment Management - Admin - GearVue{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+<script>
+    // Add class to body for wider container
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('page-admin-equipment');
+        document.body.classList.add('wide-container');
+    });
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <h1>Equipment Management <span class="badge bg-warning">NEW VERSION</span></h1>
-        <p class="lead">Add, edit, or remove equipment items in the system. <strong>jQuery-Enhanced: May 11, 2025 v2</strong></p>
-        <div class="alert alert-info">
-            <p><strong>Important:</strong> This page uses JavaScript for form interaction, which may not always work consistently.</p>
-            <p><strong>If you're having issues with the edit form:</strong> Use our <a href="{{ url_for('admin.equipment_management_direct') }}" class="alert-link font-weight-bold">direct edit version</a> which uses reliable server-side rendering instead of JavaScript.</p>
-            <p>The direct version also makes it easier to generate and print QR codes for equipment.</p>
-        </div>
+        <h1>Equipment Management</h1>
+        <p class="lead">Add, edit, or remove equipment items in the system.</p>
     </div>
     <div class="col-md-4 text-end">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
@@ -20,87 +26,262 @@
         <a href="{{ url_for('checkout.admin') }}" class="btn btn-outline-secondary ms-2">
             <i class="bi bi-arrow-left"></i> Back to Admin
         </a>
+        <a href="{{ url_for('admin.equipment_management_direct') }}" class="btn btn-outline-secondary ms-2" title="Alternative equipment editing interface">
+            <i class="bi bi-sliders"></i> Direct Edit
+        </a>
     </div>
 </div>
 
 <!-- Equipment Stats Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body text-center">
-                <h5 class="card-title">Total Equipment</h5>
-                <h2 class="display-4">{{ stats.total_equipment }}</h2>
+        <a href="{{ url_for('admin.equipment_management') }}" class="text-decoration-none">
+            <div class="card bg-primary text-white stat-card">
+                <div class="card-body text-center pb-1">
+                    <h5 class="card-title mb-1">Total Equipment</h5>
+                    <h2 class="display-4 mb-1">{{ stats.total_equipment }}</h2>
+                </div>
+                <div class="card-footer text-white text-center p-1">
+                    <small><i class="bi bi-search"></i> View All</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body text-center">
-                <h5 class="card-title">Chambers</h5>
-                <h2 class="display-4">{{ stats.chambers_count }}</h2>
+        <a href="{{ url_for('admin.equipment_management', category='Chamber') }}" class="text-decoration-none">
+            <div class="card bg-success text-white stat-card">
+                <div class="card-body text-center pb-1">
+                    <h5 class="card-title mb-1">Chambers</h5>
+                    <h2 class="display-4 mb-1">{{ stats.chambers_count }}</h2>
+                </div>
+                <div class="card-footer text-white text-center p-1">
+                    <small><i class="bi bi-filter"></i> Filter by Chambers</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body text-center">
-                <h5 class="card-title">Electrometers</h5>
-                <h2 class="display-4">{{ stats.electrometers_count }}</h2>
+        <a href="{{ url_for('admin.equipment_management', category='Electrometer') }}" class="text-decoration-none">
+            <div class="card bg-info text-white stat-card">
+                <div class="card-body text-center pb-1">
+                    <h5 class="card-title mb-1">Electrometers</h5>
+                    <h2 class="display-4 mb-1">{{ stats.electrometers_count }}</h2>
+                </div>
+                <div class="card-footer text-white text-center p-1">
+                    <small><i class="bi bi-filter"></i> Filter by Electrometers</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body text-center">
-                <h5 class="card-title">Survey Meters</h5>
-                <h2 class="display-4">{{ stats.survey_meters_count }}</h2>
+        <a href="{{ url_for('admin.equipment_management', category='Survey Meter') }}" class="text-decoration-none">
+            <div class="card bg-warning text-dark stat-card">
+                <div class="card-body text-center pb-1">
+                    <h5 class="card-title mb-1">Survey Meters</h5>
+                    <h2 class="display-4 mb-1">{{ stats.survey_meters_count }}</h2>
+                </div>
+                <div class="card-footer text-dark text-center p-1">
+                    <small><i class="bi bi-filter"></i> Filter by Survey Meters</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
-<!-- Filter and Search Row -->
+<!-- Filters -->
+<div class="mb-4">
+    <div class="d-flex align-items-center flex-wrap">
+        <!-- Category Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="categoryFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-tags"></i> Category:
+                {% if selected_category %}{{ selected_category }}{% else %}All{% endif %}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="categoryFilterDropdown">
+                <li><a class="dropdown-item {% if not selected_category %}active{% endif %}" href="{{ url_for('admin.equipment_management', manufacturer=selected_manufacturer, location=selected_location) }}">
+                    <i class="bi bi-grid-3x3-gap"></i> All Categories
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                {% for category in categories %}
+                <li><a class="dropdown-item {% if selected_category == category %}active{% endif %}" href="{{ url_for('admin.equipment_management', category=category, manufacturer=selected_manufacturer, location=selected_location) }}">
+                    {% if category == 'Chamber' %}<i class="bi bi-circle-square"></i>
+                    {% elif category == 'Electrometer' %}<i class="bi bi-device-ssd"></i>
+                    {% elif category == 'Survey Meter' %}<i class="bi bi-radioactive"></i>
+                    {% else %}<i class="bi bi-box"></i>{% endif %}
+                    {{ category }}
+                </a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Manufacturer Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="manufacturerFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-building"></i> Manufacturer: {{ selected_manufacturer or 'All' }}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="manufacturerFilterDropdown" style="max-height: 350px; overflow-y: auto;">
+                <li><a class="dropdown-item {% if not selected_manufacturer %}active{% endif %}" href="{{ url_for('admin.equipment_management', category=selected_category, location=selected_location) }}">All Manufacturers</a></li>
+                <li><hr class="dropdown-divider"></li>
+                {% for manufacturer in manufacturers %}
+                <li><a class="dropdown-item {% if selected_manufacturer == manufacturer %}active{% endif %}" href="{{ url_for('admin.equipment_management', category=selected_category, manufacturer=manufacturer, location=selected_location) }}">{{ manufacturer }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Location Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="locationFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-geo-alt"></i> Location: {{ selected_location or 'All' }}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="locationFilterDropdown" style="max-height: 350px; overflow-y: auto;">
+                <li><a class="dropdown-item {% if not selected_location %}active{% endif %}" href="{{ url_for('admin.equipment_management', category=selected_category, manufacturer=selected_manufacturer, status=status_filter) }}">All Locations</a></li>
+                <li><hr class="dropdown-divider"></li>
+                {% for location in locations %}
+                <li><a class="dropdown-item {% if selected_location == location %}active{% endif %}" href="{{ url_for('admin.equipment_management', category=selected_category, manufacturer=selected_manufacturer, location=location, status=status_filter) }}">{{ location }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="statusFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-circle-half"></i> Status:
+                {% if status_filter == 'available' %}Available
+                {% elif status_filter == 'checked_out' %}Checked Out
+                {% elif status_filter == 'transport_requested' %}Transport Req.
+                {% elif status_filter == 'in_transit' %}In Transit
+                {% elif status_filter == 'any_transport' %}Any Transport
+                {% else %}All
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="statusFilterDropdown">
+                <li><a class="dropdown-item {% if not status_filter %}active{% endif %}" href="{{ url_for('admin.equipment_management', category=selected_category, location=selected_location, manufacturer=selected_manufacturer) }}">All Statuses</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item {% if status_filter == 'available' %}active{% endif %}" href="{{ url_for('admin.equipment_management', status='available', category=selected_category, location=selected_location, manufacturer=selected_manufacturer) }}">
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Available</span>
+                </a></li>
+                <li><a class="dropdown-item {% if status_filter == 'checked_out' %}active{% endif %}" href="{{ url_for('admin.equipment_management', status='checked_out', category=selected_category, location=selected_location, manufacturer=selected_manufacturer) }}">
+                    <span class="badge bg-info"><i class="bi bi-box-arrow-right"></i> Checked Out</span>
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item {% if status_filter == 'transport_requested' %}active{% endif %}" href="{{ url_for('admin.equipment_management', status='transport_requested', category=selected_category, location=selected_location, manufacturer=selected_manufacturer) }}">
+                    <span class="badge bg-secondary"><i class="bi bi-truck"></i> Transport Requested</span>
+                </a></li>
+                <li><a class="dropdown-item {% if status_filter == 'in_transit' %}active{% endif %}" href="{{ url_for('admin.equipment_management', status='in_transit', category=selected_category, location=selected_location, manufacturer=selected_manufacturer) }}">
+                    <span class="badge bg-dark"><i class="bi bi-truck"></i> In Transit</span>
+                </a></li>
+                <li><a class="dropdown-item {% if status_filter == 'any_transport' %}active{% endif %}" href="{{ url_for('admin.equipment_management', status='any_transport', category=selected_category, location=selected_location, manufacturer=selected_manufacturer) }}">
+                    <span class="badge bg-secondary"><i class="bi bi-truck"></i> Any Transport Status</span>
+                </a></li>
+            </ul>
+        </div>
+
+        <!-- Clear Filters -->
+        {% if selected_location or selected_category or selected_manufacturer or status_filter %}
+        <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-outline-danger mb-2">
+            <i class="bi bi-x-circle"></i> Clear Filters
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .filter-btn {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        min-width: 130px;
+        text-align: left;
+    }
+
+    .filter-btn i {
+        margin-right: 5px;
+    }
+</style>
+
+<!-- Legend for Status Badges -->
 <div class="row mb-4">
     <div class="col-md-12">
         <div class="card">
-            <div class="card-header">
-                <h5>Filter Equipment</h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Status Legend</h5>
+                <button class="btn btn-sm btn-outline-secondary legend-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#legendCollapse" aria-expanded="false" aria-controls="legendCollapse">
+                    <i class="bi bi-info-circle me-1"></i> <span class="legend-toggle-text">Show Legend</span>
+                </button>
             </div>
-            <div class="card-body">
-                <form action="{{ url_for('admin.equipment_management') }}" method="GET" class="row g-3">
-                    <div class="col-md-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select class="form-select" id="category" name="category">
-                            <option value="">All Categories</option>
-                            {% for category in categories %}
-                            <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
-                            {% endfor %}
-                        </select>
+            <div class="collapse" id="legendCollapse">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Status badges -->
+                        <div class="col-md-3">
+                            <h6 class="border-bottom pb-2">Equipment Status</h6>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-success me-2"><i class="bi bi-check-circle"></i> Ready</span>
+                                <span class="text-muted small">Equipment is available for checkout</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-info me-2"><i class="bi bi-arrow-bar-right"></i> Out</span>
+                                <span class="text-muted small">Equipment is currently checked out</span>
+                            </div>
+                        </div>
+
+                        <!-- Transport badges -->
+                        <div class="col-md-3">
+                            <h6 class="border-bottom pb-2">Transport Status</h6>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-secondary me-2"><i class="bi bi-truck"></i> Transport</span>
+                                <span class="text-muted small">Transport has been requested</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-dark me-2"><i class="bi bi-truck"></i> Moving</span>
+                                <span class="text-muted small">Equipment is in transit</span>
+                            </div>
+                        </div>
+
+                        <!-- Condition badges -->
+                        <div class="col-md-3">
+                            <h6 class="border-bottom pb-2">Equipment Condition</h6>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-success me-2"><i class="bi bi-circle-fill"></i> OK</span>
+                                <span class="text-muted small">Equipment is in normal condition</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-warning me-2"><i class="bi bi-exclamation-triangle-fill"></i> Attn</span>
+                                <span class="text-muted small">Equipment needs attention</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-danger me-2"><i class="bi bi-x-circle-fill"></i> OOS</span>
+                                <span class="text-muted small">Equipment is out of service</span>
+                            </div>
+                        </div>
+
+                        <!-- Calibration badges -->
+                        <div class="col-md-3">
+                            <h6 class="border-bottom pb-2">Calibration Status</h6>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-danger me-2"><i class="bi bi-calendar-x"></i> Cal Due</span>
+                                <span class="text-muted small">Calibration is overdue</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-warning me-2"><i class="bi bi-calendar-check"></i> Cal Soon</span>
+                                <span class="text-muted small">Calibration is due soon</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label for="manufacturer" class="form-label">Manufacturer</label>
-                        <select class="form-select" id="manufacturer" name="manufacturer">
-                            <option value="">All Manufacturers</option>
-                            {% for manufacturer in manufacturers %}
-                            <option value="{{ manufacturer }}" {% if selected_manufacturer == manufacturer %}selected{% endif %}>{{ manufacturer }}</option>
-                            {% endfor %}
-                        </select>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2">Location Information</h6>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="me-2"><strong class="small text-muted">Primary:</strong> Main Location</span>
+                                <span class="text-muted small">The default storage location for this equipment</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="me-2"><strong class="small text-muted">Current:</strong> <span class="text-info">Temporary Location</span></span>
+                                <span class="text-muted small">Where the equipment is currently located (if checked out)</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label for="location" class="form-label">Location</label>
-                        <select class="form-select" id="location" name="location">
-                            <option value="">All Locations</option>
-                            {% for location in locations %}
-                            <option value="{{ location }}" {% if selected_location == location %}selected{% endif %}>{{ location }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-filter"></i> Apply Filters
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -116,56 +297,143 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover" id="equipmentTable">
+                    <table class="table table-hover equipment-table" id="equipmentTable">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th>Manufacturer</th>
-                                <th>Model</th>
-                                <th>Serial Number</th>
-                                <th>Location</th>
-                                <th>Calibration Due</th>
-                                <th>Actions</th>
+                                <th class="col-id-category">Cat/Type/ID</th>
+                                <th class="col-manufacturer">Manufacturer</th>
+                                <th class="col-model">Model</th>
+                                <th class="col-serial">Serial Number</th>
+                                <th class="col-location">Location</th>
+                                <th class="col-calibration">Calibration Due</th>
+                                <th class="col-status" style="min-width: 80px; width: 8%;">Status</th>
+                                <th class="col-condition" style="min-width: 60px; width: 6%;">Condition</th>
+                                <th class="col-actions text-center" style="min-width: 60px; width: 6%;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in equipment %}
                             <tr>
-                                <td>{{ item.id }}</td>
-                                <td>{{ item.category }}</td>
-                                <td>{{ item.equipment_type }}</td>
+                                <td>
+                                    <div class="id-category-cell">
+                                        <div class="equipment-category small"><strong>Category:</strong> {{ item.category }}</div>
+                                        <div class="equipment-type small"><strong>Type:</strong> {{ item.equipment_type }}</div>
+                                        <div class="equipment-id small"><strong>ID:</strong> {{ item.id }}</div>
+                                    </div>
+                                </td>
                                 <td>{{ item.manufacturer }}</td>
                                 <td>{{ item.model }}</td>
                                 <td>{{ item.serial_number }}</td>
-                                <td>{{ item.location }}</td>
-                                <td>{{ item.calibration_due_date }}</td>
                                 <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="{{ url_for('admin.edit_equipment_direct', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-info qr-btn"
-                                            data-id="{{ item.id }}"
-                                            data-manufacturer="{{ item.manufacturer }}"
-                                            data-model="{{ item.model }}"
-                                            data-serial="{{ item.serial_number }}"
-                                            onclick="generateQRCodeDirect(this)">
-                                            <i class="bi bi-qr-code"></i>
+                                    <div><strong class="small text-muted">Primary:</strong> {{ item.location }}</div>
+                                    {% set status = checkout_manager.get_equipment_status(item.id) %}
+                                    {% if status and status.checked_out and status.location and status.location != item.location %}
+                                        <div class="mt-1"><strong class="small text-muted">Current:</strong> <span class="text-info">{{ status.location }}</span></div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.calibration_due_date }}</td>
+                                <td class="status-cell" style="min-width: 80px;">
+                                    {% set status = checkout_manager.get_equipment_status(item.id) %}
+                                    {% if status and status.checked_out %}
+                                        <span class="badge bg-info"><i class="bi bi-arrow-bar-right"></i>Out</span>
+                                    {% else %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i>Ready</span>
+                                    {% endif %}
+
+                                    <!-- Check for active transport requests -->
+                                    {% set active_transport = false %}
+                                    {% set transport_status = '' %}
+                                    {% set is_in_transit = false %}
+
+                                    {% for request in transport_requests %}
+                                        {% if request.equipment_id == item.id and request.status not in ['completed', 'cancelled'] %}
+                                            {% set active_transport = true %}
+                                            {% set transport_status = request.status %}
+                                            {% set is_in_transit = request.status == 'in_transit' %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if active_transport %}
+                                        <div class="mt-1">
+                                            <span class="badge {% if is_in_transit %}bg-dark{% else %}bg-secondary{% endif %}">
+                                                <i class="bi bi-truck"></i>
+                                                {% if is_in_transit %}Moving{% else %}Transport{% endif %}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="condition-cell" style="min-width: 60px;">
+                                    {% set condition = ticket_manager.get_equipment_condition(item.id) %}
+                                    {% if condition == 'normal' %}
+                                        <span class="badge bg-success"><i class="bi bi-circle-fill"></i>OK</span>
+                                    {% elif condition == 'warning' %}
+                                        <span class="badge bg-warning"><i class="bi bi-exclamation-triangle-fill"></i>Attn</span>
+                                    {% elif condition == 'critical' %}
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i>OOS</span>
+                                    {% endif %}
+
+                                    {% if item.calibration_status == 'overdue' %}
+                                        <div class="mt-1">
+                                            <span class="badge bg-danger"><i class="bi bi-calendar-x"></i> Cal Due</span>
+                                        </div>
+                                    {% elif item.calibration_status == 'due_soon' %}
+                                        <div class="mt-1">
+                                            <span class="badge bg-warning"><i class="bi bi-calendar-check"></i> Cal Soon</span>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center actions-cell">
+                                    <div class="dropdown action-dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary px-2 py-0 action-dropdown-toggle" type="button" id="actions-{{ item.id }}" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                            <i class="bi bi-three-dots"></i>
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
-                                            data-id="{{ item.id }}"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteEquipmentModal">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actions-{{ item.id }}">
+                                            <!-- Edit -->
+                                            <li>
+                                                <a href="{{ url_for('admin.edit_equipment_direct', equipment_id=item.id) }}" class="dropdown-item py-1">
+                                                    <i class="bi bi-pencil text-primary"></i> Edit Equipment
+                                                </a>
+                                            </li>
+
+                                            <li><hr class="dropdown-divider"></li>
+
+                                            <!-- QR Code -->
+                                            <li>
+                                                <button type="button" class="dropdown-item py-1 qr-btn"
+                                                    data-id="{{ item.id }}"
+                                                    data-manufacturer="{{ item.manufacturer }}"
+                                                    data-model="{{ item.model }}"
+                                                    data-serial="{{ item.serial_number }}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#qrCodeModal">
+                                                    <i class="bi bi-qr-code text-info"></i> View QR Code
+                                                </button>
+                                            </li>
+
+                                            <!-- Regenerate QR option removed -->
+
+                                            <li><hr class="dropdown-divider"></li>
+
+                                            <!-- Delete -->
+                                            <li>
+                                                <button type="button" class="dropdown-item py-1 delete-btn text-danger"
+                                                    data-id="{{ item.id }}"
+                                                    data-manufacturer="{{ item.manufacturer }}"
+                                                    data-model="{{ item.model }}"
+                                                    data-serial="{{ item.serial_number }}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteEquipmentModal"
+                                                    onclick="prepareDeleteModal('{{ item.id }}', '{{ item.manufacturer }}', '{{ item.model }}', '{{ item.serial_number }}')">
+                                                    <i class="bi bi-trash text-danger"></i> Delete Equipment
+                                                </button>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="9" class="text-center">No equipment found</td>
+                                <td colspan="11" class="text-center">No equipment found</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -253,100 +521,174 @@
 
 <!-- Edit Equipment Modal -->
 <div class="modal fade" id="editEquipmentModal" tabindex="-1" aria-labelledby="editEquipmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editEquipmentModalLabel">Edit Equipment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editEquipmentForm" action="" method="POST">
-                <div class="modal-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="edit_id" class="form-label">Equipment ID</label>
-                            <input type="text" class="form-control" id="edit_id" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="edit_category" class="form-label">Category*</label>
-                            <select class="form-select" id="edit_category" name="category" required>
-                                <option value="Chamber">Chamber</option>
-                                <option value="Electrometer">Electrometer</option>
-                                <option value="Survey Meter">Survey Meter</option>
-                            </select>
-                        </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <!-- Left side - Equipment Form -->
+                    <div class="col-md-8 p-4">
+                        <form id="editEquipmentForm" action="" method="POST">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="edit_id" class="form-label">Equipment ID</label>
+                                    <input type="text" class="form-control" id="edit_id" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="edit_category" class="form-label">Category*</label>
+                                    <select class="form-select" id="edit_category" name="category" required>
+                                        <option value="Chamber">Chamber</option>
+                                        <option value="Electrometer">Electrometer</option>
+                                        <option value="Survey Meter">Survey Meter</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="edit_equipment_type" class="form-label">Equipment Type*</label>
+                                    <input type="text" class="form-control" id="edit_equipment_type" name="equipment_type" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="edit_manufacturer" class="form-label">Manufacturer*</label>
+                                    <input type="text" class="form-control" id="edit_manufacturer" name="manufacturer" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="edit_model" class="form-label">Model*</label>
+                                    <input type="text" class="form-control" id="edit_model" name="model" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="edit_serial_number" class="form-label">Serial Number*</label>
+                                    <input type="text" class="form-control" id="edit_serial_number" name="serial_number" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="edit_location" class="form-label">Location*</label>
+                                    <input type="text" class="form-control" id="edit_location" name="location" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="edit_calibration_due_date" class="form-label">Calibration Due Date*</label>
+                                    <input type="text" class="form-control" id="edit_calibration_due_date" name="calibration_due_date" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="edit_notes" name="notes" rows="3"></textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <!-- Left side - Delete button -->
+                                <div>
+                                    <button type="button" class="btn btn-danger" id="deleteFromEditBtn">
+                                        <i class="bi bi-trash"></i> Delete Equipment
+                                    </button>
+                                </div>
+                                <!-- Right side - Save button -->
+                                <div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="edit_equipment_type" class="form-label">Equipment Type*</label>
-                            <input type="text" class="form-control" id="edit_equipment_type" name="equipment_type" required>
+
+                    <!-- Right side - QR Code -->
+                    <div class="col-md-4 border-start bg-light">
+                        <div class="p-4 text-center">
+                            <h5 class="mb-3">Equipment QR Code</h5>
+
+                            <!-- QR Code loading -->
+                            <div id="editQRLoading" class="mb-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p>Loading QR code...</p>
+                            </div>
+
+                            <!-- QR Code error -->
+                            <div id="editQRError" class="alert alert-danger" style="display: none;">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <span id="editQRErrorText">Error loading QR code</span>
+                            </div>
+
+                            <!-- QR Code display -->
+                            <div id="editQRDisplay" style="display: none;">
+                                <img id="editQRImage" src="" alt="QR Code" class="img-fluid mb-3" style="max-width: 250px; background-color: white; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px;">
+                                <p class="mb-2" id="editQREquipmentId">Equipment ID: </p>
+                                <p class="small text-muted mb-2" id="editQRDescription">Scan this QR code for quick access to equipment details.</p>
+                                <p class="small text-muted" id="editQRUrlDisplay" style="font-size: 0.8rem; word-break: break-all;"></p>
+                            </div>
+
+                            <!-- QR Code buttons -->
+                            <div class="d-grid gap-2 mt-3">
+                                <button type="button" class="btn btn-primary" id="editRegenerateQRBtn">
+                                    <i class="bi bi-arrow-repeat"></i> Regenerate QR Code
+                                </button>
+                                <a id="editQRDownloadBtn" href="#" class="btn btn-outline-secondary" download="qr_code.png" style="display: none;">
+                                    <i class="bi bi-download"></i> Download QR Code
+                                </a>
+                                <a id="editQRPrintBtn" href="#" class="btn btn-outline-secondary" onclick="printEditQRCode()" style="display: none;">
+                                    <i class="bi bi-printer"></i> Print QR Code
+                                </a>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="edit_manufacturer" class="form-label">Manufacturer*</label>
-                            <input type="text" class="form-control" id="edit_manufacturer" name="manufacturer" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="edit_model" class="form-label">Model*</label>
-                            <input type="text" class="form-control" id="edit_model" name="model" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="edit_serial_number" class="form-label">Serial Number*</label>
-                            <input type="text" class="form-control" id="edit_serial_number" name="serial_number" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="edit_location" class="form-label">Location*</label>
-                            <input type="text" class="form-control" id="edit_location" name="location" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="edit_calibration_due_date" class="form-label">Calibration Due Date*</label>
-                            <input type="text" class="form-control" id="edit_calibration_due_date" name="calibration_due_date" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_notes" class="form-label">Notes</label>
-                        <textarea class="form-control" id="edit_notes" name="notes" rows="3"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-info me-2" id="generateQRBtn" data-id="" onclick="generateQRCode('edit')">
-                        <i class="bi bi-qr-code"></i> Generate QR Code
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Save Changes
-                    </button>
-                </div>
-            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Delete Equipment Modal -->
+<!-- Delete Equipment Confirmation Modal -->
 <div class="modal fade" id="deleteEquipmentModal" tabindex="-1" aria-labelledby="deleteEquipmentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteEquipmentModalLabel">Delete Equipment</h5>
+                <h5 class="modal-title" id="deleteEquipmentModalLabel">Confirm Delete</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete the equipment item <strong id="delete_equipment_id"></strong>?</p>
-                <p class="text-danger">This action cannot be undone.</p>
+                <p>Are you sure you want to delete this equipment?</p>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>ID:</strong> <span id="delete_equipment_id"></span></p>
+                        <p><strong>Equipment:</strong> <span id="delete_equipment_name"></span></p>
+                        <p><strong>Serial Number:</strong> <span id="delete_equipment_serial"></span></p>
+                    </div>
+                </div>
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">Cascade Deletion Warning</h6>
+                    <p><i class="bi bi-exclamation-triangle"></i> The following related data will also be deleted:</p>
+                    <ul>
+                        <li>All tickets associated with this equipment</li>
+                        <li>All QR codes generated for this equipment</li>
+                        <li>All checkout history records for this equipment</li>
+                        <li>Current equipment status and condition data</li>
+                    </ul>
+                </div>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteEquipmentForm" action="" method="POST">
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Delete
+                        <i class="bi bi-trash"></i> Delete Equipment & Related Data
                     </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 <!-- QR Code Modal -->
 <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -394,11 +736,66 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Load the QR print script and the debug script -->
+<script src="{{ url_for('static', filename='js/qr-debug.js') }}"></script>
+<script src="{{ url_for('static', filename='js/qr-print.js') }}?v={{ now.timestamp()|int }}"></script>
+
+<script>
+    // Legend toggle state persistence
+    document.addEventListener('DOMContentLoaded', function() {
+        const legendCollapse = document.getElementById('legendCollapse');
+        const legendToggleBtn = document.querySelector('[data-bs-target="#legendCollapse"]');
+        const legendToggleText = document.querySelector('.legend-toggle-text');
+
+        // Function to update button text
+        function updateLegendButtonText(isExpanded) {
+            if (legendToggleText) {
+                legendToggleText.textContent = isExpanded ? 'Hide Legend' : 'Show Legend';
+            }
+        }
+
+        // Check if we have a saved state
+        const legendState = localStorage.getItem('adminLegendState');
+
+        if (legendState === 'shown') {
+            // Show the legend if it was previously shown
+            if (legendCollapse) {
+                legendCollapse.classList.add('show');
+                if (legendToggleBtn) {
+                    legendToggleBtn.setAttribute('aria-expanded', 'true');
+                    updateLegendButtonText(true);
+                }
+            }
+        }
+
+        // Add event listener to save state when toggled
+        if (legendToggleBtn) {
+            legendToggleBtn.addEventListener('click', function() {
+                const isExpanded = legendToggleBtn.getAttribute('aria-expanded') === 'true';
+                const newState = !isExpanded;
+                localStorage.setItem('adminLegendState', newState ? 'shown' : 'hidden');
+                updateLegendButtonText(newState);
+            });
+        }
+
+        // Bootstrap event listeners for collapse
+        if (legendCollapse) {
+            legendCollapse.addEventListener('shown.bs.collapse', function() {
+                updateLegendButtonText(true);
+            });
+
+            legendCollapse.addEventListener('hidden.bs.collapse', function() {
+                updateLegendButtonText(false);
+            });
+        }
+    });
+</script>
+
 <script>
     // Debug utility function
     function showDebug(message, isError = false) {
         console.log(message);
-        
+
         const container = document.getElementById('debug-container');
         container.style.display = 'block';
         container.style.backgroundColor = isError ? '#f8d7da' : '#d1e7dd';
@@ -408,7 +805,7 @@
         container.style.border = isError ? '1px solid #f5c6cb' : '1px solid #c3e6cb';
         container.style.maxWidth = '80%';
         container.innerHTML = message;
-        
+
         setTimeout(() => {
             container.style.display = 'none';
         }, 5000);
@@ -474,7 +871,7 @@
         // Set QR button data
         document.getElementById('generateQRBtn').setAttribute('data-id', id);
 
-        // Show confirmation of form population
+        // Set confirmation of form population
         const formValues = {
             id: document.getElementById('edit_id').value,
             category: document.getElementById('edit_category').value,
@@ -688,19 +1085,126 @@
         });
     });
 
-    // Handle delete equipment modal
+    // Function to prepare the delete modal with equipment details
+    function prepareDeleteModal(id, manufacturer, model, serial) {
+        console.log("Preparing delete modal for:", { id, manufacturer, model, serial });
+
+        // Set values in the modal
+        document.getElementById('delete_equipment_id').textContent = id;
+        document.getElementById('delete_equipment_name').textContent = manufacturer + " " + model;
+        document.getElementById('delete_equipment_serial').textContent = serial;
+
+        // Set form action URL
+        document.getElementById('deleteEquipmentForm').action = `/admin/equipment/delete/${id}`;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle Delete Equipment Modal
-        const deleteButtons = document.querySelectorAll('.delete-btn');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
+        // Initialize Delete from Edit button
+        const deleteFromEditBtn = document.getElementById('deleteFromEditBtn');
+        if (deleteFromEditBtn) {
+            deleteFromEditBtn.addEventListener('click', function() {
+                // Close the edit modal
+                const editModal = bootstrap.Modal.getInstance(document.getElementById('editEquipmentModal'));
+                editModal.hide();
+
+                // Get the current equipment data from the edit form
+                const id = document.getElementById('edit_id').value;
+                const manufacturer = document.getElementById('edit_manufacturer').value;
+                const model = document.getElementById('edit_model').value;
+                const serial = document.getElementById('edit_serial_number').value;
+
+                // Prepare and show the delete confirmation modal
+                prepareDeleteModal(id, manufacturer, model, serial);
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteEquipmentModal'));
+                deleteModal.show();
+            });
+        }
+
+        // Initialize the Edit QR Code regeneration button
+        const editRegenerateQRBtn = document.getElementById('editRegenerateQRBtn');
+        if (editRegenerateQRBtn) {
+            editRegenerateQRBtn.addEventListener('click', function() {
+                const id = document.getElementById('edit_id').value;
+                const manufacturer = document.getElementById('edit_manufacturer').value;
+                const model = document.getElementById('edit_model').value;
+                const serial = document.getElementById('edit_serial_number').value;
+
+                if (!id || !manufacturer || !model || !serial) {
+                    document.getElementById('editQRError').style.display = 'block';
+                    document.getElementById('editQRErrorText').textContent = 'Missing required fields for QR code generation.';
+                    return;
+                }
+
+                // Show loading state
+                document.getElementById('editQRLoading').style.display = 'block';
+                document.getElementById('editQRDisplay').style.display = 'none';
+                document.getElementById('editQRError').style.display = 'none';
+
+                // Generate new QR code
+                generateQRCodeForEdit(id, manufacturer, model, serial, true);
+            });
+        }
+
+        // Hook into the edit equipment modal shown event to load QR code
+        $('#editEquipmentModal').on('shown.bs.modal', function() {
+            // Get equipment data
+            const id = document.getElementById('edit_id').value;
+            const manufacturer = document.getElementById('edit_manufacturer').value;
+            const model = document.getElementById('edit_model').value;
+            const serial = document.getElementById('edit_serial_number').value;
+
+            // Check if we have all required data
+            if (id && manufacturer && model && serial) {
+                // Show loading state
+                document.getElementById('editQRLoading').style.display = 'block';
+                document.getElementById('editQRDisplay').style.display = 'none';
+                document.getElementById('editQRError').style.display = 'none';
+
+                // Try to load existing QR code
+                loadExistingQRForEdit(id, manufacturer, model, serial);
+            } else {
+                // Hide loading and show error
+                document.getElementById('editQRLoading').style.display = 'none';
+                document.getElementById('editQRError').style.display = 'block';
+                document.getElementById('editQRErrorText').textContent = 'Equipment data not fully loaded. Please try again.';
+            }
+        });
+
+        // Initialize QR code show buttons
+        const qrButtons = document.querySelectorAll('.qr-btn');
+        console.log('Found QR show buttons:', qrButtons.length);
+
+        qrButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                console.log('QR show button clicked via event listener');
                 const id = this.getAttribute('data-id');
+                const manufacturer = this.getAttribute('data-manufacturer');
+                const model = this.getAttribute('data-model');
+                const serial = this.getAttribute('data-serial');
 
-                // Set ID in confirmation message
-                document.getElementById('delete_equipment_id').textContent = id;
+                console.log('QR show button data:', { id, manufacturer, model, serial });
 
-                // Set form action URL
-                document.getElementById('deleteEquipmentForm').action = `/admin/equipment/delete/${id}`;
+                // First check if QR code exists already
+                checkExistingQR(id, manufacturer, model, serial, false);
+            });
+        });
+
+        // Initialize QR code regenerate buttons
+        const qrRegenerateButtons = document.querySelectorAll('.qr-regenerate-btn');
+        console.log('Found QR regenerate buttons:', qrRegenerateButtons.length);
+
+        qrRegenerateButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                console.log('QR regenerate button clicked via event listener');
+                const id = this.getAttribute('data-id');
+                const manufacturer = this.getAttribute('data-manufacturer');
+                const model = this.getAttribute('data-model');
+                const serial = this.getAttribute('data-serial');
+
+                console.log('QR regenerate button data:', { id, manufacturer, model, serial });
+
+                // Generate new QR code directly
+                generateQR(id, manufacturer, model, serial, true);
             });
         });
 
@@ -713,21 +1217,38 @@
         }
     });
 
-    // Function to generate QR code directly from the equipment list
-    function generateQRCodeDirect(buttonElement) {
-        // Get equipment ID from the button
-        const equipmentId = buttonElement.getAttribute('data-id');
+    // Function to check if a QR code already exists for an equipment ID
+    function checkExistingQR(equipmentId, manufacturer, model, serialNumber, forceRegenerate = false) {
+        console.log("Checking if QR code exists for ID:", equipmentId);
 
-        // Redirect to the server-side QR generation page instead of using AJAX
-        window.location.href = `/admin/equipment/${equipmentId}/qr`;
-    }
+        if (forceRegenerate) {
+            // Skip check and regenerate
+            generateQR(equipmentId, manufacturer, model, serialNumber, true);
+            return;
+        }
 
-    function generateQRCode(mode) {
-        console.log(`generateQRCode called with mode: ${mode}`);
-        
         // Show the QR code modal
-        const qrModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
-        qrModal.show();
+        const qrModalElement = document.getElementById('qrCodeModal');
+        console.log('QR Modal element found:', !!qrModalElement);
+
+        // Check if Bootstrap is available
+        if (typeof bootstrap !== 'undefined') {
+            try {
+                const qrModal = new bootstrap.Modal(qrModalElement);
+                qrModal.show();
+                console.log('Modal shown with bootstrap');
+            } catch (e) {
+                console.error('Error showing modal with bootstrap:', e);
+                // Fallback modal display
+                qrModalElement.classList.add('show');
+                qrModalElement.style.display = 'block';
+            }
+        } else {
+            console.error('Bootstrap not available, using fallback');
+            // Fallback for when bootstrap isn't available
+            qrModalElement.classList.add('show');
+            qrModalElement.style.display = 'block';
+        }
 
         // Show loading state
         document.getElementById('qrCodeLoading').style.display = 'block';
@@ -736,33 +1257,241 @@
         document.getElementById('qrCodeDownloadBtn').style.display = 'none';
         document.getElementById('qrCodePrintBtn').style.display = 'none';
 
-        // Get equipment data based on the mode (add or edit)
-        let equipmentId, manufacturer, model, serialNumber;
-
-        if (mode === 'add') {
-            // Get values from add form
-            equipmentId = document.getElementById('equipment_id').value.trim();
-            manufacturer = document.getElementById('manufacturer').value.trim();
-            model = document.getElementById('model').value.trim();
-            serialNumber = document.getElementById('serial_number').value.trim();
-
-            // If equipment ID is not provided, generate it from other fields
-            if (!equipmentId && manufacturer && serialNumber) {
-                const category = document.getElementById('add_category').value.trim();
-                equipmentId = `${category}-${manufacturer}-${serialNumber}`;
-            }
-            
-            console.log("Add form QR data:", { equipmentId, manufacturer, model, serialNumber });
-            
-        } else if (mode === 'edit') {
-            // Get values from edit form
-            equipmentId = document.getElementById('edit_id').value.trim();
-            manufacturer = document.getElementById('edit_manufacturer').value.trim();
-            model = document.getElementById('edit_model').value.trim();
-            serialNumber = document.getElementById('edit_serial_number').value.trim();
-            
-            console.log("Edit form QR data:", { equipmentId, manufacturer, model, serialNumber });
+        // Validate required fields
+        if (!equipmentId) {
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = "Missing equipment ID";
+            document.getElementById('qrCodeError').style.display = 'block';
+            return;
         }
+
+        // Construct the URL for the QR code - direct to the equipment detail page
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Make AJAX request to check if the QR code exists
+        fetch(`/admin/equipment/check-qr/${equipmentId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide loading
+            document.getElementById('qrCodeLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                if (data.exists) {
+                    // QR code already exists, display it
+                    document.getElementById('qrCodeDisplay').style.display = 'block';
+                    document.getElementById('qrCodeImage').src = data.qr_code_url;
+                    document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${equipmentId}`;
+                    document.getElementById('qrCodeUrlDisplay').textContent = `When scanned, takes you to: ${qrUrl}`;
+
+                    // Set download link
+                    const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+                    downloadBtn.href = data.qr_code_url;
+                    downloadBtn.download = `qr_code_${equipmentId}.png`;
+                    downloadBtn.style.display = 'inline-block';
+
+                    // Show print button
+                    document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+                } else {
+                    // QR code doesn't exist, generate a new one
+                    generateQR(equipmentId, manufacturer, model, serialNumber, false);
+                }
+            } else {
+                document.getElementById('qrCodeError').textContent = data.message || 'Failed to check QR code';
+                document.getElementById('qrCodeError').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            // Show error
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = `Error: ${error.message}`;
+            document.getElementById('qrCodeError').style.display = 'block';
+            console.error('Error checking QR code:', error);
+
+            // Fall back to generation
+            generateQR(equipmentId, manufacturer, model, serialNumber, false);
+        });
+    }
+
+    // Function to generate QR code for equipment items
+    function generateQR(equipmentId, manufacturer, model, serialNumber, forceRegenerate = false) {
+        console.log("generateQR called with ID:", equipmentId, "forceRegenerate:", forceRegenerate);
+
+        // If modal is not already showing, show it
+        const qrModalElement = document.getElementById('qrCodeModal');
+        if (!qrModalElement.classList.contains('show')) {
+            console.log('QR Modal element found:', !!qrModalElement);
+
+            // Check if Bootstrap is available
+            if (typeof bootstrap !== 'undefined') {
+                try {
+                    const qrModal = new bootstrap.Modal(qrModalElement);
+                    qrModal.show();
+                    console.log('Modal shown with bootstrap');
+                } catch (e) {
+                    console.error('Error showing modal with bootstrap:', e);
+                    // Fallback modal display
+                    qrModalElement.classList.add('show');
+                    qrModalElement.style.display = 'block';
+                }
+            } else {
+                console.error('Bootstrap not available, using fallback');
+                // Fallback for when bootstrap isn't available
+                qrModalElement.classList.add('show');
+                qrModalElement.style.display = 'block';
+            }
+        }
+
+        // Show loading state
+        document.getElementById('qrCodeLoading').style.display = 'block';
+        document.getElementById('qrCodeError').style.display = 'none';
+        document.getElementById('qrCodeDisplay').style.display = 'none';
+        document.getElementById('qrCodeDownloadBtn').style.display = 'none';
+        document.getElementById('qrCodePrintBtn').style.display = 'none';
+
+        // Validate required fields
+        if (!equipmentId) {
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = "Missing equipment ID";
+            document.getElementById('qrCodeError').style.display = 'block';
+            return;
+        }
+
+        // Construct the URL for the QR code - direct to the equipment detail page
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Make AJAX request to generate the QR code
+        const requestData = {
+            url: qrUrl,
+            equipment_id: equipmentId,
+            manufacturer: manufacturer,
+            model: model,
+            serial: serialNumber,
+            force_regenerate: forceRegenerate
+        };
+
+        fetch('/admin/equipment/generate-qr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide loading, show QR code
+            document.getElementById('qrCodeLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                document.getElementById('qrCodeDisplay').style.display = 'block';
+                document.getElementById('qrCodeImage').src = data.qr_code_url;
+                document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${equipmentId}`;
+                document.getElementById('qrCodeUrlDisplay').textContent = `When scanned, takes you to: ${data.qr_url || qrUrl}`;
+
+                // Set download link
+                const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+                downloadBtn.href = data.qr_code_url;
+                downloadBtn.download = `qr_code_${equipmentId}.png`;
+                downloadBtn.style.display = 'inline-block';
+
+                // Show print button
+                document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+
+                // Add message if regenerated
+                if (forceRegenerate) {
+                    const qrCodeDisplay = document.getElementById('qrCodeDisplay');
+                    const regenerateMessage = document.createElement('div');
+                    regenerateMessage.className = 'alert alert-info mt-2';
+                    regenerateMessage.innerHTML = '<i class="bi bi-arrow-repeat"></i> QR code has been regenerated.';
+                    qrCodeDisplay.appendChild(regenerateMessage);
+                }
+            } else {
+                document.getElementById('qrCodeError').textContent = data.message || 'Failed to generate QR code';
+                document.getElementById('qrCodeError').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            // Show error
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = `Error: ${error.message}`;
+            document.getElementById('qrCodeError').style.display = 'block';
+            console.error('Error generating QR code:', error);
+        });
+    }
+
+    // Function to generate QR code for the Add Equipment modal (kept for backwards compatibility)
+    function generateQRCode(mode) {
+        console.log(`generateQRCode called with mode: ${mode}`);
+
+        // If this was called from the edit form, use the new implementation
+        if (mode === 'edit') {
+            const id = document.getElementById('edit_id').value.trim();
+            const manufacturer = document.getElementById('edit_manufacturer').value.trim();
+            const model = document.getElementById('edit_model').value.trim();
+            const serialNumber = document.getElementById('edit_serial_number').value.trim();
+
+            // Generate using the new function
+            generateQRCodeForEdit(id, manufacturer, model, serialNumber, true);
+            return;
+        }
+
+        // Show the QR code modal
+        const qrModalElement = document.getElementById('qrCodeModal');
+        console.log('QR Modal element found:', !!qrModalElement);
+
+        // Check if Bootstrap is available
+        if (typeof bootstrap !== 'undefined') {
+            try {
+                const qrModal = new bootstrap.Modal(qrModalElement);
+                qrModal.show();
+            } catch (e) {
+                console.error('Error showing modal with bootstrap:', e);
+                // Fallback modal display
+                qrModalElement.classList.add('show');
+                qrModalElement.style.display = 'block';
+            }
+        } else {
+            console.error('Bootstrap not available, using fallback');
+            qrModalElement.classList.add('show');
+            qrModalElement.style.display = 'block';
+        }
+
+        // Show loading state
+        document.getElementById('qrCodeLoading').style.display = 'block';
+        document.getElementById('qrCodeError').style.display = 'none';
+        document.getElementById('qrCodeDisplay').style.display = 'none';
+        document.getElementById('qrCodeDownloadBtn').style.display = 'none';
+        document.getElementById('qrCodePrintBtn').style.display = 'none';
+
+        // Get values from add form (only 'add' mode is supported now)
+        let equipmentId = document.getElementById('equipment_id').value.trim();
+        const manufacturer = document.getElementById('manufacturer').value.trim();
+        const model = document.getElementById('model').value.trim();
+        const serialNumber = document.getElementById('serial_number').value.trim();
+
+        // If equipment ID is not provided, generate it from other fields
+        if (!equipmentId && manufacturer && serialNumber) {
+            const category = document.getElementById('add_category').value.trim();
+            equipmentId = `${category}-${manufacturer}-${serialNumber}`;
+        }
+
+        console.log("Add form QR data:", { equipmentId, manufacturer, model, serialNumber });
 
         // Validate required fields
         if (!equipmentId || !manufacturer || !serialNumber) {
@@ -773,10 +1502,12 @@
             return;
         }
 
+        // Always regenerate for the add equipment flow
+        const forceRegenerate = true;
+
         // Construct the URL for the QR code - direct to the equipment detail page
         const baseUrl = window.location.origin;
         const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
-        console.log("QR URL:", qrUrl);
 
         // Make AJAX request to generate the QR code
         const requestData = {
@@ -784,10 +1515,9 @@
             equipment_id: equipmentId,
             manufacturer: manufacturer,
             model: model,
-            serial: serialNumber
+            serial: serialNumber,
+            force_regenerate: forceRegenerate
         };
-
-        console.log("Sending request to generate QR code:", requestData);
 
         fetch('/admin/equipment/generate-qr', {
             method: 'POST',
@@ -797,15 +1527,12 @@
             body: JSON.stringify(requestData),
         })
         .then(response => {
-            console.log("Response status:", response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log("QR code response:", data);
-            
             // Hide loading, show QR code
             document.getElementById('qrCodeLoading').style.display = 'none';
 
@@ -837,57 +1564,282 @@
         });
     }
 
-    // Function to print the QR code
-    function printQRCode() {
-        const printWindow = window.open('', '_blank');
-        const qrImage = document.getElementById('qrCodeImage').src;
-        const equipmentId = document.getElementById('qrCodeEquipmentId').textContent;
+    // printQRCode function is now in qr-print.js
 
-        printWindow.document.write(`
-            <!DOCTYPE html>
+    // Function to print QR code from edit modal
+    function printEditQRCode() {
+        // Get the QR image src
+        const qrImageSrc = document.getElementById('editQRImage').src;
+        const equipmentId = document.getElementById('edit_id').value;
+
+        // Create content for printing
+        const content = `
             <html>
             <head>
                 <title>QR Code - ${equipmentId}</title>
                 <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        text-align: center;
-                        padding: 20px;
-                    }
-                    img {
-                        max-width: 300px;
-                        height: auto;
-                    }
-                    .container {
-                        display: inline-block;
-                        border: 1px solid #ccc;
-                        padding: 20px;
-                        margin: 10px;
-                    }
+                    body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; }
+                    h2 { margin-bottom: 10px; }
+                    .qr-code { max-width: 400px; margin: 20px auto; padding: 15px; border: 1px solid #ddd; background-color: white; }
+                    .equipment-info { margin-top: 15px; font-size: 14px; }
+                    .footer { margin-top: 30px; font-size: 12px; color: #666; }
                 </style>
             </head>
             <body>
-                <div class="container">
-                    <img src="${qrImage}" alt="QR Code">
-                    <div>
-                        <p><strong>${equipmentId}</strong></p>
-                        <p>Mary Bird Perkins Cancer Center</p>
+                <h2>Equipment QR Code</h2>
+                <div class="qr-code">
+                    <img src="${qrImageSrc}" style="width: 100%; max-width: 350px;">
+                    <div class="equipment-info">
+                        <p><strong>ID:</strong> ${equipmentId}</p>
+                        <p><strong>Manufacturer:</strong> ${document.getElementById('edit_manufacturer').value}</p>
+                        <p><strong>Model:</strong> ${document.getElementById('edit_model').value}</p>
+                        <p><strong>Serial:</strong> ${document.getElementById('edit_serial_number').value}</p>
                     </div>
                 </div>
-                <script>
-                    window.onload = function() {
-                        setTimeout(() => {
-                            window.print();
-                            setTimeout(() => {
-                                window.close();
-                            }, 100);
-                        }, 500);
-                    };
-                </script>
+                <div class="footer">
+                    <p>Scan this code for quick access to equipment information</p>
+                </div>
             </body>
             </html>
-        `);
+        `;
+
+        // Open print window
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(content);
         printWindow.document.close();
+
+        // Add load handler to execute print when image is loaded
+        printWindow.onload = function() {
+            printWindow.focus();
+            printWindow.print();
+            setTimeout(function() {
+                printWindow.close();
+            }, 1000);
+        };
     }
+
+    // Function to load existing QR code for the edit modal
+    function loadExistingQRForEdit(equipmentId, manufacturer, model, serialNumber) {
+        console.log("Loading existing QR code for edit modal:", equipmentId);
+
+        // Validate required fields
+        if (!equipmentId) {
+            document.getElementById('editQRLoading').style.display = 'none';
+            document.getElementById('editQRError').style.display = 'block';
+            document.getElementById('editQRErrorText').textContent = "Missing equipment ID";
+            return;
+        }
+
+        // Construct the URL for the QR code - direct to the equipment detail page
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Make AJAX request to check if the QR code exists
+        fetch(`/admin/equipment/check-qr/${equipmentId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide loading
+            document.getElementById('editQRLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                if (data.exists) {
+                    // QR code already exists, display it
+                    document.getElementById('editQRDisplay').style.display = 'block';
+                    document.getElementById('editQRImage').src = data.qr_code_url;
+                    document.getElementById('editQREquipmentId').textContent = `Equipment ID: ${equipmentId}`;
+                    document.getElementById('editQRUrlDisplay').textContent = `When scanned, takes you to: ${qrUrl}`;
+
+                    // Set download link
+                    const downloadBtn = document.getElementById('editQRDownloadBtn');
+                    downloadBtn.href = data.qr_code_url;
+                    downloadBtn.download = `qr_code_${equipmentId}.png`;
+                    downloadBtn.style.display = 'block';
+
+                    // Show print button
+                    document.getElementById('editQRPrintBtn').style.display = 'block';
+                } else {
+                    // QR code doesn't exist, generate a new one
+                    generateQRCodeForEdit(equipmentId, manufacturer, model, serialNumber, false);
+                }
+            } else {
+                document.getElementById('editQRError').style.display = 'block';
+                document.getElementById('editQRErrorText').textContent = data.message || 'Failed to check QR code';
+            }
+        })
+        .catch(error => {
+            // Show error
+            document.getElementById('editQRLoading').style.display = 'none';
+            document.getElementById('editQRError').style.display = 'block';
+            document.getElementById('editQRErrorText').textContent = `Error: ${error.message}`;
+            console.error('Error checking QR code:', error);
+
+            // Fall back to generation
+            generateQRCodeForEdit(equipmentId, manufacturer, model, serialNumber, false);
+        });
+    }
+
+    // Function to generate QR code for the edit modal
+    function generateQRCodeForEdit(equipmentId, manufacturer, model, serialNumber, forceRegenerate = false) {
+        console.log("Generating QR code for edit modal:", equipmentId, "forceRegenerate:", forceRegenerate);
+
+        // Validate required fields
+        if (!equipmentId) {
+            document.getElementById('editQRLoading').style.display = 'none';
+            document.getElementById('editQRError').style.display = 'block';
+            document.getElementById('editQRErrorText').textContent = "Missing equipment ID";
+            return;
+        }
+
+        // Show loading state
+        document.getElementById('editQRLoading').style.display = 'block';
+        document.getElementById('editQRDisplay').style.display = 'none';
+        document.getElementById('editQRError').style.display = 'none';
+
+        // Construct the URL for the QR code - direct to the equipment detail page
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Make AJAX request to generate the QR code
+        const requestData = {
+            url: qrUrl,
+            equipment_id: equipmentId,
+            manufacturer: manufacturer,
+            model: model,
+            serial: serialNumber,
+            force_regenerate: forceRegenerate
+        };
+
+        fetch('/admin/equipment/generate-qr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide loading
+            document.getElementById('editQRLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                // Show QR code
+                document.getElementById('editQRDisplay').style.display = 'block';
+                document.getElementById('editQRImage').src = data.qr_code_url;
+                document.getElementById('editQREquipmentId').textContent = `Equipment ID: ${equipmentId}`;
+                document.getElementById('editQRUrlDisplay').textContent = `When scanned, takes you to: ${data.qr_url || qrUrl}`;
+
+                // Set download link
+                const downloadBtn = document.getElementById('editQRDownloadBtn');
+                downloadBtn.href = data.qr_code_url;
+                downloadBtn.download = `qr_code_${equipmentId}.png`;
+                downloadBtn.style.display = 'block';
+
+                // Show print button
+                document.getElementById('editQRPrintBtn').style.display = 'block';
+
+                // Add regeneration message if applicable
+                if (forceRegenerate) {
+                    // Check for existing message
+                    const existingMessage = document.querySelector('#editQRDisplay .alert');
+                    if (existingMessage) {
+                        existingMessage.remove();
+                    }
+
+                    // Add new message
+                    const regenerateMessage = document.createElement('div');
+                    regenerateMessage.className = 'alert alert-info mt-2 mb-3';
+                    regenerateMessage.innerHTML = '<i class="bi bi-arrow-repeat"></i> QR code has been regenerated.';
+
+                    // Insert after QR image
+                    const qrImage = document.getElementById('editQRImage');
+                    qrImage.parentNode.insertBefore(regenerateMessage, qrImage.nextSibling);
+                }
+            } else {
+                // Show error
+                document.getElementById('editQRError').style.display = 'block';
+                document.getElementById('editQRErrorText').textContent = data.message || 'Failed to generate QR code';
+            }
+        })
+        .catch(error => {
+            // Show error
+            document.getElementById('editQRLoading').style.display = 'none';
+            document.getElementById('editQRError').style.display = 'block';
+            document.getElementById('editQRErrorText').textContent = `Error: ${error.message}`;
+            console.error('Error generating QR code:', error);
+        });
+    }
+
+    // Initialize tooltips on load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Enhanced dropdown handling
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                // Hide any tooltips when opening dropdown
+                const tooltipInstance = bootstrap.Tooltip.getInstance(this);
+                if (tooltipInstance) {
+                    tooltipInstance.hide();
+                }
+
+                // Make sure the parent row and cell don't interfere
+                const cell = this.closest('td');
+                const row = this.closest('tr');
+
+                if (cell) {
+                    cell.style.position = 'relative';
+                    cell.style.zIndex = '2000';
+                }
+
+                if (row) {
+                    row.style.position = 'relative';
+                    row.style.zIndex = '1000';
+                }
+
+                // Make sure the dropdown has highest priority
+                const dropdown = this.closest('.dropdown');
+                if (dropdown) {
+                    dropdown.style.position = 'relative';
+                    dropdown.style.zIndex = '3000';
+                }
+            });
+
+            // Add mousedown event to prevent event bubbling
+            toggle.addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+            });
+        });
+
+        // Reset z-index when clicking outside dropdowns
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                // Reset z-index for all cells
+                const cells = document.querySelectorAll('#equipmentTable td');
+                cells.forEach(cell => {
+                    cell.style.zIndex = '';
+                });
+            }
+        });
+    });
 </script>
 {% endblock %}

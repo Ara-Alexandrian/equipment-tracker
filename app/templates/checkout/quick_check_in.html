@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <div class="text-center mb-4">
-        <img src="{{ url_for('static', filename='img/Equipment Tracker.png') }}" alt="Equipment Tracker Logo" style="max-height: 100px;">
+        <img src="{{ url_for('static', filename='img/gearvue-text-transparent.png') }}" alt="GearVue Logo" style="max-height: 100px;">
         <h1 class="display-5 mt-3">Equipment Check In</h1>
     </div>
 
@@ -102,15 +102,18 @@
                         <!-- Return Location -->
                         <div class="mb-3">
                             <label for="return_location" class="form-label">Return Location</label>
-                            <input type="text" class="form-control" id="return_location" name="return_location" 
-                                   required list="location_list" value="{{ equipment.location }}">
+                            <select class="form-select" id="return_location" name="return_location" required>
+                                <option value="">-- Select location --</option>
+                                <option value="Essen (BR)" {% if equipment.location == "Essen (BR)" %}selected{% endif %}>Essen (BR)</option>
+                                <option value="Picardy (BRG)" {% if equipment.location == "Picardy (BRG)" %}selected{% endif %}>Picardy (BRG)</option>
+                                <option value="Gonzales" {% if equipment.location == "Gonzales" %}selected{% endif %}>Gonzales</option>
+                                <option value="Covington" {% if equipment.location == "Covington" %}selected{% endif %}>Covington</option>
+                                <option value="Perkins Rowe QC" {% if equipment.location == "Perkins Rowe QC" %}selected{% endif %}>Perkins Rowe QC</option>
+                                <option value="Hammond" {% if equipment.location == "Hammond" %}selected{% endif %}>Hammond</option>
+                                <option value="Natchez" {% if equipment.location == "Natchez" %}selected{% endif %}>Natchez</option>
+                                <option value="Houma" {% if equipment.location == "Houma" %}selected{% endif %}>Houma</option>
+                            </select>
                             <div class="invalid-feedback">Please specify where the equipment will be returned.</div>
-                            
-                            <datalist id="location_list">
-                                {% for location in locations %}
-                                <option value="{{ location }}">
-                                {% endfor %}
-                            </datalist>
                             <div class="form-text">Default is the primary location for this equipment</div>
                         </div>
                         

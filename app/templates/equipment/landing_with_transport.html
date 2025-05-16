@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ equipment.manufacturer }} {{ equipment.model }} - GearVue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-4">
+        <img src="{{ url_for('static', filename='img/gearvue-text-transparent.png') }}" alt="GearVue Logo" style="max-height: 100px;">
+        <h1 class="display-5 mt-3">Equipment Action Portal</h1>
+    </div>
+
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">{{ equipment.manufacturer }} {{ equipment.model }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Equipment Details</h5>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%">Category</th>
+                                <td>{{ equipment.category }}</td>
+                            </tr>
+                            <tr>
+                                <th>Type</th>
+                                <td>{{ equipment.equipment_type }}</td>
+                            </tr>
+                            <tr>
+                                <th>Manufacturer</th>
+                                <td>{{ equipment.manufacturer }}</td>
+                            </tr>
+                            <tr>
+                                <th>Model</th>
+                                <td>{{ equipment.model }}</td>
+                            </tr>
+                            <tr>
+                                <th>Serial Number</th>
+                                <td>{{ equipment.serial_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Location</th>
+                                <td>{{ status.location }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Current Status</h5>
+                    
+                    <!-- Traffic Light Indicators -->
+                    <div class="d-flex align-items-center mb-3 traffic-light">
+                        {% if condition == 'normal' %}
+                        <div class="light bg-success me-3"></div>
+                        <div>
+                            <strong>Normal</strong> - Equipment is fully operational
+                        </div>
+                        {% elif condition == 'warning' %}
+                        <div class="light bg-warning me-3"></div>
+                        <div>
+                            <strong>Warning</strong> - Equipment needs attention
+                        </div>
+                        {% elif condition == 'critical' %}
+                        <div class="light bg-danger me-3"></div>
+                        <div>
+                            <strong>Critical</strong> - Equipment is not operational
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Status Information -->
+                    <div class="alert {% if status.status == 'Checked Out' %}alert-info{% else %}alert-success{% endif %}">
+                        <h6>Status: {{ status.status }}</h6>
+                        {% if status.status == 'Checked Out' %}
+                            <p class="mb-1">Checked out by: {{ status.checked_out_by }}</p>
+                            {% if status.expected_return %}
+                                <p class="mb-0">Expected return: {{ status.expected_return|datetime('%Y-%m-%d') }}</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Calibration Information if available -->
+                    {% if equipment.calibration_due_date %}
+                        {% set due_date = equipment.calibration_due_date|datetime if equipment.calibration_due_date is string else equipment.calibration_due_date %}
+                        {% set now = now|datetime if now is string else now %}
+                        {% set days_until = (due_date - now).days %}
+                        
+                        <div class="alert {% if days_until < 0 %}alert-danger{% elif days_until <= 30 %}alert-warning{% else %}alert-success{% endif %}">
+                            <h6>Calibration: 
+                                {% if days_until < 0 %}
+                                    Overdue by {{ abs(days_until) }} days
+                                {% elif days_until <= 30 %}
+                                    Due in {{ days_until }} days
+                                {% else %}
+                                    Current
+                                {% endif %}
+                            </h6>
+                            <p class="mb-0">Due date: {{ due_date|datetime('%Y-%m-%d') }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="mb-3">Quick Actions</h5>
+                </div>
+                
+                <div class="col-6 col-md-3 mb-3">
+                    {% if status.status == 'Checked Out' %}
+                    <a href="{{ url_for('qr.quick_checkin', equipment_id=equipment.id) }}" class="btn btn-success btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                        <i class="bi bi-box-arrow-in-left fs-1 mb-2"></i>
+                        <span>Check In</span>
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('qr.quick_checkout', equipment_id=equipment.id) }}" class="btn btn-primary btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                        <i class="bi bi-box-arrow-right fs-1 mb-2"></i>
+                        <span>Check Out</span>
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('qr.quick_ticket', equipment_id=equipment.id) }}" class="btn btn-warning btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                        <i class="bi bi-exclamation-triangle fs-1 mb-2"></i>
+                        <span>Report Issue</span>
+                    </a>
+                </div>
+                
+                <!-- NEW: Transport Request Button -->
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('qr_transport.request_transport', equipment_id=equipment.id) }}" class="btn btn-info btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                        <i class="bi bi-truck fs-1 mb-2"></i>
+                        <span>Request Transport</span>
+                    </a>
+                </div>
+                
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('qr_transport.equipment_history', equipment_id=equipment.id) }}" class="btn btn-outline-secondary btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                        <i class="bi bi-clock-history fs-1 mb-2"></i>
+                        <span>Transport History</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tickets Section -->
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Recent Tickets</h3>
+            <a href="{{ url_for('qr.quick_ticket', equipment_id=equipment.id) }}" class="btn btn-sm btn-light">
+                <i class="bi bi-plus"></i> New Ticket
+            </a>
+        </div>
+        <div class="card-body">
+            {% if tickets %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ ticket.title }}</td>
+                            <td>
+                                <span class="badge {% if ticket.status == 'open' %}bg-danger{% elif ticket.status == 'in_progress' %}bg-warning{% elif ticket.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ ticket.status|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ ticket.created_at|datetime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('ticket.view_ticket', ticket_id=ticket.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center my-4">No tickets found for this equipment.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- NEW: Transport Requests Section -->
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Recent Transport Requests</h3>
+            <a href="{{ url_for('qr_transport.request_transport', equipment_id=equipment.id) }}" class="btn btn-sm btn-light">
+                <i class="bi bi-plus"></i> New Transport Request
+            </a>
+        </div>
+        <div class="card-body">
+            {% if transport_requests %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>From → To</th>
+                            <th>Status</th>
+                            <th>Requested Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in transport_requests %}
+                        <tr>
+                            <td>{{ request.origin }} → {{ request.destination }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if request.status == 'requested' %}bg-info
+                                    {% elif request.status == 'approved' %}bg-primary
+                                    {% elif request.status == 'scheduled' %}bg-warning
+                                    {% elif request.status == 'in_transit' %}bg-dark
+                                    {% elif request.status == 'completed' %}bg-success
+                                    {% elif request.status == 'cancelled' %}bg-danger
+                                    {% endif %}">
+                                    {{ request.status|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ request.requested_date|datetime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('qr_transport.view_request', request_id=request.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center my-4">No transport requests found for this equipment.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .traffic-light .light {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    
+    @media (max-width: 768px) {
+        .display-5 {
+            font-size: 1.8rem;
+        }
+        h3.card-title {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+{% endblock %}

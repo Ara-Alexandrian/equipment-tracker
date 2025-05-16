@@ -1,0 +1,38 @@
+/* Navigation icon buttons styling */
+
+/* Common styling for icon buttons in the navbar */
+.nav-icon-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+}
+
+/* Size the theme and layout icons appropriately */
+.nav-icon-btn i {
+    font-size: 16px !important;
+}
+
+.nav-icon-btn img {
+    width: 20px !important;
+    height: 20px !important;
+    object-fit: contain !important;
+}
+
+/* Center the GearVue logo in the navbar */
+.navbar-brand {
+    display: block !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+}
+
+/* Adjust dracula icon sizing */
+#theme-icon[src*="dracula-icon.svg"],
+#theme-icon[src*="sweet-dracula-icon.svg"] {
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+}

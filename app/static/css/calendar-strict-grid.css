@@ -1,0 +1,83 @@
+/* Calendar strict grid alignment fixes */
+
+/* Force strict table-based grid layout */
+.fc .fc-scrollgrid-liquid {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+/* Ensure column widths are strictly maintained */
+.fc-scrollgrid-sync-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+/* All cells must match width exactly */
+.fc td, .fc th {
+    box-sizing: border-box !important;
+}
+
+/* Ensure column headers and day cells align perfectly */
+.fc-col-header-cell {
+    position: relative !important;
+    box-sizing: border-box !important;
+}
+
+/* Day number position */
+.fc-daygrid-day-top {
+    position: relative !important;
+    box-sizing: border-box !important;
+    padding-right: 8px !important;
+}
+
+/* Ensure all day headers have identical padding */
+.fc-col-header-cell-cushion {
+    padding: 6px 8px !important;
+    text-align: right !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Ensure day numbers have identical padding */
+.fc-daygrid-day-number {
+    padding: 4px 4px !important;
+    text-align: right !important;
+}
+
+/* Remove any individual cell spacing that might be causing misalignment */
+.fc-daygrid-day {
+    padding: 0 !important;
+}
+
+/* Reset any browser default spacing on table cells */
+.fc table {
+    border-spacing: 0 !important;
+    border-collapse: collapse !important;
+}
+
+/* IMPORTANT: Force browser to redraw the grid */
+.fc:after {
+    content: "" !important;
+    display: table !important;
+    clear: both !important;
+}
+
+/* Force the browser to treat the calendar as a strict grid */
+.fc-view-harness {
+    display: grid !important;
+}
+
+/* Fix any box sizing issues */
+.fc *, .fc *:before, .fc *:after {
+    box-sizing: border-box !important;
+}
+
+/* Force identical sizing for column headers */
+.fc .fc-col-header-cell {
+    width: 14.285714% !important; /* 1/7 for each day */
+}
+
+/* Force identical sizing for day cells */
+.fc .fc-daygrid-day {
+    width: 14.285714% !important; /* 1/7 for each day */
+}

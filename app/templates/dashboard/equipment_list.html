@@ -1,6 +1,132 @@
 {% extends 'base.html' %}
 
-{% block title %}Equipment List - Equipment Tracker{% endblock %}
+{% block title %}Equipment List - GearVue{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-fixes.css') }}?v={{ now.timestamp()|int }}">
+<script>
+    // Add class to body for wider container
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('page-equipment');
+        document.body.classList.add('wide-container');
+    });
+</script>
+<style>
+    /* Reduce overall font size in table */
+    .equipment-table {
+        font-size: 0.85rem;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    /* Optimize column widths */
+    .equipment-table th.col-category { width: 8%; }
+    .equipment-table th.col-type { width: 9%; }
+    .equipment-table th.col-manufacturer { width: 12%; }
+    .equipment-table th.col-model { width: 12%; }
+    .equipment-table th.col-serial { width: 10%; }
+    .equipment-table th.col-location { width: 10%; }
+    .equipment-table th.col-status { width: 8%; }
+    .equipment-table th.col-operational { width: 8%; }
+    .equipment-table th.col-actions { width: 22%; }
+
+    /* Make table cells more compact */
+    .equipment-table td, .equipment-table th {
+        padding: 0.4rem 0.4rem;
+        vertical-align: middle;
+    }
+
+    /* Ensure action buttons are properly sized and visible */
+    .table td:last-child {
+        width: auto;
+        white-space: nowrap;
+        padding: 0.5rem 0.8rem;
+    }
+
+    /* Make buttons more visible but still efficient */
+    .btn-xs {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        border-radius: 0.25rem;
+        width: auto !important;
+        margin-right: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-xs:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+
+    /* Better handling of long text with multi-line support */
+    .equipment-table td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-wrap: break-word;
+        line-height: 1.3;
+        min-height: 2.6em;
+        max-height: 3.9em;
+    }
+
+    /* Special handling for manufacturer text - allow line breaks */
+    .equipment-table td.manufacturer-cell {
+        white-space: normal;
+        line-height: 1.3;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    /* Expand the table to use more space */
+    .equipment-table-container {
+        max-width: 100%;
+        overflow-x: auto;
+        margin: -1rem -1rem;  /* Negative margin to expand beyond card padding */
+        padding: 0 1rem;
+    }
+
+    /* Make column headers sticky on scroll */
+    @media (min-width: 768px) {
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background-color: var(--bs-body-bg);
+            z-index: 1;
+        }
+    }
+
+    /* Adjust badge sizes */
+    .badge {
+        font-size: 75%;
+        padding: 0.25em 0.5em;
+    }
+
+    /* Compact icons in badges */
+    .badge i {
+        font-size: 90%;
+        margin-right: 0.15rem;
+    }
+
+    /* Styles for smaller filter elements */
+    .small-card .card-header {
+        font-size: 0.9rem;
+    }
+
+    .list-group-sm .list-group-item {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Make filter title more compact */
+    .small-card .card-body strong.small {
+        font-size: 0.8rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
@@ -9,11 +135,12 @@
         <p class="lead">Browse and search all equipment in the inventory.</p>
     </div>
     <div class="col-md-4 text-end">
-        <div class="btn-group" role="group">
-            <a href="{{ url_for('dashboard.equipment_list') }}" class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
-            <a href="{{ url_for('dashboard.equipment_list', category='Chamber') }}" class="btn {% if selected_category == 'Chamber' %}btn-primary{% else %}btn-outline-primary{% endif %}">Chambers</a>
-            <a href="{{ url_for('dashboard.equipment_list', category='Electrometer') }}" class="btn {% if selected_category == 'Electrometer' %}btn-primary{% else %}btn-outline-primary{% endif %}">Electrometers</a>
-            <a href="{{ url_for('dashboard.equipment_list', category='Survey Meter') }}" class="btn {% if selected_category == 'Survey Meter' %}btn-primary{% else %}btn-outline-primary{% endif %}">Survey Meters</a>
+        <div class="mb-2">
+            {% if user and user.role in ['admin', 'physicist'] %}
+            <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Add New Equipment
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -25,65 +152,347 @@
 </div>
 {% endif %}
 
-{% if selected_location %}
-<div class="alert alert-info">
-    Filtering by location: <strong>{{ selected_location }}</strong>
-    <a href="{{ url_for('dashboard.equipment_list') }}" class="float-end">Clear filter</a>
+<!-- New Filter Dropdown at Top -->
+<div class="mb-4">
+    <div class="d-flex align-items-center flex-wrap">
+        <!-- Category Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="categoryFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-tags"></i> Category:
+                {% if selected_category == 'Chamber' %}Chambers
+                {% elif selected_category == 'Electrometer' %}Electrometers
+                {% elif selected_category == 'Survey Meter' %}Survey Meters
+                {% else %}All
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="categoryFilterDropdown">
+                <li><a class="dropdown-item {% if not selected_category %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', location=selected_location, status=status_filter, condition=condition_filter) }}">
+                    <i class="bi bi-grid-3x3-gap"></i> All Categories
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item {% if selected_category == 'Chamber' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category='Chamber', location=selected_location, status=status_filter, condition=condition_filter) }}">
+                    <i class="bi bi-circle-square"></i> Chambers
+                </a></li>
+                <li><a class="dropdown-item {% if selected_category == 'Electrometer' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category='Electrometer', location=selected_location, status=status_filter, condition=condition_filter) }}">
+                    <i class="bi bi-device-ssd"></i> Electrometers
+                </a></li>
+                <li><a class="dropdown-item {% if selected_category == 'Survey Meter' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category='Survey Meter', location=selected_location, status=status_filter, condition=condition_filter) }}">
+                    <i class="bi bi-radioactive"></i> Survey Meters
+                </a></li>
+            </ul>
+        </div>
+
+        <!-- Location Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="locationFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-geo-alt"></i> Location: {{ selected_location or 'All' }}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="locationFilterDropdown" style="max-height: 350px; overflow-y: auto;">
+                <li><a class="dropdown-item {% if not selected_location %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category=selected_category, status=status_filter, condition=condition_filter) }}">All Locations</a></li>
+                <li><hr class="dropdown-divider"></li>
+                {% for location in locations %}
+                <li><a class="dropdown-item {% if selected_location == location %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', location=location, category=selected_category, status=status_filter, condition=condition_filter) }}">{{ location }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="statusFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-circle-half"></i> Status:
+                {% if status_filter == 'available' %}Available
+                {% elif status_filter == 'checked_out' %}Checked Out
+                {% elif status_filter == 'in_transport' %}In Transport
+                {% else %}All
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="statusFilterDropdown">
+                <li><a class="dropdown-item {% if not status_filter %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category=selected_category, location=selected_location, condition=condition_filter) }}">All Statuses</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item {% if status_filter == 'available' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='available', category=selected_category, location=selected_location, condition=condition_filter) }}">
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Available</span>
+                </a></li>
+                <li><a class="dropdown-item {% if status_filter == 'checked_out' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='checked_out', category=selected_category, location=selected_location, condition=condition_filter) }}">
+                    <span class="badge bg-info"><i class="bi bi-box-arrow-right"></i> Checked Out</span>
+                </a></li>
+                <li><a class="dropdown-item {% if status_filter == 'in_transport' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', status='in_transport', category=selected_category, location=selected_location, condition=condition_filter) }}">
+                    <span class="badge bg-secondary"><i class="bi bi-truck"></i> In Transport</span>
+                </a></li>
+            </ul>
+        </div>
+
+        <!-- Condition Filter -->
+        <div class="dropdown me-2 mb-2">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn" type="button" id="conditionFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-shield-check"></i> Condition:
+                {% if condition_filter == 'normal' %}Normal
+                {% elif condition_filter == 'warning' %}Needs Attention
+                {% elif condition_filter == 'critical' %}Out of Service
+                {% else %}All
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="conditionFilterDropdown">
+                <li><a class="dropdown-item {% if not condition_filter %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', category=selected_category, location=selected_location, status=status_filter) }}">All Conditions</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item {% if condition_filter == 'normal' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='normal', category=selected_category, location=selected_location, status=status_filter) }}">
+                    <span class="badge bg-success"><i class="bi bi-circle-fill"></i> Normal</span>
+                </a></li>
+                <li><a class="dropdown-item {% if condition_filter == 'warning' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='warning', category=selected_category, location=selected_location, status=status_filter) }}">
+                    <span class="badge bg-warning"><i class="bi bi-exclamation-triangle-fill"></i> Needs Attention</span>
+                </a></li>
+                <li><a class="dropdown-item {% if condition_filter == 'critical' %}active{% endif %}" href="{{ url_for('dashboard.equipment_list', condition='critical', category=selected_category, location=selected_location, status=status_filter) }}">
+                    <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Out of Service</span>
+                </a></li>
+            </ul>
+        </div>
+
+        <!-- Clear Filters -->
+        {% if selected_location or selected_category or status_filter or condition_filter %}
+        <a href="{{ url_for('dashboard.equipment_list') }}" class="btn btn-outline-danger mb-2">
+            <i class="bi bi-x-circle"></i> Clear Filters
+        </a>
+        {% endif %}
+    </div>
 </div>
-{% endif %}
+
+<style>
+    .filter-btn {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        min-width: 130px;
+        text-align: left;
+    }
+
+    .filter-btn i {
+        margin-right: 5px;
+    }
+</style>
 
 <div class="row">
-    <div class="col-md-3 mb-4">
+    <div class="col-12">
         <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Filters</h5>
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h5 class="mb-0">Equipment List</h5>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#equipLegendCollapse" aria-expanded="false" aria-controls="equipLegendCollapse">
+                    <i class="bi bi-info-circle"></i> <span class="legend-toggle-text">Show Legend</span>
+                </button>
             </div>
-            <div class="card-body">
-                <h6>Locations</h6>
-                <div class="list-group">
-                    {% for location in locations %}
-                    <a href="{{ url_for('dashboard.equipment_list', location=location) }}" class="list-group-item list-group-item-action {% if selected_location == location %}active{% endif %}">
-                        {{ location }}
-                    </a>
-                    {% endfor %}
+            
+            <!-- Inline Legend Collapse (Won't displace table) -->
+            <div class="collapse" id="equipLegendCollapse">
+                <div class="p-2 border-bottom" style="font-size: 0.8rem;">
+                    <h6 class="mb-2 border-bottom pb-1 text-muted" style="font-size: 0.9rem;">Equipment Reference Guide</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <span class="badge bg-success me-1"><i class="bi bi-check-circle"></i>Ready</span>
+                                    <span class="small text-nowrap">Available for use</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-info me-1"><i class="bi bi-arrow-bar-right"></i>Out</span>
+                                    <span class="small text-nowrap">Checked out</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-secondary me-1"><i class="bi bi-truck"></i>Transport</span>
+                                    <span class="small text-nowrap">Has transport request</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <span class="badge bg-success me-1"><i class="bi bi-circle-fill"></i>OK</span>
+                                    <span class="small text-nowrap">Normal</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-warning me-1"><i class="bi bi-exclamation-triangle-fill"></i>Attn</span>
+                                    <span class="small text-nowrap">Needs attention</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-danger me-1"><i class="bi bi-x-circle-fill"></i>OOS</span>
+                                    <span class="small text-nowrap">Out of service</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transport Section Legend -->
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <h6 class="mb-2 border-bottom pb-1 text-muted" style="font-size: 0.9rem;">Action Buttons</h6>
+                            <div class="d-flex flex-wrap" style="gap: 10px;">
+                                <div>
+                                    <button class="btn btn-xs btn-outline-primary disabled"><i class="bi bi-eye"></i> View Details</button>
+                                    <span class="small">Equipment details</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-xs btn-outline-info disabled"><i class="bi bi-qr-code"></i> QR Code</button>
+                                    <span class="small">View/print QR code</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-xs btn-primary disabled"><i class="bi bi-box-arrow-right"></i> Check Out</button>
+                                    <span class="small">Assign to location</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-xs btn-warning disabled"><i class="bi bi-ticket"></i> Report Issue</button>
+                                    <span class="small">Report problem</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-xs btn-info disabled"><i class="bi bi-truck"></i> Request Transport</button>
+                                    <span class="small">Request movement</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-9">
-        <div class="card">
+            
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
+                <div class="table-responsive equipment-table-container">
+                    <table class="table table-hover equipment-table">
                         <thead>
                             <tr>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th>Manufacturer</th>
-                                <th>Model</th>
-                                <th>Serial Number</th>
-                                <th>Location</th>
-                                <th>Actions</th>
+                                <th class="col-category text-center">
+                                    Category
+                                </th>
+                                <th class="col-type text-center">
+                                    Type
+                                </th>
+                                <th class="col-manufacturer text-center">
+                                    Manufacturer
+                                </th>
+                                <th class="col-model text-center">
+                                    Model
+                                </th>
+                                <th class="col-serial text-center">
+                                    Serial Number
+                                </th>
+                                <th class="col-location text-center">
+                                    Location
+                                </th>
+                                <th class="col-status text-center">
+                                    Status
+                                </th>
+                                <th class="col-condition text-center">
+                                    Condition
+                                </th>
+                                <th class="col-actions text-center">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in equipment %}
                             <tr>
-                                <td>{{ item.category }}</td>
-                                <td>{{ item.equipment_type }}</td>
-                                <td>{{ item.manufacturer }}</td>
-                                <td>{{ item.model }}</td>
-                                <td>{{ item.serial_number }}</td>
-                                <td>{{ item.location }}</td>
-                                <td>
-                                    <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
+                                <td class="text-center">{{ item.category }}</td>
+                                <td class="text-center">{{ item.equipment_type }}</td>
+                                <td class="text-center manufacturer-cell">{{ item.manufacturer }}</td>
+                                <td class="text-center">{{ item.model }}</td>
+                                <td class="text-center">{{ item.serial_number }}</td>
+                                <td class="text-center">{{ item.location }}</td>
+                                <td class="text-center status-cell">
+                                    {% set status = checkout_manager.get_equipment_status(item.id) %}
+                                    {% if status and status.status == "Checked Out" %}
+                                        <div class="status-container">
+                                            <span class="badge bg-info"><i class="bi bi-arrow-bar-right"></i>Out</span>
+                                            {% if status.location and status.location != item.location %}
+                                                <span class="d-block location-info" title="{{ status.location }}">{{ status.location }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i>Ready</span>
+                                    {% endif %}
+
+                                    <!-- Check for active transport requests -->
+                                    {% set active_transport = false %}
+                                    {% set transport_status = '' %}
+                                    {% set is_in_transit = false %}
+
+                                    {% for request in transport_requests %}
+                                        {% if request.equipment_id == item.id and request.status not in ['completed', 'cancelled'] %}
+                                            {% set active_transport = true %}
+                                            {% set transport_status = request.status %}
+                                            {% set is_in_transit = request.status == 'in_transit' %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if active_transport %}
+                                        <div class="mt-2">
+                                            <span class="badge
+                                                {% if is_in_transit %}bg-dark{% else %}bg-secondary{% endif %}">
+                                                <i class="bi bi-truck"></i>
+                                                {% if is_in_transit %}Moving{% else %}Transport{% endif %}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% set condition = ticket_manager.get_equipment_condition(item.id) %}
+                                    {% if condition == 'normal' %}
+                                        <span class="badge bg-success"><i class="bi bi-circle-fill"></i>OK</span>
+                                    {% elif condition == 'warning' %}
+                                        <span class="badge bg-warning"><i class="bi bi-exclamation-triangle-fill"></i>Attn</span>
+                                    {% elif condition == 'critical' %}
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i>OOS</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div style="display: inline-block; white-space: nowrap;">
+                                        <a href="{{ url_for('dashboard.equipment_detail', equipment_id=item.id) }}" class="btn btn-sm btn-outline-primary py-0 px-2 mr-1" style="margin-right: 2px;" data-bs-toggle="tooltip" data-bs-placement="top" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle py-0 px-2" type="button" id="actions-{{ item.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actions-{{ item.id }}">
+                                                <!-- QR Code -->
+                                                <li>
+                                                    <a class="dropdown-item py-1 qr-dashboard-btn" href="javascript:void(0);"
+                                                       data-id="{{ item.id }}"
+                                                       data-manufacturer="{{ item.manufacturer }}"
+                                                       data-model="{{ item.model }}"
+                                                       data-serial="{{ item.serial_number }}"
+                                                       onclick="generateQRCodeForEquipment('{{ item.id }}', '{{ item.manufacturer }}', '{{ item.model }}', '{{ item.serial_number }}'); return false;">
+                                                        <i class="bi bi-qr-code text-info"></i> QR Code
+                                                    </a>
+                                                </li>
+
+                                                <!-- Check In/Out -->
+                                                {% if status and status.status == "Checked Out" %}
+                                                <li>
+                                                    <a class="dropdown-item py-1" href="{{ url_for('qr.quick_checkin', equipment_id=item.id) }}">
+                                                        <i class="bi bi-box-arrow-in-left text-success"></i> Check In
+                                                    </a>
+                                                </li>
+                                                {% else %}
+                                                <li>
+                                                    <a class="dropdown-item py-1" href="{{ url_for('qr.quick_checkout', equipment_id=item.id) }}">
+                                                        <i class="bi bi-box-arrow-right text-primary"></i> Check Out
+                                                    </a>
+                                                </li>
+                                                {% endif %}
+
+                                                <!-- Ticket -->
+                                                <li>
+                                                    <a class="dropdown-item py-1" href="{{ url_for('qr.quick_ticket', equipment_id=item.id) }}">
+                                                        <i class="bi bi-ticket text-warning"></i> Create Ticket
+                                                    </a>
+                                                </li>
+
+                                                <!-- Transport -->
+                                                <li>
+                                                    <a class="dropdown-item py-1" href="{{ url_for('transport.create', equipment_id=item.id) }}">
+                                                        <i class="bi bi-truck text-info"></i> Request Transport
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                    </div>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="7" class="text-center">No equipment found</td>
+                                <td colspan="9" class="text-center">No equipment found</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -93,4 +502,319 @@
         </div>
     </div>
 </div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">Generated QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCodeLoading" class="mb-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Generating QR code...</p>
+                </div>
+                <div id="qrCodeError" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Error generating QR code. Please try again.
+                </div>
+                <div id="qrCodeDisplay" style="display: none;">
+                    <img id="qrCodeImage" src="" alt="Generated QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+                    <div class="mt-2">
+                        <p class="mb-2"><strong id="qrCodeEquipmentId">Equipment ID: </strong></p>
+                        <p class="mb-2">Scan this QR code for quick access to equipment details, checkout, and maintenance.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="qrCodeDownloadBtn" href="#" class="btn btn-primary" download="qr_code.png" style="display: none;">
+                    <i class="bi bi-download"></i> Download QR Code
+                </a>
+                <a id="qrCodePrintBtn" href="#" class="btn btn-outline-primary" onclick="printQRCode()" style="display: none;">
+                    <i class="bi bi-printer"></i> Print
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Load the QR print script and the debug script -->
+<script src="{{ url_for('static', filename='js/qr-debug.js') }}"></script>
+<script src="{{ url_for('static', filename='js/qr-print.js') }}?v={{ now.timestamp()|int }}"></script>
+
+<script>
+    // Add QR functionality to the "View Details & QR" button
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all View Details buttons
+        const viewDetailsButtons = document.querySelectorAll('a.btn-outline-primary.action-button');
+
+        // Add click event to each button
+        viewDetailsButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Check if Shift key is pressed during click
+                if (e.shiftKey) {
+                    e.preventDefault(); // Prevent default navigation
+
+                    // Find the corresponding hidden QR button
+                    const equipmentRow = this.closest('tr');
+                    const qrButton = equipmentRow.querySelector('.qr-dashboard-btn');
+
+                    // Trigger QR code generation
+                    if (qrButton) {
+                        const id = qrButton.getAttribute('data-id');
+                        const manufacturer = qrButton.getAttribute('data-manufacturer');
+                        const model = qrButton.getAttribute('data-model');
+                        const serial = qrButton.getAttribute('data-serial');
+
+                        // Call the QR code generation function
+                        generateQRCodeForEquipment(id, manufacturer, model, serial);
+                    }
+                }
+                // Otherwise, normal navigation happens
+            });
+        });
+    });
+
+    // Equipment legend toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const legendToggleBtn = document.querySelector('[data-bs-target="#equipLegendCollapse"]');
+        if (legendToggleBtn) {
+            const legendToggleText = legendToggleBtn.querySelector('.legend-toggle-text');
+            const legendToggleIcon = legendToggleBtn.querySelector('i');
+
+            legendToggleBtn.addEventListener('click', function() {
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+                if (isExpanded) {
+                    // Collapsing
+                    legendToggleText.textContent = 'Show Legend';
+                    legendToggleIcon.classList.remove('bi-x-circle');
+                    legendToggleIcon.classList.add('bi-info-circle');
+                } else {
+                    // Expanding
+                    legendToggleText.textContent = 'Hide Legend';
+                    legendToggleIcon.classList.remove('bi-info-circle');
+                    legendToggleIcon.classList.add('bi-x-circle');
+                }
+
+                // Save preference to localStorage
+                localStorage.setItem('equipLegendVisible', !isExpanded);
+            });
+
+            // Check if user preference for legend visibility exists
+            const legendVisible = localStorage.getItem('equipLegendVisible');
+            if (legendVisible === 'true') {
+                // User previously showed the legend, expand it
+                const legendCollapse = document.getElementById('equipLegendCollapse');
+                if (legendCollapse) {
+                    legendCollapse.classList.add('show');
+                    legendToggleText.textContent = 'Hide Legend';
+                    legendToggleIcon.classList.remove('bi-info-circle');
+                    legendToggleIcon.classList.add('bi-x-circle');
+                    legendToggleBtn.setAttribute('aria-expanded', 'true');
+                }
+            }
+        }
+    });
+
+    // Initialize tooltips and event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Enhanced dropdown handling
+        const dropdownToggles = document.querySelectorAll('.equipment-table .dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                // Hide any tooltips when opening dropdown
+                const tooltipInstance = bootstrap.Tooltip.getInstance(this);
+                if (tooltipInstance) {
+                    tooltipInstance.hide();
+                }
+
+                // Make sure the parent row doesn't interfere
+                const row = this.closest('tr');
+                if (row) {
+                    row.style.position = 'relative';
+                    row.style.zIndex = '1000';
+                }
+            });
+        });
+
+        // Initialize QR code buttons
+        const qrButtons = document.querySelectorAll('.qr-dashboard-btn');
+        console.log('Found dashboard QR buttons:', qrButtons.length);
+
+        qrButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent the default action
+                console.log('Dashboard QR button clicked via event listener');
+                const id = this.getAttribute('data-id');
+                const manufacturer = this.getAttribute('data-manufacturer');
+                const model = this.getAttribute('data-model');
+                const serial = this.getAttribute('data-serial');
+
+                console.log('Dashboard QR button data:', { id, manufacturer, model, serial });
+
+                // Call the QR code generator function
+                generateQRCodeForEquipment(id, manufacturer, model, serial);
+            });
+        });
+    });
+
+    // Function to generate QR codes for equipment in the list
+    function generateQRCodeForEquipment(equipmentId, manufacturer, model, serialNumber) {
+        console.log("Handling QR code for", equipmentId);
+
+        // Show the QR code modal
+        const qrModalElement = document.getElementById('qrCodeModal');
+        console.log('QR Modal element found:', !!qrModalElement);
+
+        // Check if Bootstrap is available
+        if (typeof bootstrap !== 'undefined') {
+            try {
+                const qrModal = new bootstrap.Modal(qrModalElement);
+                qrModal.show();
+                console.log('Modal shown with bootstrap');
+            } catch (e) {
+                console.error('Error showing modal with bootstrap:', e);
+                // Fallback modal display
+                qrModalElement.classList.add('show');
+                qrModalElement.style.display = 'block';
+            }
+        } else {
+            console.error('Bootstrap not available, using fallback');
+            // Fallback for when bootstrap isn't available
+            qrModalElement.classList.add('show');
+            qrModalElement.style.display = 'block';
+        }
+
+        // Show loading state
+        document.getElementById('qrCodeLoading').style.display = 'block';
+        document.getElementById('qrCodeError').style.display = 'none';
+        document.getElementById('qrCodeDisplay').style.display = 'none';
+        document.getElementById('qrCodeDownloadBtn').style.display = 'none';
+        document.getElementById('qrCodePrintBtn').style.display = 'none';
+
+        // Validate required fields
+        if (!equipmentId || !manufacturer || !serialNumber) {
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').style.display = 'block';
+            return;
+        }
+
+        // First check if QR code already exists
+        fetch(`/admin/equipment/check-qr/${equipmentId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success' && data.exists) {
+                // QR code already exists, just display it
+                displayExistingQRCode(data);
+            } else {
+                // QR code doesn't exist, generate a new one
+                generateNewQRCode(equipmentId, manufacturer, model, serialNumber);
+            }
+        })
+        .catch(error => {
+            // If check fails for any reason, try to generate a new one
+            console.error('Error checking QR code:', error);
+            generateNewQRCode(equipmentId, manufacturer, model, serialNumber);
+        });
+    }
+
+    // Function to display an existing QR code
+    function displayExistingQRCode(data) {
+        // Hide loading, show QR code
+        document.getElementById('qrCodeLoading').style.display = 'none';
+
+        document.getElementById('qrCodeDisplay').style.display = 'block';
+        document.getElementById('qrCodeImage').src = data.qr_code_url;
+        document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${data.equipment_id}`;
+
+        // Set download link
+        const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+        downloadBtn.href = data.qr_code_url;
+        downloadBtn.download = `qr_code_${data.equipment_id}.png`;
+        downloadBtn.style.display = 'inline-block';
+
+        // Show print button
+        document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+    }
+
+    // Function to generate a new QR code
+    function generateNewQRCode(equipmentId, manufacturer, model, serialNumber) {
+        // Construct the URL for the QR code - direct to the equipment detail page
+        const baseUrl = window.location.origin;
+        const qrUrl = `${baseUrl}/qr/equipment/${equipmentId}`;
+
+        // Make AJAX request to generate the QR code
+        const requestData = {
+            url: qrUrl,
+            equipment_id: equipmentId,
+            manufacturer: manufacturer,
+            model: model,
+            serial: serialNumber
+        };
+
+        fetch('/admin/equipment/generate-qr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide loading, show QR code
+            document.getElementById('qrCodeLoading').style.display = 'none';
+
+            if (data.status === 'success') {
+                document.getElementById('qrCodeDisplay').style.display = 'block';
+                document.getElementById('qrCodeImage').src = data.qr_code_url;
+                document.getElementById('qrCodeEquipmentId').textContent = `Equipment ID: ${equipmentId}`;
+
+                // Set download link
+                const downloadBtn = document.getElementById('qrCodeDownloadBtn');
+                downloadBtn.href = data.qr_code_url;
+                downloadBtn.download = `qr_code_${equipmentId}.png`;
+                downloadBtn.style.display = 'inline-block';
+
+                // Show print button
+                document.getElementById('qrCodePrintBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('qrCodeError').textContent = data.message || 'Failed to generate QR code';
+                document.getElementById('qrCodeError').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            // Show error
+            document.getElementById('qrCodeLoading').style.display = 'none';
+            document.getElementById('qrCodeError').textContent = `Error: ${error.message}`;
+            document.getElementById('qrCodeError').style.display = 'block';
+            console.error('Error generating QR code:', error);
+        });
+    }
+
+    // printQRCode function is now in qr-print.js
+</script>
 {% endblock %}

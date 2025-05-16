@@ -16,9 +16,9 @@
 </div>
 
 <div class="row">
-    <div class="col-md-7">
+    <div class="col-md-8">
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header">
                 <h5 class="mb-0">Checkout Information</h5>
             </div>
             <div class="card-body">
@@ -34,7 +34,7 @@
                         </select>
                         <div class="form-text">Select the location where the equipment will be used</div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="expected_return_days" class="form-label">Expected Return (days) <span class="text-danger">*</span></label>
                         <select class="form-select" id="expected_return_days" name="expected_return_days" required>
@@ -46,18 +46,18 @@
                         </select>
                         <div class="form-text">How long do you plan to keep this equipment?</div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="notes" class="form-label">Notes</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="3" 
+                        <textarea class="form-control" id="notes" name="notes" rows="3"
                                   placeholder="Optional notes about this checkout"></textarea>
                     </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bi bi-box-arrow-right"></i> Check Out Equipment
                         </button>
-                        <a href="{{ url_for('checkout.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-outline-secondary">
+                        <a href="{{ url_for('checkout.equipment_detail', equipment_id=equipment.id) }}" class="btn btn-secondary">
                             Cancel
                         </a>
                     </div>
@@ -65,8 +65,9 @@
             </div>
         </div>
     </div>
-    
-    <div class="col-md-5">
+
+    <div class="col-md-4">
+        <!-- Equipment Information Card -->
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">Equipment Details</h5>
@@ -75,7 +76,7 @@
                 <table class="table">
                     <tbody>
                         <tr>
-                            <th style="width: 40%">Category</th>
+                            <th>Category</th>
                             <td>{{ equipment.category }}</td>
                         </tr>
                         <tr>
@@ -102,10 +103,10 @@
                 </table>
             </div>
         </div>
-        
+
         <!-- Checkout policy information -->
         <div class="card mb-4">
-            <div class="card-header bg-info text-white">
+            <div class="card-header">
                 <h5 class="mb-0">Checkout Policy</h5>
             </div>
             <div class="card-body">

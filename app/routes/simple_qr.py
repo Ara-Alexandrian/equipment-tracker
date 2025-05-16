@@ -1,64 +1,95 @@
 """
-Simple QR code generator that doesn't rely on complex dependencies
+Direct QR code generator for equipment tracking
 """
-import qrcode
-from PIL import Image, ImageDraw, ImageFont
 import os
+import sys
+import subprocess
 import time
 
-def generate_simple_qr(url, output_path, equipment_id="", manufacturer="", model="", serial=""):
-    """Generate a simple QR code without requiring complex dependencies"""
+def generate_qr_code(url, output_path, equipment_id="", manufacturer="", model="", serial=""):
+    """
+    Generate a QR code using the shell script without fallbacks
+
+    This is the canonical QR code generation function used throughout the application.
+    All other QR generation functions should use this one for consistency.
+
+    Args:
+        url: URL to encode in the QR code
+        output_path: Path where to save the QR code
+        equipment_id: Equipment ID
+        manufacturer: Manufacturer name
+        model: Model number
+        serial: Serial number
+
+    Returns:
+        Tuple of (success, result_path_or_error_message)
+    """
     try:
-        # Create QR code
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_H,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(url)
-        qr.make(fit=True)
+        # Get the root directory for the project
+        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        qrcodes_dir = os.path.join(root_dir, 'qrcodes')
 
-        # Create QR image
-        qr_img = qr.make_image(fill_color="black", back_color="white")
+        print(f"QR codes directory: {qrcodes_dir}")
+        print(f"Generating QR code with parameters: URL={url}, MFR={manufacturer}, MODEL={model}, SN={serial}")
 
-        # Create a larger image with space for text
-        img_width, img_height = qr_img.size
-        background = Image.new('RGB', (img_width, img_height + 80), color='white')
+        # Ensure output directory exists
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-        # Paste QR code onto background
-        background.paste(qr_img, (0, 0))
+        # Change to qrcodes directory
+        current_dir = os.getcwd()
+        os.chdir(qrcodes_dir)
 
-        # Add text
-        draw = ImageDraw.Draw(background)
+        # Make the script executable
         try:
-            # Try to use a font
-            # font = ImageFont.truetype("arial.ttf", 15)
-            font = ImageFont.load_default()
-
-            # Create text content
-            title_text = "Mary Bird Perkins Cancer Center"
-            equipment_text = f"{equipment_id} - {manufacturer} {model} {serial}"
-
-            # Draw title at top
-            title_position = (10, img_height + 10)
-            draw.text(title_position, title_text, fill="black", font=font)
-
-            # Draw equipment info below
-            text_position = (10, img_height + 40)
-            draw.text(text_position, equipment_text, fill="black", font=font)
-
+            subprocess.run(["chmod", "+x", "./generate_qr.sh"], check=True)
         except Exception as e:
-            print(f"Error adding text to QR code: {str(e)}")
-            # Continue without text if font fails
+            print(f"Warning: couldn't change script permissions: {e}")
 
-        # Save the QR code
-        background.save(output_path)
-        print(f"QR code saved to {output_path}")
+        # Run the shell script with arguments
+        cmd = [
+            "./generate_qr.sh",
+            url,
+            manufacturer,
+            model,
+            serial
+        ]
 
-        return True, output_path
+        print(f"Running QR generator: {' '.join(cmd)}")
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+
+        # Extract the output path from the script's output
+        output_lines = result.stdout.splitlines()
+        generated_qr_path = None
+
+        for line in output_lines:
+            if "QR code has been generated successfully" in line:
+                parts = line.split(": ")
+                if len(parts) > 1:
+                    generated_qr_path = parts[1].strip()
+
+        if not generated_qr_path:
+            # Find the most recent file in Generated_QR
+            generated_dir = os.path.join(qrcodes_dir, "Generated_QR")
+            if os.path.exists(generated_dir):
+                files = [os.path.join(generated_dir, f) for f in os.listdir(generated_dir) if f.endswith('.png')]
+                if files:
+                    generated_qr_path = max(files, key=os.path.getctime)
+
+        # Return to original directory
+        os.chdir(current_dir)
+
+        if generated_qr_path and os.path.exists(os.path.join(qrcodes_dir, generated_qr_path)):
+            # Copy to the requested output path
+            import shutil
+            full_path = os.path.join(qrcodes_dir, generated_qr_path)
+            shutil.copy2(full_path, output_path)
+            print(f"QR code copied to {output_path}")
+            return True, output_path
+        else:
+            raise Exception("QR code generation failed: No output file found")
+
     except Exception as e:
-        print(f"Error generating QR code: {str(e)}")
+        print(f"Error generating QR code: {e}")
         return False, str(e)
 
 if __name__ == "__main__":
@@ -69,8 +100,8 @@ if __name__ == "__main__":
     test_url = "https://example.com/test"
     test_output = os.path.join(output_dir, f"test_qr_{int(time.time())}.png")
     
-    success, result = generate_simple_qr(
-        test_url, 
+    success, result = generate_qr_code(
+        test_url,
         test_output,
         equipment_id="TEST-1234",
         manufacturer="Test Mfr",

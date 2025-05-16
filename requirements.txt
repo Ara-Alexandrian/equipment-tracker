@@ -19,6 +19,9 @@ gunicorn>=21.0.0
 argparse>=1.4.0
 python-dateutil>=2.8.0
 pytz>=2022.0
+qrcode[pil]>=8.0.0
+opencv-python>=4.5.0
+schedule>=1.2.0
 
 # For PDF generation
 weasyprint>=60.0

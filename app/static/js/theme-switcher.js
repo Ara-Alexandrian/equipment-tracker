@@ -47,6 +47,25 @@ function applyTheme(theme) {
     // Store the theme preference to ensure it's saved
     localStorage.setItem('theme', theme);
 
+    // Toggle logo visibility based on theme
+    if (theme === 'light') {
+        // In light mode, show transparent logos and hide non-transparent ones
+        document.querySelectorAll('.light-mode-logo').forEach(logo => {
+            logo.classList.remove('d-none');
+        });
+        document.querySelectorAll('.dark-mode-logo').forEach(logo => {
+            logo.classList.add('d-none');
+        });
+    } else {
+        // In dark mode, show non-transparent logos and hide transparent ones
+        document.querySelectorAll('.light-mode-logo').forEach(logo => {
+            logo.classList.add('d-none');
+        });
+        document.querySelectorAll('.dark-mode-logo').forEach(logo => {
+            logo.classList.remove('d-none');
+        });
+    }
+
     // Apply to any extra elements that might need the theme class
     if (theme !== 'light') {
         // Apply theme class to tables
