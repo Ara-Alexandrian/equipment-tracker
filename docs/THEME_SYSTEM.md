@@ -1,6 +1,11 @@
 # GearVue Theme System Documentation
 
-This document explains how the GearVue theme system works and how to make updates or add new themes.
+<div align="center">
+  <img src="../Resources/gearvue-text.png" alt="GearVue Logo" width="400">
+  <br>
+  <i>Customizable visual experience for users</i>
+  <br><br>
+</div>
 
 ## Overview
 
@@ -13,17 +18,37 @@ GearVue supports multiple themes that can be cycled through using the theme butt
 
 ## Current Themes
 
-- **Light** - Default light theme
-- **Dark** - Dark mode with blue accents
+- **Light** - Default light theme with blue accents
+- **Dark** - Dark mode with blue accents and reduced eye strain
 - **Dracula** - Classic Dracula theme with purple/pink accents
 - **Sweet Dracula** - A softer version of Dracula with enhanced UI elements
 - **Pastel** - A light theme with soft pastel colors
+
+## Theme Features
+
+### Theme Persistence
+
+Themes are saved in the browser's localStorage and persist across page loads and sessions. Users can set their preferred theme once, and it will be automatically applied on subsequent visits.
+
+### Custom Theme Icons
+
+Each theme has a unique icon in the navigation bar:
+- Light mode uses a sun icon (☀️)
+- Dark mode uses a moon icon (🌙)
+- Dracula mode uses a custom vampire icon (🧛)
+- Sweet Dracula mode uses a stylized vampire icon
+- Pastel mode uses a flower icon (🌸)
+
+### System Preference Detection
+
+The theme system can detect the user's system preference for light or dark mode and automatically apply the appropriate theme on their first visit.
 
 ## How Themes Work
 
 1. Each theme has its own CSS file (`app/static/css/{theme-name}-mode.css`)
 2. The theme switcher JavaScript (`app/static/js/theme-unified.js`) handles toggling between themes
 3. The active theme is saved to localStorage to persist between page loads
+4. When a page loads, the theme is immediately applied before content rendering to prevent flickering
 
 ## Adding a New Theme
 
@@ -134,6 +159,31 @@ Use these selectors to ensure your theme is applied correctly:
 4. Consider responsive behavior
 5. Use CSS variables for color consistency
 
+## Current Theme Implementation
+
+The theme system is implemented with these key files:
+
+### CSS Files
+
+- `app/static/css/style.css` - Base styles for all themes
+- `app/static/css/dark-mode.css` - Dark theme styles
+- `app/static/css/dracula-mode.css` - Dracula theme styles
+- `app/static/css/sweet-dracula-mode.css` - Sweet Dracula theme styles
+- `app/static/css/pastel-mode.css` - Pastel theme styles
+
+### JavaScript
+
+- `app/static/js/theme-unified.js` - Main theme switching code
+- `app/static/js/theme-switcher.js` - Legacy theme switching (for backward compatibility)
+
+### HTML Integration
+
+The `app/templates/base.html` file includes:
+
+1. Theme CSS links in the head
+2. Theme toggle button in the navbar
+3. Immediate theme application script at the end of the body section
+
 ## Troubleshooting
 
 - **Cache Issues**: Add version parameters to CSS links
@@ -156,3 +206,13 @@ To preview themes before applying:
 1. Hold Shift + Click on the theme button
 2. Preview mode activates for 5 seconds
 3. Click to apply or wait for timeout to revert
+
+## Accessibility Considerations
+
+When designing themes, keep these accessibility guidelines in mind:
+
+1. **Color Contrast**: Maintain WCAG 2.1 AA contrast ratios (4.5:1 for normal text, 3:1 for large text)
+2. **Focus Indicators**: Ensure keyboard focus indicators are visible in all themes
+3. **Text Legibility**: Maintain readable font sizes and weights
+4. **Form Controls**: Ensure form controls are easily identifiable
+5. **Error States**: Make sure error states are clearly visible in all themes

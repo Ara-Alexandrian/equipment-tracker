@@ -1,7 +1,7 @@
 # GearVue Deployment Guide
 
 <div align="center">
-  <img src="Resources/gearvue-text.png" alt="GearVue Logo" width="400">
+  <img src="../Resources/gearvue-text.png" alt="GearVue Logo" width="400">
   <br>
   <i>Medical Physics Equipment Management System</i>
   <br><br>

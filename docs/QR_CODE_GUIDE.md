@@ -1,5 +1,12 @@
 # GearVue QR Code System
 
+<div align="center">
+  <img src="../Resources/gearvue-text.png" alt="GearVue Logo" width="400">
+  <br>
+  <i>Zero-Friction Equipment Management</i>
+  <br><br>
+</div>
+
 ## Overview
 
 The GearVue QR code system provides a completely frictionless way for users to check out, check in, and report issues with equipment without requiring login. This guide explains how to use and implement the QR code system.
@@ -76,12 +83,25 @@ Users can report problems by:
 
 The issue is immediately logged with appropriate traffic light status indicators!
 
+### 4. Request Transport
+
+Users can request equipment movement by:
+- Clicking the "Request Transport" button
+- Identifying themselves (selecting from dropdown or entering name/initials)
+- Specifying the destination location
+- Setting a requested date
+- Adding special handling instructions if needed
+
+The transport request is instantly created and ready for administrator approval!
+
 ## Best Practices
 
 1. **Place QR Codes Prominently**: Affix QR codes in visible locations on the equipment.
 2. **Laminate or Protect QR Codes**: Ensure durability in clinical environments.
 3. **Educate Users**: Show staff how easy it is to use the QR code system.
 4. **Test Periodically**: Ensure QR codes remain scannable and links valid.
+5. **Use High-Quality Printing**: Maintain QR code clarity and scannability.
+6. **Standardize Placement**: Put QR codes in the same location on similar equipment.
 
 ## Equipment Condition Indicators
 
@@ -111,3 +131,29 @@ The QR code system uses several techniques to ensure completely frictionless acc
 3. **Mobile-First Design**: Templates optimized for smaller touch screens
 4. **User Selection**: Simple dropdown or name/initials entry for identification
 5. **Traffic Light System**: Visual indicators make equipment status immediately clear
+
+## Batch QR Code Generation
+
+For generating multiple QR codes at once:
+
+1. Navigate to Administration > Equipment Management
+2. Select the equipment items you want to generate QR codes for
+3. Click the "Batch QR Code Generation" button
+4. Print the generated QR codes (they will download as a PDF)
+
+Alternatively, you can use the command-line script:
+
+```bash
+cd qrcodes
+./batch_generate.sh
+```
+
+## Troubleshooting
+
+If users have trouble scanning QR codes:
+
+1. **Lighting**: Ensure adequate lighting for scanning
+2. **Damage**: Replace damaged QR codes promptly
+3. **Size**: Make sure QR codes are not too small (minimum 3cm x 3cm recommended)
+4. **Contrast**: Black on white provides the best scanning results
+5. **URL Validation**: Test the URLs periodically to ensure they still work
