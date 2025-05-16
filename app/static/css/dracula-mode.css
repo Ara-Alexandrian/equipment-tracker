@@ -311,6 +311,12 @@ body.dracula-mode .dark-mode-logo {
   display: inline-block !important;
 }
 
+/* Dracula mode navbar logo */
+body.dracula-mode .navbar-logo {
+  filter: brightness(1.2);
+  mix-blend-mode: lighten;
+}
+
 /* Dracula mode specific styling for the logo container */
 body.dracula-mode .dashboard-logo-container {
   background: linear-gradient(145deg, #282a36, #383a56);

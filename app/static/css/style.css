@@ -162,17 +162,53 @@ body {
     margin-right: 10px !important;
 }
 
+/* Force navbar to align everything to the left with no auto-centering */
+.container-fluid {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+/* Ensure the navbar contents are left-aligned */
+.navbar > .container-fluid {
+    justify-content: flex-start !important;
+}
+
 .dropdown-menu {
     z-index: 11;
 }
 
-/* Logo styling */
-.navbar-brand img {
-    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
-    transition: transform 0.3s ease;
+/* Navbar logo styling */
+/* Wrapper for circular logo in navbar */
+.navbar-logo-wrapper {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: transparent;
 }
 
-.navbar-brand:hover img {
+/* The actual logo inside the wrapper with circular clipping */
+.navbar-logo {
+    width: 165%;
+    height: 165%;
+    object-fit: contain;
+    clip-path: circle(36% at 55% 50%);
+    transform: translate(-20%, 0);
+    position: relative;
+}
+
+/* Force logo to the left */
+.navbar-brand.ms-0 {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.navbar-brand:hover .navbar-logo-wrapper {
     transform: scale(1.05);
 }
 

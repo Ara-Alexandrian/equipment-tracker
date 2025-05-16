@@ -75,11 +75,12 @@
     <!-- The theme classes are now applied by the unified theme switcher script -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid px-4">
-            <!-- Brand/logo moved to the left -->
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <!-- Updated with new logo images -->
-                <img src="{{ url_for('static', filename='img/GearVue-Transparentbackground.jpg') }}" alt="GearVue" height="28" class="d-inline-block align-text-top me-2 light-mode-logo">
-                <img src="{{ url_for('static', filename='img/GearVue-Whitebackground.jpg') }}" alt="GearVue" height="28" class="d-inline-block align-text-top me-2 dark-mode-logo d-none">
+            <!-- Brand/logo forced to the left with no centering -->
+            <a class="navbar-brand ms-0 ps-0" href="{{ url_for('index') }}">
+                <!-- Logo in a circular wrapper that hides white background -->
+                <div class="navbar-logo-wrapper d-inline-block align-text-top me-2">
+                    <img src="{{ url_for('static', filename='img/NewGearVue.jpg') }}" alt="GearVue" class="navbar-logo">
+                </div>
                 <span class="brand-text">GearVue</span>
             </a>
 
