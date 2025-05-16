@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="gearShape">
+      <circle cx="100" cy="100" r="80"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#gearShape)">
+    <image href="../../../Resources/GearVue-Transparentbackground.jpg" x="10" y="10" width="180" height="180" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+</svg>
