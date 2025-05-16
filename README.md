@@ -1,7 +1,7 @@
 # GearVue - Medical Physics Equipment Management System
 
 <div align="center">
-  <img src="Resources/gearvue-text.png" alt="GearVue Logo" width="400">
+  <img src="Resources/GearVue-Whitebackground.jpg" alt="GearVue Logo" width="400">
   <br>
   <i>Comprehensive equipment tracking for medical physics departments</i>
   <br><br>
@@ -219,6 +219,10 @@ Features include:
    - Select different report types
    - Try different formats (PDF, CSV)
 
+## Documentation
+
+For complete documentation, see the [Documentation Index](docs/README.md).
+
 ## Deployment
 
 For detailed deployment instructions, see [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md).
@@ -234,8 +238,13 @@ gearvue/
 │   ├── static/             # Static assets (CSS, JS, images)
 │   └── templates/          # HTML templates
 ├── docs/                   # Documentation files
+│   ├── README.md           # Documentation index
 │   ├── DEPLOYMENT_GUIDE.md # Deployment instructions
-│   └── QR_CODE_GUIDE.md    # QR code system guide
+│   ├── QR_CODE_GUIDE.md    # QR code system guide
+│   ├── TRANSPORT_GUIDE.md  # Transport system guide
+│   ├── THEME_SYSTEM.md     # Theme system documentation
+│   ├── CODE_STANDARDS.md   # Coding standards
+│   └── CHANGELOG.md        # Version history
 ├── docker/                 # Docker configuration
 │   ├── docker-compose.yml  # Docker Compose configuration
 │   ├── Dockerfile          # Main application Dockerfile
