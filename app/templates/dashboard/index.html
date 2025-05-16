@@ -39,13 +39,8 @@
     <div class="col-md-4 text-center">
         <div class="mb-2">
             <div class="dashboard-logo-container">
-                <!-- Approach using direct images with the new logo but ensuring circular cropping with CSS -->
-                <div class="logo-wrapper light-mode-logo">
-                    <img src="{{ url_for('static', filename='img/NewGearVue.jpg') }}" alt="GearVue Logo" class="img-fluid dashboard-logo">
-                </div>
-                <div class="logo-wrapper dark-mode-logo d-none">
-                    <img src="{{ url_for('static', filename='img/NewGearVueDark.jpg') }}" alt="GearVue Logo Dark" class="img-fluid dashboard-logo">
-                </div>
+                <!-- Using custom SVG that precisely draws the gear icon -->
+                <img src="{{ url_for('static', filename='img/GearOnly.svg') }}" alt="GearVue Logo" class="img-fluid dashboard-logo">
             </div>
         </div>
         <div class="mt-1">

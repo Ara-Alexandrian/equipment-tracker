@@ -69,26 +69,15 @@
     pointer-events: none;
 }
 
-/* The logo wrapper inside the container for creating a circular mask */
-.dashboard-logo-container .logo-wrapper {
-    position: relative;
-    width: 90%;
-    height: 90%;
-    border-radius: 50%;
-    overflow: hidden;
-    margin: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* The actual logo inside the wrapper */
+/* The actual logo inside the container */
 .dashboard-logo-container .dashboard-logo {
-    width: 110%;
-    height: 110%;
+    width: 75%;
+    height: 75%;
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
     background-color: transparent;
+    z-index: 3;
+    position: relative;
 }
 
 /* Floating animation */
