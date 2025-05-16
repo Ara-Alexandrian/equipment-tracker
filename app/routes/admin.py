@@ -795,6 +795,9 @@ def settings():
     except:
         user_count = 0
 
+    # Pass application config to the template
+    from flask import current_app as app
+
     return render_template(
         'admin/settings.html',
         categories=categories,
@@ -805,8 +808,46 @@ def settings():
         checkout_count=checkout_count,
         user_count=user_count,
         message=message,
-        message_type=message_type
+        message_type=message_type,
+        config=app.config
     )
+
+@bp.route('/settings/save', methods=['POST'])
+@admin_required
+def save_settings():
+    """Save system settings."""
+    settings_type = request.form.get('settings_type')
+    from flask import current_app as app
+
+    if settings_type == 'general':
+        # Save general settings
+        app.config['APPLICATION_NAME'] = request.form.get('application_name', 'GearVue')
+        app.config['APPLICATION_URL'] = request.form.get('application_url', 'http://localhost:5000')
+
+        # In a real app, we would save these to a config file or database
+        flash('General settings saved successfully', 'success')
+
+    elif settings_type == 'users':
+        # Save user settings
+        app.config['ALLOW_REGISTRATION'] = 'allow_registration' in request.form
+        app.config['REQUIRE_APPROVAL'] = 'require_approval' in request.form
+
+        flash('User settings saved successfully', 'success')
+
+    elif settings_type == 'email':
+        # Save email settings
+        app.config['MAIL_SERVER'] = request.form.get('mail_server', 'smtp.marybird.com')
+        app.config['MAIL_PORT'] = int(request.form.get('mail_port', 587))
+        app.config['MAIL_USE_TLS'] = 'mail_use_tls' in request.form
+        app.config['MAIL_USERNAME'] = request.form.get('mail_username')
+        app.config['MAIL_PASSWORD'] = request.form.get('mail_password')
+        app.config['MAIL_DEFAULT_SENDER'] = request.form.get('mail_default_sender', 'gearvue@marybird.com')
+
+        # In a real app, we would save these securely
+        flash('Email settings saved successfully', 'success')
+
+    # Redirect back to settings page
+    return redirect(url_for('admin.settings', message='Settings saved successfully', message_type='success'))
 
 @bp.route('/settings/add', methods=['POST'])
 @admin_required

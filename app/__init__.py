@@ -26,7 +26,7 @@ app.config.from_mapping(
     PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=7),
     # Disable CSRF protection globally for easy mobile access
     WTF_CSRF_ENABLED=False,
-    
+
     # Email configuration (override with environment variables in production)
     MAIL_SERVER=os.environ.get('MAIL_SERVER', 'smtp.marybird.com'),
     MAIL_PORT=int(os.environ.get('MAIL_PORT', 587)),
@@ -35,9 +35,13 @@ app.config.from_mapping(
     MAIL_USERNAME=os.environ.get('MAIL_USERNAME', None),
     MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD', None),
     MAIL_DEFAULT_SENDER=os.environ.get('MAIL_DEFAULT_SENDER', 'gearvue@marybird.com'),
-    
+
     # Application URL for links in notifications
-    APPLICATION_URL=os.environ.get('APPLICATION_URL', 'http://localhost:5000')
+    APPLICATION_URL=os.environ.get('APPLICATION_URL', 'http://localhost:5000'),
+
+    # Automatic report configuration
+    AUTO_REPORTS_ENABLED=os.environ.get('AUTO_REPORTS_ENABLED', 'True').lower() in ['true', '1', 't'],
+    AUTO_REPORTS_STORAGE_PATH=os.environ.get('AUTO_REPORTS_STORAGE_PATH', 'reports/auto')
 )
 
 # Ensure JSON data directory exists
@@ -64,7 +68,7 @@ email_service.init_app(app)
 
 # Import and register routes
 from app.routes import dashboard, api, checkout, visual, reports, admin, ticket, equipment_landing, qr_access
-from app.routes import transport, qr_transport
+from app.routes import transport, qr_transport, auto_reports
 
 app.register_blueprint(dashboard.bp)
 app.register_blueprint(api.bp)
@@ -77,6 +81,7 @@ app.register_blueprint(equipment_landing.bp)
 app.register_blueprint(qr_access.bp)
 app.register_blueprint(transport.bp)
 app.register_blueprint(qr_transport.bp)
+app.register_blueprint(auto_reports.bp)
 
 # Add template context processors
 @app.context_processor

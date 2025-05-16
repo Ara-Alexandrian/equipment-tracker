@@ -1,0 +1,144 @@
+/* Footer color contrast fixes for GearVue Equipment Tracker */
+
+/* Improve light mode footer contrast */
+footer.bg-dark {
+    background-color: #212529 !important;
+}
+
+footer.bg-dark .text-white {
+    color: #ffffff !important;
+}
+
+footer.bg-dark p {
+    color: #ffffff !important;
+}
+
+footer.bg-dark .text-md-end p,
+footer.bg-dark .small,
+footer.bg-dark .mb-0 {
+    color: #f0f0f0 !important; /* Light color with good contrast */
+}
+
+/* Footer links should have excellent contrast */
+footer.bg-dark a,
+footer.bg-dark a.text-light,
+footer.bg-dark a.footer-contact-link {
+    color: #9fcdff !important; /* Light blue with good contrast on dark bg */
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+footer.bg-dark a:hover,
+footer.bg-dark a.footer-contact-link:hover {
+    color: #c6e2ff !important;
+    text-decoration: underline;
+}
+
+/* Dark mode footer fixes */
+html.dark-mode footer.bg-dark,
+body.dark-mode footer.bg-dark {
+    background-color: #1a1a1a !important;
+}
+
+html.dark-mode footer.bg-dark a,
+body.dark-mode footer.bg-dark a,
+html.dark-mode footer.bg-dark a.footer-contact-link,
+body.dark-mode footer.bg-dark a.footer-contact-link {
+    color: #90caf9 !important; /* Brighter blue for dark mode */
+    font-weight: 500;
+}
+
+html.dark-mode footer.bg-dark a:hover,
+body.dark-mode footer.bg-dark a:hover,
+html.dark-mode footer.bg-dark a.footer-contact-link:hover,
+body.dark-mode footer.bg-dark a.footer-contact-link:hover {
+    color: #bbdefb !important;
+}
+
+/* Dracula mode footer */
+html.dracula-mode footer.bg-dark,
+body.dracula-mode footer.bg-dark {
+    background-color: #282a36 !important; /* Dracula background */
+}
+
+html.dracula-mode footer.bg-dark p,
+body.dracula-mode footer.bg-dark p,
+html.dracula-mode footer.bg-dark .text-white,
+body.dracula-mode footer.bg-dark .text-white {
+    color: #f8f8f2 !important; /* Dracula foreground */
+}
+
+html.dracula-mode footer.bg-dark a,
+body.dracula-mode footer.bg-dark a,
+html.dracula-mode footer.bg-dark a.footer-contact-link,
+body.dracula-mode footer.bg-dark a.footer-contact-link {
+    color: #8be9fd !important; /* Dracula cyan */
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+html.dracula-mode footer.bg-dark a:hover,
+body.dracula-mode footer.bg-dark a:hover,
+html.dracula-mode footer.bg-dark a.footer-contact-link:hover,
+body.dracula-mode footer.bg-dark a.footer-contact-link:hover {
+    color: #bd93f9 !important; /* Dracula purple */
+}
+
+/* Sweet dracula mode footer */
+html.sweet-dracula-mode footer.bg-dark,
+body.sweet-dracula-mode footer.bg-dark {
+    background-color: #2a2d3d !important;
+}
+
+html.sweet-dracula-mode footer.bg-dark p,
+body.sweet-dracula-mode footer.bg-dark p,
+html.sweet-dracula-mode footer.bg-dark .text-white,
+body.sweet-dracula-mode footer.bg-dark .text-white {
+    color: #f8f8f2 !important;
+}
+
+html.sweet-dracula-mode footer.bg-dark a,
+body.sweet-dracula-mode footer.bg-dark a,
+html.sweet-dracula-mode footer.bg-dark a.footer-contact-link,
+body.sweet-dracula-mode footer.bg-dark a.footer-contact-link {
+    color: #00c3ff !important; /* Brighter cyan */
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+html.sweet-dracula-mode footer.bg-dark a:hover,
+body.sweet-dracula-mode footer.bg-dark a:hover,
+html.sweet-dracula-mode footer.bg-dark a.footer-contact-link:hover,
+body.sweet-dracula-mode footer.bg-dark a.footer-contact-link:hover {
+    color: #66d9ff !important; /* Lighter cyan for hover */
+}
+
+/* Pastel mode footer */
+html.pastel-mode footer.bg-dark,
+body.pastel-mode footer.bg-dark {
+    background-color: #5e5585 !important; /* Darker purple for contrast */
+}
+
+html.pastel-mode footer.bg-dark p,
+body.pastel-mode footer.bg-dark p,
+html.pastel-mode footer.bg-dark .text-white,
+body.pastel-mode footer.bg-dark .text-white {
+    color: #fff0f5 !important; /* Light pink/lavender */
+}
+
+html.pastel-mode footer.bg-dark a,
+body.pastel-mode footer.bg-dark a,
+html.pastel-mode footer.bg-dark a.footer-contact-link,
+body.pastel-mode footer.bg-dark a.footer-contact-link {
+    color: #ffcce0 !important; /* Light pink */
+    text-decoration: underline;
+    font-weight: 500;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5); /* Text shadow for better readability */
+}
+
+html.pastel-mode footer.bg-dark a:hover,
+body.pastel-mode footer.bg-dark a:hover,
+html.pastel-mode footer.bg-dark a.footer-contact-link:hover,
+body.pastel-mode footer.bg-dark a.footer-contact-link:hover {
+    color: #fff0f5 !important;
+}
