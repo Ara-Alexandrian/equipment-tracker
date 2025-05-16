@@ -1,46 +1,90 @@
 version: '3.8'
 
 services:
-  equipment-tracker:
-    build: .
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./Resources:/app/Resources
-      - ./output:/app/output
-      - ./app/data:/app/app/data
-      - ./logs:/app/logs
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gearvue/equipment-tracker:${TAG:-latest}
+    container_name: gearvue-app
     restart: unless-stopped
+    ports:
+      - "${PORT:-5000}:5000"
+    volumes:
+      - app_data:/app/app/data
+      - ./logs:/app/logs
+      - ./output:/app/output
+      - ./Resources:/app/Resources
     environment:
-      - FLASK_ENV=production
+      - FLASK_ENV=${FLASK_ENV:-production}
       - FLASK_APP=run.py
       - DATA_DIR=Resources
       - JSON_DATA_DIR=app/data
-      - MAIL_SERVER=smtp.marybird.com
-      - MAIL_PORT=587
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.example.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
       - MAIL_USERNAME=${MAIL_USERNAME:-}
       - MAIL_PASSWORD=${MAIL_PASSWORD:-}
-      - MAIL_USE_TLS=True
-      - MAIL_DEFAULT_SENDER=equipment-tracker@marybird.com
-      # Set this to your machine's network IP for external access (e.g., 192.168.1.11)
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-True}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER:-equipment-tracker@example.com}
       - APPLICATION_URL=${APPLICATION_URL:-http://localhost:5000}
+      - TZ=${TZ:-America/Chicago}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - gearvue-network
   
   cron:
     build:
       context: .
       dockerfile: cron_jobs/Dockerfile.cron
-    volumes:
-      - ./app/data:/app/app/data
-      - ./logs:/app/logs
+    image: gearvue/equipment-tracker-cron:${TAG:-latest}
+    container_name: gearvue-cron
     restart: unless-stopped
+    volumes:
+      - app_data:/app/app/data
+      - ./logs:/app/logs
     environment:
-      - FLASK_ENV=production
+      - FLASK_ENV=${FLASK_ENV:-production}
       - DATA_DIR=Resources
       - JSON_DATA_DIR=app/data
-      - MAIL_SERVER=smtp.marybird.com
-      - MAIL_PORT=587
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.example.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
       - MAIL_USERNAME=${MAIL_USERNAME:-}
       - MAIL_PASSWORD=${MAIL_PASSWORD:-}
-      - MAIL_USE_TLS=True
-      - MAIL_DEFAULT_SENDER=equipment-tracker@marybird.com
-      - APPLICATION_URL=http://localhost:5000
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-True}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER:-equipment-tracker@example.com}
+      - APPLICATION_URL=${APPLICATION_URL:-http://localhost:5000}
+      - TZ=${TZ:-America/Chicago}
+    depends_on:
+      app:
+        condition: service_started
+    networks:
+      - gearvue-network
+
+  # Uncomment this section to enable HTTPS with Traefik
+  # traefik:
+  #   image: traefik:v2.9
+  #   container_name: gearvue-traefik
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro
+  #     - ./traefik/config:/etc/traefik/config:ro
+  #     - ./traefik/certificates:/certificates:ro
+  #   networks:
+  #     - gearvue-network
+
+networks:
+  gearvue-network:
+    driver: bridge
+
+volumes:
+  app_data:
+    name: gearvue_data
