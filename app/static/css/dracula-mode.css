@@ -313,8 +313,8 @@ body.dracula-mode .dark-mode-logo {
 
 /* Dracula mode navbar logo */
 body.dracula-mode .navbar-logo {
-  filter: brightness(1.2);
-  mix-blend-mode: lighten;
+  filter: brightness(1.3) contrast(1.1);
+  mix-blend-mode: screen;
 }
 
 /* Dracula mode specific styling for the logo container */

@@ -76,12 +76,12 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-0 mx-0">
         <div class="container-fluid px-0 mx-0" style="justify-content: flex-start !important; max-width: 100% !important;">
             <!-- Brand/logo forced to the left with no centering -->
-            <a class="navbar-brand ms-0 ps-0" href="{{ url_for('index') }}" style="margin-left: 0 !important;">
+            <a class="navbar-brand ms-0 ps-2" href="{{ url_for('index') }}" style="margin-left: 0 !important; padding-left: 8px !important; display: flex; align-items: center;">
                 <!-- Logo in a circular wrapper that hides white background -->
-                <div class="navbar-logo-wrapper d-inline-block align-text-top me-2">
+                <div class="navbar-logo-wrapper">
                     <img src="{{ url_for('static', filename='img/NewGearVue.jpg') }}" alt="GearVue" class="navbar-logo">
                 </div>
-                <span class="brand-text">GearVue</span>
+                <span class="brand-text" style="font-weight: 500;">GearVue</span>
             </a>
 
             <!-- Navbar toggler (hamburger menu) -->
