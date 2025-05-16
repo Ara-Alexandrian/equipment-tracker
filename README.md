@@ -26,24 +26,42 @@ GearVue is designed for clinical physicists and support staff to efficiently man
 - **Reporting:** Generate PDF, CSV, and Excel reports for audits and reviews
 - **Multiple Themes:** Light, Dark, Dracula, and other visual themes
 
-## Setup Instructions
+## Deployment Options
 
-### Using Docker (Recommended)
+GearVue offers several deployment methods to suit different environments:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/gearvue.git
-   cd gearvue
-   ```
+### 1. Standard Docker Deployment
 
-2. Build and start the containers:
-   ```bash
-   docker-compose up -d
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/gearvue.git
+cd gearvue
 
-3. Access the application at [http://localhost:5000](http://localhost:5000)
+# Run the deployment script
+./deploy.sh
+```
 
-### Manual Setup
+This interactive script will guide you through configuring and starting the application.
+
+### 2. Organization-Specific Deployments
+
+For specific organizational requirements, we provide pre-configured deployment options:
+
+- **Mary Bird Perkins Cancer Center:**
+  ```bash
+  ./mbp-deploy.sh  # Configured for 172.30.98.21:7373
+  ```
+
+- **A-NaviQ:**
+  ```bash
+  ./anaviq-deploy.sh  # Configured for 192.168.1.11:8889
+  ```
+
+- **Unraid Servers:**
+  - Add the Docker template in Unraid's Community Applications
+  - Template URL: `https://raw.githubusercontent.com/organization/gearvue/main/unraid/gearvue.xml`
+
+### 3. Manual Setup
 
 1. Clone the repository:
    ```bash
@@ -78,6 +96,12 @@ GearVue is designed for clinical physicists and support staff to efficiently man
 5. Access the application:
    - Local access: [http://localhost:5000](http://localhost:5000)
    - External access: http://YOUR_IP_ADDRESS:5000 (e.g., http://192.168.1.11:5000)
+
+For detailed deployment instructions, see:
+- [Docker Deployment Guide](docs/DOCKER_DEPLOYMENT.md)
+- [Mary Bird Perkins Deployment](docs/MBP_DEPLOYMENT.md)
+- [A-NaviQ Deployment](docs/ANAVIQ_DEPLOYMENT.md)
+- [Unraid Deployment](docs/UNRAID_DEPLOYMENT.md)
 
 ## System Architecture
 
@@ -144,7 +168,7 @@ export MAIL_USE_TLS=True
 export MAIL_DEFAULT_SENDER=gearvue@example.com
 ```
 
-For Docker deployment, these variables can be set in the docker-compose.yml file.
+For Docker deployment, these variables can be set in the docker-compose.yml file or through the deployment scripts.
 
 The included cron job automatically checks for upcoming and overdue calibrations daily at 8:00 AM and sends notifications to users with appropriate roles and preferences.
 
@@ -258,10 +282,6 @@ This workflow ensures that:
 
 For complete documentation, see the [Documentation Index](docs/README.md).
 
-## Deployment
-
-For detailed deployment instructions, see [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md).
-
 ## Project Structure
 
 ```
@@ -274,23 +294,20 @@ gearvue/
 │   └── templates/          # HTML templates
 ├── docs/                   # Documentation files
 │   ├── README.md           # Documentation index
-│   ├── DEPLOYMENT_GUIDE.md # Deployment instructions
+│   ├── DOCKER_DEPLOYMENT.md # Docker deployment guide
+│   ├── MBP_DEPLOYMENT.md   # Mary Bird Perkins guide
+│   ├── ANAVIQ_DEPLOYMENT.md # A-NaviQ deployment guide
+│   ├── UNRAID_DEPLOYMENT.md # Unraid deployment guide
 │   ├── QR_CODE_GUIDE.md    # QR code system guide
 │   ├── TRANSPORT_GUIDE.md  # Transport system guide
 │   ├── THEME_SYSTEM.md     # Theme system documentation
 │   ├── CODE_STANDARDS.md   # Coding standards
 │   └── CHANGELOG.md        # Version history
 ├── docker/                 # Docker configuration
-│   ├── docker-compose.yml  # Docker Compose configuration
-│   ├── Dockerfile          # Main application Dockerfile
-│   └── Dockerfile.cron     # Cron jobs Dockerfile
+├── unraid/                 # Unraid Docker template
 ├── logs/                   # Log files
 ├── scripts/                # Utility scripts
-│   ├── analysis/           # Data analysis scripts
-│   └── utilities/          # Utility tools and scripts
 └── tests/                  # Test suite
-    ├── debug_tools/        # Debugging utilities
-    └── unit_tests/         # Unit tests
 ```
 
 ## Running Tests
