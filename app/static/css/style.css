@@ -69,15 +69,26 @@
     pointer-events: none;
 }
 
-/* The actual logo inside the container */
-.dashboard-logo-container .dashboard-logo {
+/* Logo wrapper for precise positioning */
+.dashboard-logo-container .logo-wrapper {
+    position: relative;
     width: 75%;
     height: 75%;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+}
+
+/* The actual logo inside the container with circular clipping */
+.dashboard-logo-container .dashboard-logo {
+    width: 165%;  /* Oversized to focus on just the logo part */
+    height: 165%;
     object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
-    background-color: transparent;
-    z-index: 3;
-    position: relative;
+    clip-path: circle(36% at 55% 50%);  /* Circular clip focused on just the gear */
+    transform: translate(-20%, 0);  /* Adjust position to center the gear in the clip */
 }
 
 /* Floating animation */
