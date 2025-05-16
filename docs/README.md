@@ -23,6 +23,7 @@ Welcome to the GearVue documentation. This directory contains comprehensive guid
 - [**Codebase Analysis**](CODEBASE_ANALYSIS.md) - Technical architecture and design decisions
 - [**UI Layout TODO**](UI_LAYOUT_TODO.md) - Planned improvements for UI layouts
 - [**Code Standards**](CODE_STANDARDS.md) - Coding standards and guidelines for the project
+- [**Developer Guide**](DEVELOPER_GUIDE.md) - Development workflow and branch management
 
 ### Additional Resources
 
@@ -61,7 +62,11 @@ gearvue/
 
 For developers working on GearVue, the following resources are available:
 
+- [**Developer Guide**](DEVELOPER_GUIDE.md) - Comprehensive guide for developers (including branch management)
 - [Code Standards](CODE_STANDARDS.md)
 - [Running Tests](../README.md#running-tests)
 - [Recent Updates](CHANGELOG.md)
 - [Known Issues](CLAUDE.md#known-issues)
+
+**IMPORTANT: Never commit directly to the main branch! Always create a feature branch for your changes.**
+See the [Developer Guide](DEVELOPER_GUIDE.md) for details on the required development workflow.

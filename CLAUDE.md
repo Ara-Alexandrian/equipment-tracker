@@ -39,7 +39,20 @@ The project documentation is organized in the `docs/` directory. Please refer to
 ### Known Issues
 - **Equipment Editing**: When editing existing equipment items, the form may not pre-fill with the current values (marked for fixing)
 
-## Code Style Guidelines
+## Development Guidelines
+
+### Branch Management
+
+**IMPORTANT: Never make changes directly to the main branch!**
+
+- **Always create a feature branch**: Create a new branch for any changes you make
+- **Branch naming**: Use prefixes like `feature/`, `bugfix/`, `refactor/`, or `docs/` followed by a descriptive name
+- **Merge back via PR**: Only merge changes back to main through a pull request after review
+- **Clean up**: Delete branches after they've been merged
+
+For detailed development workflow guidelines, see [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md).
+
+### Code Style Guidelines
 
 - **Imports**: Group imports by standard library, third-party, and local modules with a blank line between groups
 - **Docstrings**: Use triple-quotes for module, class, and function docstrings with clear descriptions and Args/Returns sections

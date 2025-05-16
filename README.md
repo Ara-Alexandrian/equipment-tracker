@@ -181,6 +181,41 @@ Features include:
 - Persistent theme selection using localStorage across sessions
 - Custom icons for each theme
 
+## Development Workflow
+
+### Branch Management
+
+**IMPORTANT: Never commit directly to the main branch!**
+
+Always follow these guidelines for development:
+
+1. **Create a new branch for all changes**:
+   ```bash
+   git checkout main     # Start from the main branch
+   git pull              # Ensure you have the latest changes
+   git checkout -b feature/your-feature-name  # Create a new branch
+   ```
+
+2. **Make changes on your branch**:
+   - Implement your changes
+   - Test thoroughly
+   - Commit regularly with descriptive messages
+
+3. **Merge to main via Pull Request**:
+   - Push your branch to remote
+   - Create a pull request
+   - Get code review
+   - Merge only after approval
+
+4. **Delete branches after merging**:
+   - Clean up branches that have been merged
+
+This workflow ensures that:
+- Main branch always remains stable
+- Changes are reviewed before being merged
+- We maintain a clean project history
+- We avoid conflicts and accidental code loss
+
 ## Testing the Application
 
 1. **Test the QR code system** (main way users will interact):
