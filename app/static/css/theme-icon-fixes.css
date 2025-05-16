@@ -1,0 +1,177 @@
+/**
+ * Theme Icons Fix - Standardizes icon display across all themes
+ * Ensures consistent appearance across Light, Dark, Dracula, and Sweet Dracula themes
+ */
+
+/* Common styles for theme toggle button - simplified */
+.theme-toggle-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  z-index: 5 !important;
+  overflow: hidden !important; /* Changed from visible to hidden */
+  position: relative !important;
+  border-radius: 4px !important; /* Changed from 50% to 4px for more subtle appearance */
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Standard icon styling for all themes - simplified */
+#theme-icon {
+  font-size: 1.2rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+  filter: none !important; /* Remove any unwanted filters */
+  box-shadow: none !important; /* Remove unwanted shadow effects */
+  text-shadow: none !important; /* Remove any text shadows */
+}
+
+/* Standardized icon shapes for all themes (including Dracula SVG images) */
+.theme-toggle-btn img#theme-icon,
+.theme-toggle-btn svg#theme-icon,
+.theme-icon-image {
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  object-fit: contain !important;
+  filter: none !important; /* Remove any filters that cause lensing effect */
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Apply consistent styling to size toggle button as well */
+#size-toggle-btn {
+  width: 36px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+#size-icon {
+  font-size: 1.2rem;
+  filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Specific fix for dracula icon alignment - removing special effects */
+.dracula-mode .theme-toggle-btn img#theme-icon,
+.sweet-dracula-mode .theme-toggle-btn img#theme-icon {
+  filter: none !important;
+  opacity: 0.9 !important;
+}
+
+/* Unified icon sizing for navbar and footer */
+.navbar-logo-container img,
+.footer-logo-container img {
+  max-height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Fix footer logo size */
+.footer-logo {
+  max-height: 32px !important;
+  width: auto !important;
+}
+
+/* Ensure logo appears correctly in all containers */
+.navbar-logo-container,
+.footer-logo-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+/* Special logo styling for dark themes */
+.dark-mode .navbar-logo-container img,
+.dark-mode .footer-logo-container img {
+  transition: all 0.3s ease;
+}
+
+/* Dracula theme logos get special treatment */
+.dracula-mode .navbar-logo-container,
+.sweet-dracula-mode .navbar-logo-container,
+.dracula-mode .footer-logo-container,
+.sweet-dracula-mode .footer-logo-container {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Specific adjustments for navbar logo */
+.navbar .navbar-logo-container {
+  margin-right: 8px;
+}
+
+/* Specific adjustments for footer logo */
+footer .footer-logo-container {
+  margin-bottom: 0;
+}
+
+/* The toggling of logo backgrounds is now handled by the JavaScript in theme-unified.js
+   This provides more dynamic control over the appearance based on theme changes */
+
+/* Fix the "active" button styling when clicked */
+.theme-toggle-btn.active,
+#size-toggle-btn.active {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: scale(1.05) !important;
+  transition: all 0.1s ease !important;
+}
+
+/* Simplified hover effects for buttons */
+.theme-toggle-btn:hover,
+#size-toggle-btn:hover {
+  transform: scale(1.05);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Remove box-shadow and glow effects that cause visual issues */
+.theme-toggle-btn,
+#size-toggle-btn {
+  box-shadow: none !important;
+}
+
+/* Simpler animation for theme changes */
+@keyframes theme-icon-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Animation class for feedback when theme changes */
+.theme-toggle-btn.animate #theme-icon {
+  animation: theme-icon-pulse 0.3s ease;
+}
+
+/* Default icon colors without excessive effects */
+.dark-mode #theme-icon.bi-moon-stars-fill {
+  color: #ffffff;
+}
+
+.light-mode #theme-icon.bi-sun-fill {
+  color: #495057;
+}

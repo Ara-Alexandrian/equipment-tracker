@@ -22,7 +22,7 @@ GearVue supports multiple themes that can be cycled through using the theme butt
 - **Dark** - Dark mode with blue accents and reduced eye strain
 - **Dracula** - Classic Dracula theme with purple/pink accents
 - **Sweet Dracula** - A softer version of Dracula with enhanced UI elements
-- **Pastel** - A light theme with soft pastel colors
+- **Pastel** - A light theme with soft pastel colors (currently skipped in theme cycling due to layout issues)
 
 ## Theme Features
 
@@ -35,9 +35,11 @@ Themes are saved in the browser's localStorage and persist across page loads and
 Each theme has a unique icon in the navigation bar:
 - Light mode uses a sun icon (☀️)
 - Dark mode uses a moon icon (🌙)
-- Dracula mode uses a custom vampire icon (🧛)
-- Sweet Dracula mode uses a stylized vampire icon
-- Pastel mode uses a flower icon (🌸)
+- Dracula mode uses a custom vampire SVG icon
+- Sweet Dracula mode uses a stylized vampire SVG icon
+- Pastel mode uses a palette icon (🎨)
+
+All theme icons use a standardized styling system defined in `theme-icon-fixes.css` to ensure consistent appearance across themes.
 
 ### System Preference Detection
 
@@ -170,11 +172,13 @@ The theme system is implemented with these key files:
 - `app/static/css/dracula-mode.css` - Dracula theme styles
 - `app/static/css/sweet-dracula-mode.css` - Sweet Dracula theme styles
 - `app/static/css/pastel-mode.css` - Pastel theme styles
+- `app/static/css/theme-icon-fixes.css` - Standardized icon styling for all themes
 
 ### JavaScript
 
-- `app/static/js/theme-unified.js` - Main theme switching code
+- `app/static/js/theme-unified.js` - Main theme switching code with theme cycling and persistence
 - `app/static/js/theme-switcher.js` - Legacy theme switching (for backward compatibility)
+- `app/static/js/modal-fixes.js` - Includes theme application to modals and backdrop cleanup
 
 ### HTML Integration
 

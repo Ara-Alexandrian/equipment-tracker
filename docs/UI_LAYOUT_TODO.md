@@ -3,34 +3,47 @@
 This document tracks needed improvements to the wider layout implementation.
 
 ## Current Status
-We've implemented wider default container sizes and responsive behavior, but several issues remain:
+We've addressed most of the layout issues through the new layout-fixes.css file. Major improvements include:
 
-- Some UI elements are colliding in the wider layout
-- Button styling needs refinement for better visual appearance
-- Mobile responsiveness needs comprehensive testing and improvements
+- Fixed UI element collisions in wider layouts
+- Improved button styling and consistency
+- Enhanced mobile responsiveness with better breakpoints
+- Fixed modal dialog positioning and behavior
 
-## Needed Improvements
+## Completed Improvements
 
 ### Layout Fixes
-- [ ] Fix collision between UI elements in wider layouts
-- [ ] Better handle tables that expand beyond their containers
-- [ ] Fix modal dialog positioning and widths in wider layouts
-- [ ] Ensure all containers properly use the width classes
+- [x] Fixed collision between UI elements in wider layouts
+- [x] Better handling of tables that expand beyond their containers
+- [x] Fixed modal dialog positioning and widths in wider layouts
+- [x] Ensured all containers properly use the width classes
 
 ### Button Styling
-- [ ] Standardize button spacing and sizing
-- [ ] Fix action button alignment and overflow issues
-- [ ] Improve button visibility and clickability on mobile
+- [x] Standardized button spacing and sizing
+- [x] Fixed action button alignment and overflow issues
+- [x] Improved button visibility and clickability on mobile
+
+### Modal Behavior
+- [x] Fixed modal backdrop removal when closing modals
+- [x] Added proper theme application to modal dialogs
+- [x] Implemented mutation observer for dynamically added modals
+- [x] Fixed specific issues with QR code modal dark overlay
+
+### Theme Compatibility
+- [x] Improved theme icon display across all themes
+- [x] Fixed logo appearance in dark themes
+- [x] Added dynamic theme application to modals
+- [x] Standardized icon styling across themes
+
+## Remaining Tasks
 
 ### Responsive Behavior
-- [ ] Complete mobile layout optimization
-- [ ] Add proper breakpoints for different device sizes
-- [ ] Test on various devices and screen sizes
+- [ ] Further mobile layout optimization
+- [ ] Additional testing on various devices and screen sizes
 - [ ] Implement collapsible tables for very small screens
 
 ### Additional Enhancements
-- [ ] Consider dark theme adjustments for wider layouts
 - [ ] Add proper table scrolling behavior for very wide tables
 
 ## Implementation Plan
-We will address these issues in the next development session, focusing first on fixing UI element collisions and ensuring proper responsive behavior.
+Most critical issues have been addressed in the May 2025 update. The remaining tasks will be tackled in future updates, with a focus on enhanced mobile support and table behavior for extremely wide screens.

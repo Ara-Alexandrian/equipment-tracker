@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar-strict-grid.css') }}?v={{ now.timestamp()|int }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer-contrast-fix.css') }}?v={{ now.timestamp()|int }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout-fixes.css') }}?v={{ now.timestamp()|int }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-icon-fixes.css') }}?v={{ now.timestamp()|int }}">
 
     <!-- Immediate theme application script - runs before anything else -->
     <script>
@@ -54,11 +55,11 @@
                     if (theme === 'dark') {
                         themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-moon-stars-fill"></i>';
                     } else if (theme === 'dracula') {
-                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/dracula-icon.svg" style="width:38px;height:38px;margin-top:-10px;margin-bottom:-10px;margin-left:-8px;margin-right:-8px;" />';
+                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/dracula-icon.svg" alt="Dracula Theme" class="theme-icon-image" />';
                     } else if (theme === 'sweet-dracula') {
-                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/sweet-dracula-icon.svg" style="width:38px;height:38px;margin-top:-10px;margin-bottom:-10px;margin-left:-8px;margin-right:-8px;" />';
+                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/sweet-dracula-icon.svg" alt="Sweet Dracula Theme" class="theme-icon-image" />';
                     } else if (theme === 'pastel') {
-                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-palette-fill" style="color:#9a7fb9;"></i>';
+                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-palette-fill"></i>';
                     } else {
                         themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-sun-fill"></i>';
                     }
@@ -203,12 +204,11 @@
                         <button
                             id="size-toggle-btn"
                             type="button"
-                            class="btn btn-outline-light btn-sm me-2 nav-icon-btn"
+                            class="btn btn-outline-light btn-sm me-2 nav-icon-btn theme-toggle-btn"
                             title="Toggle layout size"
-                            style="cursor: pointer !important; z-index: 999 !important; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;"
                             onclick="toggleLayoutSize()"
                         >
-                            <i class="bi bi-grid-3x3-gap"></i>
+                            <i class="bi bi-grid-3x3-gap" id="size-icon"></i>
                         </button>
 
                         <!-- Theme toggle button - controlled by theme-unified.js -->
@@ -218,7 +218,6 @@
                             class="btn btn-outline-light btn-sm theme-toggle-btn nav-icon-btn"
                             title="Toggle theme (Light/Dark/Dracula)"
                             onclick="cycleTheme(event);"
-                            style="cursor: pointer !important; z-index: 999 !important; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;"
                         >
                             <!-- Icon will be set by the theme-unified.js script based on current theme -->
                             <i id="theme-icon" class="bi bi-sun-fill"></i>
@@ -367,11 +366,11 @@
                     if (theme === 'dark') {
                         themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-moon-stars-fill"></i>';
                     } else if (theme === 'dracula') {
-                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/dracula-icon.svg" style="width:38px;height:38px;margin-top:-10px;margin-bottom:-10px;margin-left:-8px;margin-right:-8px;" />';
+                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/dracula-icon.svg" alt="Dracula Theme" class="theme-icon-image" />';
                     } else if (theme === 'sweet-dracula') {
-                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/sweet-dracula-icon.svg" style="width:38px;height:38px;margin-top:-10px;margin-bottom:-10px;margin-left:-8px;margin-right:-8px;" />';
+                        themeBtn.innerHTML = '<img id="theme-icon" src="/static/img/icons/sweet-dracula-icon.svg" alt="Sweet Dracula Theme" class="theme-icon-image" />';
                     } else if (theme === 'pastel') {
-                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-palette-fill" style="color:#9a7fb9;"></i>';
+                        themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-palette-fill"></i>';
                     } else {
                         themeBtn.innerHTML = '<i id="theme-icon" class="bi bi-sun-fill"></i>';
                     }

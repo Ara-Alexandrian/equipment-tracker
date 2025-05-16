@@ -3,7 +3,51 @@
  * Addresses issues with modals not properly closing and backdrop remaining visible
  */
 
+/**
+ * Add theme-specific modal styling based on current theme.
+ * This ensures modals look good in all themes.
+ *
+ * Note: This function is also defined in theme-unified.js.
+ * It's duplicated here to ensure modals are properly themed even if they're created
+ * before the main theme system is loaded.
+ */
+function applyThemeToModals() {
+    const theme = localStorage.getItem('theme') || 'light';
+    const modals = document.querySelectorAll('.modal, .modal-backdrop, .modal-content, .modal-header, .modal-body, .modal-footer');
+
+    modals.forEach(modal => {
+        // Remove all theme classes first
+        modal.classList.remove('dark-mode', 'dracula-mode', 'sweet-dracula-mode', 'pastel-mode');
+
+        // Add theme class based on current theme
+        if (theme === 'dark') {
+            modal.classList.add('dark-mode');
+        } else if (theme === 'dracula') {
+            modal.classList.add('dracula-mode');
+        } else if (theme === 'sweet-dracula') {
+            modal.classList.add('sweet-dracula-mode');
+        } else if (theme === 'pastel') {
+            modal.classList.add('pastel-mode');
+        }
+    });
+
+    // Apply theme-specific styles to modal backdrops
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => {
+        // Adjust backdrop opacity based on theme
+        if (theme === 'dracula' || theme === 'sweet-dracula') {
+            backdrop.style.opacity = '0.7';
+        } else if (theme === 'dark') {
+            backdrop.style.opacity = '0.5';
+        } else {
+            backdrop.style.opacity = '0.5';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Apply theme to modals initially
+    applyThemeToModals();
     // Fix any modal backdrop issues across the site
     const fixBackdropIssues = function() {
         // Fix for lingering backdrops when modal is closed
@@ -150,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reapply fixes if needed
             if (shouldReapplyFixes) {
                 fixBackdropIssues();
+                applyThemeToModals(); // Also reapply the theme to new modals
             }
         });
         
