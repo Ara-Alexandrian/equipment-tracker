@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>gearvue</Name>
+  <Repository>gearvue/equipment-tracker:latest</Repository>
+  <Registry>https://hub.docker.com/r/gearvue/equipment-tracker/</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/organization/gearvue/issues</Support>
+  <Project>https://github.com/organization/gearvue</Project>
+  <Overview>
+    GearVue is a comprehensive web-based system for medical physics departments to track equipment, manage calibrations, and streamline workflows through innovative QR code technology.
+    
+    Key features include:
+    - Equipment inventory management
+    - Automated calibration tracking and notifications
+    - QR code-based equipment access
+    - Maintenance ticketing system
+    - Location and checkout tracking
+    - Multiple theme support (Light/Dark/Dracula)
+  </Overview>
+  <Category>Tools: Productivity: Medical</Category>
+  <WebUI>http://[IP]:[PORT:8889]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/organization/gearvue/main/unraid/gearvue.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/organization/gearvue/main/Resources/GearVue-Whitebackground.jpg</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1684214400</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="WebUI Port" Target="5000" Default="8889" Mode="tcp" Description="The port for accessing the GearVue web interface" Type="Port" Display="always" Required="true" Mask="false">8889</Config>
+  <Config Name="Data" Target="/app/app/data" Default="/mnt/user/appdata/gearvue/data" Mode="rw" Description="Application data storage location" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gearvue/data</Config>
+  <Config Name="Logs" Target="/app/logs" Default="/mnt/user/appdata/gearvue/logs" Mode="rw" Description="Log files location" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gearvue/logs</Config>
+  <Config Name="Output Files" Target="/app/output" Default="/mnt/user/appdata/gearvue/output" Mode="rw" Description="Generated reports and output files" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gearvue/output</Config>
+  <Config Name="Resources" Target="/app/Resources" Default="/mnt/user/appdata/gearvue/resources" Mode="rw" Description="Resource files location" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/gearvue/resources</Config>
+  <Config Name="TZ" Target="TZ" Default="America/Chicago" Mode="" Description="Specify a timezone to use (e.g., America/Chicago)" Type="Variable" Display="always" Required="true" Mask="false">America/Chicago</Config>
+  <Config Name="MAIL_SERVER" Target="MAIL_SERVER" Default="smtp.example.com" Mode="" Description="SMTP server for sending notifications" Type="Variable" Display="always" Required="false" Mask="false">smtp.example.com</Config>
+  <Config Name="MAIL_PORT" Target="MAIL_PORT" Default="587" Mode="" Description="SMTP port" Type="Variable" Display="always" Required="false" Mask="false">587</Config>
+  <Config Name="MAIL_USERNAME" Target="MAIL_USERNAME" Default="" Mode="" Description="SMTP username" Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="MAIL_PASSWORD" Target="MAIL_PASSWORD" Default="" Mode="" Description="SMTP password" Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="MAIL_USE_TLS" Target="MAIL_USE_TLS" Default="True" Mode="" Description="Use TLS for SMTP connection" Type="Variable" Display="always" Required="false" Mask="false">True</Config>
+  <Config Name="MAIL_DEFAULT_SENDER" Target="MAIL_DEFAULT_SENDER" Default="gearvue@example.com" Mode="" Description="Default email sender address" Type="Variable" Display="always" Required="false" Mask="false">gearvue@example.com</Config>
+  <Config Name="APPLICATION_URL" Target="APPLICATION_URL" Default="http://localhost:8889" Mode="" Description="The public URL where the application will be accessible" Type="Variable" Display="always" Required="true" Mask="false">http://localhost:8889</Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="UID for container user" Type="Variable" Display="advanced" Required="false" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="GID for container user" Type="Variable" Display="advanced" Required="false" Mask="false">100</Config>
+</Container>
