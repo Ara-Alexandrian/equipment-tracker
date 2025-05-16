@@ -2,16 +2,14 @@ version: '3.8'
 
 services:
   equipment-tracker:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    build: .
     ports:
       - "5000:5000"
     volumes:
-      - ../Resources:/app/Resources
-      - ../output:/app/output
-      - ../app/data:/app/app/data
-      - ../logs:/app/logs
+      - ./Resources:/app/Resources
+      - ./output:/app/output
+      - ./app/data:/app/app/data
+      - ./logs:/app/logs
     restart: unless-stopped
     environment:
       - FLASK_ENV=production
@@ -26,14 +24,14 @@ services:
       - MAIL_DEFAULT_SENDER=equipment-tracker@marybird.com
       # Set this to your machine's network IP for external access (e.g., 192.168.1.11)
       - APPLICATION_URL=${APPLICATION_URL:-http://localhost:5000}
-
+  
   cron:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.cron
+      context: .
+      dockerfile: cron_jobs/Dockerfile.cron
     volumes:
-      - ../app/data:/app/app/data
-      - ../logs:/app/logs
+      - ./app/data:/app/app/data
+      - ./logs:/app/logs
     restart: unless-stopped
     environment:
       - FLASK_ENV=production

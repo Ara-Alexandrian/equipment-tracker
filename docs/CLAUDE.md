@@ -63,3 +63,25 @@ Key points to remember:
 - **Formatting**: Use 4 spaces for indentation, not tabs
 - **Functions**: Keep functions focused on a single task with descriptive names
 - **Comments**: Use comments to explain "why" not "what"
+
+## Project Structure
+
+The project follows a clean, organized structure:
+
+- **app/**: Main application code
+  - **data/**: JSON data files
+  - **models/**: Data models
+  - **routes/**: Flask routes
+  - **static/**: Static assets (CSS, JS, images)
+  - **templates/**: HTML templates
+  - **utils/**: Utility modules
+- **docker/**: Docker configuration files
+- **docs/**: Documentation files
+- **logs/**: Log files
+- **scripts/**: Utility scripts
+  - **analysis/**: Data analysis scripts
+  - **batch/**: Batch scripts
+  - **utilities/**: Utility scripts
+- **tests/**: Test files
+
+The root directory contains only essential files like run.py, start.sh, README.md, and requirements.txt to keep the project organized and maintainable.

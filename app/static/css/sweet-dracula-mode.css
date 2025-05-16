@@ -180,6 +180,12 @@ body.sweet-dracula-mode a:not(.btn):hover {
   text-decoration: underline;
 }
 
+/* Remove underline from navbar brand in sweet-dracula mode */
+body.sweet-dracula-mode .navbar-brand:hover,
+body.sweet-dracula-mode .navbar-brand:hover .brand-text {
+  text-decoration: none !important;
+}
+
 /* Nav tabs with better contrast for sweet-dracula mode */
 body.sweet-dracula-mode .nav-tabs {
   border-bottom-color: #675f89 !important;
@@ -304,6 +310,22 @@ body.sweet-dracula-mode code {
 /* Sweet Dracula theme toggle button enhancement */
 body.sweet-dracula-mode #theme-btn {
   box-shadow: 0 0 5px rgba(255, 146, 223, 0.7) !important;
+}
+
+/* Sweet Dracula mode navbar and footer logos - enhance visibility */
+body.sweet-dracula-mode .navbar-logo,
+body.sweet-dracula-mode .footer-logo {
+  filter: brightness(1.4) contrast(1.0);
+  mix-blend-mode: color-dodge;
+  background-color: transparent !important;
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><filter id="a"><feGaussianBlur stdDeviation="0.8" /></filter><circle cx="50%" cy="50%" r="50%" filter="url(%23a)"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><filter id="a"><feGaussianBlur stdDeviation="0.8" /></filter><circle cx="50%" cy="50%" r="50%" filter="url(%23a)"/></svg>');
+}
+
+/* Sweet Dracula mode dashboard logo - maintain original colors */
+body.sweet-dracula-mode .dashboard-logo-container img.dashboard-logo {
+  filter: brightness(1.4) contrast(1.0);
+  mix-blend-mode: color-dodge;
 }
 
 /* Filter items */
@@ -458,5 +480,14 @@ body.sweet-dracula-mode .dashboard-logo-container::after {
 
 /* Sweet Dracula mode logo glow effect */
 body.sweet-dracula-mode .dashboard-logo-container img.dashboard-logo {
-  filter: drop-shadow(0 0 8px rgba(199, 160, 255, 0.5));
+  filter: drop-shadow(0 0 8px rgba(199, 160, 255, 0.5)) brightness(1.4) contrast(1.2) hue-rotate(310deg);
+  mix-blend-mode: multiply;
+}
+
+/* Sweet Dracula mode navbar and footer logos - enhance visibility */
+body.sweet-dracula-mode .navbar-logo,
+body.sweet-dracula-mode .footer-logo {
+  filter: brightness(1.4) contrast(1.2) hue-rotate(310deg);
+  mix-blend-mode: multiply;
+  background-color: transparent !important;
 }

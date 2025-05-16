@@ -37,8 +37,8 @@ def main():
     args = parser.parse_args()
     
     # Set base directory
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
     # Set data directories
     json_data_dir = os.path.join(base_dir, 'app', 'data')
     users_file_path = os.path.join(json_data_dir, 'users.json')

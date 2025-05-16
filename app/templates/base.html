@@ -77,11 +77,11 @@
         <div class="container-fluid px-0 mx-0" style="justify-content: flex-start !important; max-width: 100% !important;">
             <!-- Brand/logo forced to the left with no centering -->
             <a class="navbar-brand ms-0 ps-2" href="{{ url_for('index') }}" style="margin-left: 0 !important; padding-left: 8px !important; display: flex; align-items: center;">
-                <!-- Logo in a circular wrapper that hides white background -->
-                <div class="navbar-logo-wrapper">
-                    <img src="{{ url_for('static', filename='img/NewGearVue.jpg') }}" alt="GearVue" class="navbar-logo">
+                <!-- JPG with transparent background -->
+                <div class="navbar-logo-container">
+                    <img src="{{ url_for('static', filename='img/GearVue-Transparentbackground.jpg') }}" alt="GearVue" class="navbar-logo">
                 </div>
-                <span class="brand-text" style="font-weight: 500;">GearVue</span>
+                <span class="brand-text" style="font-weight: 500; margin-left: 4px;">GearVue</span>
             </a>
 
             <!-- Navbar toggler (hamburger menu) -->
@@ -267,10 +267,10 @@
             <div class="mx-auto">
             <div class="row align-items-center">
                 <div class="col-md-1 d-none d-md-block">
-                    <!-- Light mode logo (transparent) - hidden in dark mode -->
-                    <img src="{{ url_for('static', filename='img/GearVue-Transparentbackground.jpg') }}" alt="GearVue Logo" height="50" class="light-mode-logo">
-                    <!-- Dark mode logo (non-transparent) - hidden in light mode -->
-                    <img src="{{ url_for('static', filename='img/GearVue-Whitebackground.jpg') }}" alt="GearVue Logo" height="50" class="dark-mode-logo d-none">
+                    <!-- JPG with transparent background -->
+                    <div class="footer-logo-container">
+                        <img src="{{ url_for('static', filename='img/GearVue-Transparentbackground.jpg') }}" alt="GearVue Logo" class="footer-logo">
+                    </div>
                 </div>
                 <div class="col-md-5">
                     <h5>GearVue</h5>

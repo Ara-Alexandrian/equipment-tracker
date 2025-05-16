@@ -197,12 +197,10 @@ body.centered-content {
 }
 
 /* Navbar logo styling */
-/* Wrapper for circular logo in navbar */
-.navbar-logo-wrapper {
-    width: 24px;
+/* Container for navbar logo */
+.navbar-logo-container {
     height: 24px;
-    border-radius: 50%;
-    overflow: hidden;
+    width: auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -213,13 +211,14 @@ body.centered-content {
     margin-bottom: 2px;
 }
 
-/* The actual logo inside the wrapper with circular clipping */
+/* The actual logo without circular clipping */
 .navbar-logo {
-    width: 110%;
-    height: 110%;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
     object-fit: contain;
-    clip-path: circle(42% at 50% 48%);
     position: relative;
+    background-color: transparent;
 }
 
 /* Force logo to the left */
@@ -228,8 +227,38 @@ body.centered-content {
     padding-left: 0 !important;
 }
 
-.navbar-brand:hover .navbar-logo-wrapper {
+.navbar-brand:hover .navbar-logo-container {
     transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Remove underline effect on navbar brand text */
+.navbar-brand:hover {
+    text-decoration: none !important;
+}
+
+.navbar-brand:hover .brand-text {
+    text-decoration: none !important;
+}
+
+/* Footer logo styling */
+.footer-logo-container {
+    height: 30px;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: transparent;
+}
+
+.footer-logo {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    position: relative;
+    background-color: transparent;
 }
 
 .dashboard-logo {

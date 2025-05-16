@@ -5,11 +5,16 @@ with app.test_client() as client:
     response = client.get('/')
     html = response.data.decode('utf-8')
     
+    # Get base directory
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    output_path = os.path.join(base_dir, 'output', 'homepage_output.html')
+
     # Write the HTML to a file for inspection
-    with open('homepage_output.html', 'w') as f:
+    with open(output_path, 'w') as f:
         f.write(html)
-    
-    print("Homepage HTML has been saved to homepage_output.html")
+
+    print(f"Homepage HTML has been saved to {output_path}")
     
     # Check for content after </html>
     html_end_pos = html.find('</html>')

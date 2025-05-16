@@ -15,9 +15,10 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'equipment-tracker=equipment_tracker:main',
-            'maintenance-tracker=maintenance_tracker:main',
-            'data-explorer=data_explorer:explorer',
+            'equipment-tracker=scripts.analysis.equipment_tracker:main',
+            'maintenance-tracker=scripts.analysis.maintenance_tracker:main',
+            'data-explorer=scripts.analysis.data_explorer:explorer',
+            'calibration-notifier=scripts.utilities.calibration_notifier:main',
         ],
     },
 )
