@@ -167,11 +167,29 @@ body {
     padding-left: 0 !important;
     margin-left: 0 !important;
     margin-right: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
 }
 
 /* Ensure the navbar contents are left-aligned */
 .navbar > .container-fluid {
     justify-content: flex-start !important;
+    max-width: 100% !important;
+}
+
+/* Override the body centering */
+body.centered-content {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    max-width: 100% !important;
+}
+
+/* Force navbar elements to the left */
+.navbar {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    padding-left: 15px !important;
 }
 
 .dropdown-menu {
@@ -194,11 +212,11 @@ body {
 
 /* The actual logo inside the wrapper with circular clipping */
 .navbar-logo {
-    width: 165%;
-    height: 165%;
+    width: 130%;
+    height: 130%;
     object-fit: contain;
-    clip-path: circle(36% at 55% 50%);
-    transform: translate(-20%, 0);
+    clip-path: circle(40% at 50% 50%);
+    transform: translate(0, 0);
     position: relative;
 }
 
