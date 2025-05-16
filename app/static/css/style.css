@@ -9,6 +9,87 @@
     display: none;
 }
 
+/* Dashboard logo container with metallic circular frame and acrylic glass effect */
+.dashboard-logo-container {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+
+    /* Metallic frame effect */
+    background: linear-gradient(145deg, #e2e2e2, #f0f0f0);
+    box-shadow:
+        inset 0 0 15px rgba(255, 255, 255, 0.8),
+        0 6px 20px rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(210, 210, 210, 0.8),
+        0 0 0 6px rgba(180, 180, 180, 0.5);
+
+    /* Create the reflection/highlight effect on the metallic border */
+    padding: 10px;
+
+    /* Acrylic glass effect with slight blur */
+    backdrop-filter: blur(5px);
+
+    /* Animation for subtle floating effect */
+    animation: float 3s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+/* The inner glass-like effect */
+.dashboard-logo-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 51%, rgba(255, 255, 255, 0.05) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Metallic ring shine effect */
+.dashboard-logo-container::after {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 40%;
+    height: 40%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* The actual logo inside the container */
+.dashboard-logo-container img.dashboard-logo {
+    position: relative;
+    z-index: 0;
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    transform: scale(0.95);
+    margin: 5% auto;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+}
+
+/* Floating animation */
+@keyframes float {
+    0% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-6px) rotate(1deg);
+    }
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+}
+
 /* Theme transition */
 body {
     transition: background-color 0.3s ease, color 0.3s ease;

@@ -498,3 +498,35 @@ body.pastel-mode .light-mode-logo {
 body.pastel-mode .dark-mode-logo {
   display: none !important;
 }
+
+/* Pastel mode specific styling for the logo container */
+body.pastel-mode .dashboard-logo-container {
+  background: linear-gradient(145deg, #f5efff, #fcf8ff);
+  box-shadow:
+    inset 0 0 15px rgba(255, 255, 255, 0.9),
+    0 6px 20px rgba(154, 127, 185, 0.3),
+    0 0 0 4px rgba(227, 217, 235, 0.8),
+    0 0 0 6px rgba(154, 127, 185, 0.3);
+}
+
+/* Pastel mode glassy effect with soft purplish hues */
+body.pastel-mode .dashboard-logo-container::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(227, 217, 235, 0.1) 50%, rgba(255, 255, 255, 0) 51%, rgba(227, 217, 235, 0.1) 100%);
+}
+
+/* Pastel mode metallic shine effect with soft pastel tones */
+body.pastel-mode .dashboard-logo-container::after {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(227, 217, 235, 0) 70%);
+  width: 50%;
+  height: 50%;
+}
+
+/* Pastel mode logo glow effect */
+body.pastel-mode .dashboard-logo-container img.dashboard-logo {
+  filter: drop-shadow(0 2px 8px rgba(154, 127, 185, 0.3));
+}
+
+/* Make the floating animation more gentle for pastel mode */
+body.pastel-mode .dashboard-logo-container {
+  animation-duration: 4s;
+}

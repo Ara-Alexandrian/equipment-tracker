@@ -433,3 +433,30 @@ body.sweet-dracula-mode .light-mode-logo {
 body.sweet-dracula-mode .dark-mode-logo {
   display: inline-block !important;
 }
+
+/* Sweet Dracula mode specific styling for the logo container */
+body.sweet-dracula-mode .dashboard-logo-container {
+  background: linear-gradient(145deg, #2b2a3d, #3c3652);
+  box-shadow:
+    inset 0 0 15px rgba(199, 160, 255, 0.3),
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    0 0 0 4px rgba(154, 147, 209, 0.4),
+    0 0 0 6px rgba(103, 95, 137, 0.5);
+}
+
+/* Sweet Dracula mode glassy effect with softer purple hues */
+body.sweet-dracula-mode .dashboard-logo-container::before {
+  background: linear-gradient(135deg, rgba(199, 160, 255, 0.25) 0%, rgba(103, 95, 137, 0.05) 50%, rgba(43, 42, 61, 0) 51%, rgba(103, 95, 137, 0.05) 100%);
+}
+
+/* Sweet Dracula mode metallic shine effect with softer tones */
+body.sweet-dracula-mode .dashboard-logo-container::after {
+  background: linear-gradient(135deg, rgba(255, 146, 223, 0.25) 0%, rgba(103, 95, 137, 0) 70%);
+  width: 45%;
+  height: 45%;
+}
+
+/* Sweet Dracula mode logo glow effect */
+body.sweet-dracula-mode .dashboard-logo-container img.dashboard-logo {
+  filter: drop-shadow(0 0 8px rgba(199, 160, 255, 0.5));
+}
