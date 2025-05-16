@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.mbp
+    image: mbp/equipment-tracker:latest
+    container_name: mbp-gearvue-app
+    restart: unless-stopped
+    ports:
+      - "172.30.98.21:7373:5000"
+    volumes:
+      - app_data:/app/app/data
+      - ./logs:/app/logs
+      - ./output:/app/output
+      - ./Resources:/app/Resources
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=run.py
+      - DATA_DIR=Resources
+      - JSON_DATA_DIR=app/data
+      - MAIL_SERVER=smtp.marybird.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_USE_TLS=True
+      - MAIL_DEFAULT_SENDER=gearvue@marybird.com
+      - APPLICATION_URL=http://172.30.98.21:7373
+      - TZ=America/Chicago
+      - GIT_REPO=https://github.com/organization/gearvue.git
+      - GIT_BRANCH=main
+    labels:
+      - "com.marybird.department=medical-physics"
+      - "com.marybird.app=gearvue"
+      - "com.marybird.auto-update=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - mbp-gearvue-network
+  
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.mbp
+    image: mbp/equipment-tracker-cron:latest
+    container_name: mbp-gearvue-cron
+    restart: unless-stopped
+    command: ["cron", "-f"]
+    volumes:
+      - app_data:/app/app/data
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - DATA_DIR=Resources
+      - JSON_DATA_DIR=app/data
+      - MAIL_SERVER=smtp.marybird.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_USE_TLS=True
+      - MAIL_DEFAULT_SENDER=gearvue@marybird.com
+      - APPLICATION_URL=http://172.30.98.21:7373
+      - TZ=America/Chicago
+      - GIT_REPO=https://github.com/organization/gearvue.git
+      - GIT_BRANCH=main
+    depends_on:
+      app:
+        condition: service_started
+    networks:
+      - mbp-gearvue-network
+  
+  # Watchtower for auto-updating containers when changes are detected on main branch
+  watchtower:
+    image: containrrr/watchtower
+    container_name: mbp-gearvue-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 86400 --cleanup --label-enable mbp-gearvue-app mbp-gearvue-cron
+    environment:
+      - TZ=America/Chicago
+      - WATCHTOWER_LABEL_ENABLE=true
+    networks:
+      - mbp-gearvue-network
+
+networks:
+  mbp-gearvue-network:
+    driver: bridge
+
+volumes:
+  app_data:
+    name: mbp_gearvue_data
