@@ -1,7 +1,7 @@
 # Claude Guidance
 
 <div align="center">
-  <img src="../Resources/gearvue-text.png" alt="GearVue Logo" width="400">
+  <img src="../Resources/GearVue-Whitebackground.jpg" alt="GearVue Logo" width="400">
   <br>
   <i>Guidance for Claude AI when working with this codebase</i>
   <br><br>
