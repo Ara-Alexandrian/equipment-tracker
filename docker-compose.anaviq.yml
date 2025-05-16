@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.anaviq
+    image: anaviq/equipment-tracker:latest
+    container_name: anaviq-gearvue-app
+    restart: unless-stopped
+    ports:
+      - "192.168.1.11:8889:5000"
+    volumes:
+      - app_data:/app/app/data
+      - ./logs:/app/logs
+      - ./output:/app/output
+      - ./Resources:/app/Resources
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=run.py
+      - DATA_DIR=Resources
+      - JSON_DATA_DIR=app/data
+      - MAIL_SERVER=smtp.a-naviq.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_USE_TLS=True
+      - MAIL_DEFAULT_SENDER=gearvue@a-naviq.com
+      - APPLICATION_URL=http://192.168.1.11:8889
+      - TZ=America/New_York
+      - GIT_REPO=https://github.com/organization/gearvue.git
+      - GIT_BRANCH=main
+    labels:
+      - "com.anaviq.app=gearvue"
+      - "com.anaviq.auto-update=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - anaviq-gearvue-network
+  
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.anaviq
+    image: anaviq/equipment-tracker-cron:latest
+    container_name: anaviq-gearvue-cron
+    restart: unless-stopped
+    command: ["cron", "-f"]
+    volumes:
+      - app_data:/app/app/data
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - DATA_DIR=Resources
+      - JSON_DATA_DIR=app/data
+      - MAIL_SERVER=smtp.a-naviq.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_USE_TLS=True
+      - MAIL_DEFAULT_SENDER=gearvue@a-naviq.com
+      - APPLICATION_URL=http://192.168.1.11:8889
+      - TZ=America/New_York
+      - GIT_REPO=https://github.com/organization/gearvue.git
+      - GIT_BRANCH=main
+    depends_on:
+      app:
+        condition: service_started
+    networks:
+      - anaviq-gearvue-network
+  
+  # Watchtower for auto-updating containers when changes are detected on main branch
+  watchtower:
+    image: containrrr/watchtower
+    container_name: anaviq-gearvue-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 86400 --cleanup --label-enable anaviq-gearvue-app anaviq-gearvue-cron
+    environment:
+      - TZ=America/New_York
+      - WATCHTOWER_LABEL_ENABLE=true
+    networks:
+      - anaviq-gearvue-network
+
+networks:
+  anaviq-gearvue-network:
+    driver: bridge
+
+volumes:
+  app_data:
+    name: anaviq_gearvue_data
