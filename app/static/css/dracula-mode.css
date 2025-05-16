@@ -301,3 +301,12 @@ body.dracula-mode code {
 body.dracula-mode #theme-btn {
   box-shadow: 0 0 5px rgba(255, 121, 198, 0.7) !important;
 }
+
+/* Logo visibility for dracula mode */
+body.dracula-mode .light-mode-logo {
+  display: none !important;
+}
+
+body.dracula-mode .dark-mode-logo {
+  display: inline-block !important;
+}

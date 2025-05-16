@@ -1,5 +1,14 @@
 /* Custom styles for Equipment Tracker */
 
+/* Default logo visibility for light mode */
+.light-mode-logo {
+    display: inline-block;
+}
+
+.dark-mode-logo {
+    display: none;
+}
+
 /* Theme transition */
 body {
     transition: background-color 0.3s ease, color 0.3s ease;

@@ -77,7 +77,9 @@
         <div class="container-fluid px-4">
             <!-- Brand/logo moved to the left -->
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <!-- Text-only until artist creates new logo -->
+                <!-- Updated with new logo images -->
+                <img src="{{ url_for('static', filename='img/GearVue-Transparentbackground.jpg') }}" alt="GearVue" height="28" class="d-inline-block align-text-top me-2 light-mode-logo">
+                <img src="{{ url_for('static', filename='img/GearVue-Whitebackground.jpg') }}" alt="GearVue" height="28" class="d-inline-block align-text-top me-2 dark-mode-logo d-none">
                 <span class="brand-text">GearVue</span>
             </a>
 
@@ -265,9 +267,9 @@
             <div class="row align-items-center">
                 <div class="col-md-1 d-none d-md-block">
                     <!-- Light mode logo (transparent) - hidden in dark mode -->
-                    <img src="{{ url_for('static', filename='img/gearvue-notext-transparent.png') }}" alt="GearVue Logo" height="50" class="light-mode-logo">
+                    <img src="{{ url_for('static', filename='img/GearVue-Transparentbackground.jpg') }}" alt="GearVue Logo" height="50" class="light-mode-logo">
                     <!-- Dark mode logo (non-transparent) - hidden in light mode -->
-                    <img src="{{ url_for('static', filename='img/gearvue-notext.png') }}" alt="GearVue Logo" height="50" class="dark-mode-logo d-none">
+                    <img src="{{ url_for('static', filename='img/GearVue-Whitebackground.jpg') }}" alt="GearVue Logo" height="50" class="dark-mode-logo d-none">
                 </div>
                 <div class="col-md-5">
                     <h5>GearVue</h5>

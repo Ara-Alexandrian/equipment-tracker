@@ -424,3 +424,12 @@ body.sweet-dracula-mode .list-group-item.active {
 body.sweet-dracula-mode :focus-visible {
   outline-color: #ff92df !important;
 }
+
+/* Logo visibility for sweet-dracula mode */
+body.sweet-dracula-mode .light-mode-logo {
+  display: none !important;
+}
+
+body.sweet-dracula-mode .dark-mode-logo {
+  display: inline-block !important;
+}

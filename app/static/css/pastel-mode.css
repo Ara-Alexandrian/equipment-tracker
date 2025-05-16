@@ -489,3 +489,12 @@ body.pastel-mode .list-group-item.active {
 body.pastel-mode :focus-visible {
   outline-color: #9a7fb9 !important;
 }
+
+/* Logo visibility for pastel mode - pastel uses light mode logo */
+body.pastel-mode .light-mode-logo {
+  display: inline-block !important;
+}
+
+body.pastel-mode .dark-mode-logo {
+  display: none !important;
+}
