@@ -22,11 +22,13 @@ Welcome to the GearVue documentation. This directory contains comprehensive guid
 - [**Theme System**](THEME_SYSTEM.md) - Documentation of the theme system and how to customize it
 - [**Codebase Analysis**](CODEBASE_ANALYSIS.md) - Technical architecture and design decisions
 - [**UI Layout TODO**](UI_LAYOUT_TODO.md) - Planned improvements for UI layouts
+- [**Code Standards**](CODE_STANDARDS.md) - Coding standards and guidelines for the project
 
 ### Additional Resources
 
-- [Project Overview](../README.md) - Main project documentation and features
-- [Changelog](../CHANGELOG.md) - Version history and changes
+- [**Project Overview**](../README.md) - Main project documentation and features
+- [**Changelog**](CHANGELOG.md) - Version history and changes
+- [**Claude Guidance**](CLAUDE.md) - Special guidance for Claude AI when working with this code
 
 ## Project Structure
 
@@ -59,7 +61,7 @@ gearvue/
 
 For developers working on GearVue, the following resources are available:
 
-- [Code Style Guidelines](../CLAUDE.md#code-style-guidelines)
+- [Code Standards](CODE_STANDARDS.md)
 - [Running Tests](../README.md#running-tests)
-- [Recent Updates](../CLAUDE.md#recent-updates)
-- [Known Issues](../CLAUDE.md#known-issues)
+- [Recent Updates](CHANGELOG.md)
+- [Known Issues](CLAUDE.md#known-issues)
