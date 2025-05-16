@@ -40,6 +40,30 @@
     transform-style: preserve-3d;
 }
 
+/* Acrylic glass background effect for the logo */
+.dashboard-logo-container::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(255, 255, 255, 0.3) 60%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    z-index: 0;
+    pointer-events: none;
+}
+
 /* The inner glass-like effect */
 .dashboard-logo-container::before {
     content: '';
@@ -71,14 +95,15 @@
 /* The actual logo inside the container */
 .dashboard-logo-container img.dashboard-logo {
     position: relative;
-    z-index: 0;
-    width: 120%;
-    height: 120%;
+    z-index: 1; /* Place above the ::after pseudo-element but below the ::before */
+    width: 110%;
+    height: 110%;
     object-fit: contain;
-    transform: scale(1.1);
+    transform: scale(1.05);
     margin: 0;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
-    mix-blend-mode: multiply; /* This helps remove white backgrounds */
+    background-color: transparent;
+    mix-blend-mode: overlay; /* Good blend mode for acrylic glass effect */
     -webkit-mask-image: radial-gradient(circle, black 70%, transparent 75%);
     mask-image: radial-gradient(circle, black 70%, transparent 75%);
 }
