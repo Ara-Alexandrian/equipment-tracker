@@ -1,25 +1,60 @@
-# Dockerfile for Equipment Tracker cron jobs
-FROM python:3.11-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
-# Copy requirements and install dependencies
+# Add a non-root user for running the cron jobs
+RUN groupadd -r gearvue && useradd -r -g gearvue gearvue
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    FLASK_ENV=production \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install cron and required dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cron \
+    build-essential \
+    libffi-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file first for better layer caching
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Create necessary directories
+RUN mkdir -p logs app/data \
+    && chown -R gearvue:gearvue /app
+
+# Copy crontab file
+COPY cron_jobs/crontab /etc/cron.d/equipment-tracker-cron
+RUN chmod 0644 /etc/cron.d/equipment-tracker-cron
 
 # Copy application code
 COPY . .
 
-# Create logs directory
-RUN mkdir -p logs
+# Fix the calibration notifier path in crontab
+RUN sed -i 's|cd /app && python calibration_notifier.py|cd /app && python -m app.utils.notifications.calibration_check|g' /etc/cron.d/equipment-tracker-cron
 
-# Set up cron job
-RUN apt-get update && apt-get -y install cron && apt-get clean
+# Set proper permissions
+RUN chown -R gearvue:gearvue /app \
+    && chmod +x cron_jobs/run_calibration_check.sh \
+    && crontab /etc/cron.d/equipment-tracker-cron \
+    && find /app -type d -exec chmod 755 {} \; \
+    && find /app -type f -exec chmod 644 {} \; \
+    && find /app -name "*.sh" -exec chmod 755 {} \; \
+    && find /app -name "*.py" -exec chmod 644 {} \;
 
-# Add crontab file
-COPY cron_jobs/crontab /etc/cron.d/equipment-tracker-cron
-RUN chmod 0644 /etc/cron.d/equipment-tracker-cron
-RUN crontab /etc/cron.d/equipment-tracker-cron
+# Create an entrypoint script to set up environment variables for cron
+RUN echo '#!/bin/bash\n\
+env > /etc/environment\n\
+cron -f\n' > /app/start-cron.sh \
+    && chmod +x /app/start-cron.sh
+
+# Set user to non-root
+USER gearvue
 
 # Run the cron daemon in foreground
-CMD ["cron", "-f"]
+CMD ["/app/start-cron.sh"]

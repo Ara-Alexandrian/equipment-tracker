@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  app:
+    image: gearvue/equipment-tracker:latest
+    container_name: gearvue
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8889}:5000"
+    volumes:
+      - /mnt/user/appdata/gearvue/data:/app/app/data
+      - /mnt/user/appdata/gearvue/logs:/app/logs
+      - /mnt/user/appdata/gearvue/output:/app/output
+      - /mnt/user/appdata/gearvue/resources:/app/Resources
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=run.py
+      - DATA_DIR=Resources
+      - JSON_DATA_DIR=app/data
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.example.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-True}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER:-gearvue@example.com}
+      - APPLICATION_URL=${APPLICATION_URL:-http://localhost:8889}
+      - TZ=${TZ:-America/Chicago}
+      - PUID=99
+      - PGID=100
+    labels:
+      - "com.unraid.app=gearvue"
+      - "com.unraid.description=Medical Physics Equipment Tracking System"
+      - "com.unraid.ui=http://[IP]:[PORT:8889]"
+      - "com.unraid.icon=https://raw.githubusercontent.com/organization/gearvue/main/Resources/GearVue-Whitebackground.jpg"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  cron:
+    image: gearvue/equipment-tracker-cron:latest
+    container_name: gearvue-cron
+    restart: unless-stopped
+    volumes:
+      - /mnt/user/appdata/gearvue/data:/app/app/data
+      - /mnt/user/appdata/gearvue/logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - DATA_DIR=Resources
+      - JSON_DATA_DIR=app/data
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.example.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-True}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER:-gearvue@example.com}
+      - APPLICATION_URL=${APPLICATION_URL:-http://localhost:8889}
+      - TZ=${TZ:-America/Chicago}
+      - PUID=99
+      - PGID=100
+    depends_on:
+      app:
+        condition: service_started
+    labels:
+      - "com.unraid.app=gearvue-cron"
+      - "com.unraid.description=Cron jobs for GearVue Equipment Tracker"
+      - "com.unraid.icon=https://raw.githubusercontent.com/organization/gearvue/main/Resources/GearVue-Whitebackground.jpg"

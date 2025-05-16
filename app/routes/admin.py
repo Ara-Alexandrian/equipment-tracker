@@ -707,9 +707,10 @@ def generate_qr_code():
 
         print(f"QR code output path: {output_path}")
 
-        # Use the direct QR code generator for more reliability
+        # Try multiple QR code generation methods to ensure one works
         try:
-            print("Using direct QR code generator...")
+            # First try the traditional script-based method
+            print("Trying script-based QR code generation...")
             from app.routes.direct_qr import generate_direct_qr
 
             success, result = generate_direct_qr(
@@ -722,10 +723,34 @@ def generate_qr_code():
             )
 
             if not success:
-                print(f"Direct QR code generator failed: {result}")
-                raise Exception(f"Direct QR code generator failed: {result}")
+                print(f"Script-based QR code generator failed: {result}")
+                print("Falling back to direct Python QR code generation...")
+
+                # If that fails, try our new direct generation method
+                from app.utils.qr_helper import generate_qr_code_fallback
+
+                success, result = generate_qr_code_fallback(
+                    url=url,
+                    output_path=output_path,
+                    equipment_id=equipment_id,
+                    manufacturer=manufacturer,
+                    model=model,
+                    serial=serial
+                )
+
+                if not success:
+                    print(f"All QR code generation methods failed: {result}")
+                    raise Exception(f"All QR code generation methods failed: {result}")
 
             print(f"QR code generated at {output_path}")
+
+            # Validate that the file was actually created and is a valid image
+            from app.utils.qr_helper import validate_qr_output
+            is_valid, validation_msg = validate_qr_output(output_path)
+
+            if not is_valid:
+                print(f"QR code validation failed: {validation_msg}")
+                raise Exception(f"QR code validation failed: {validation_msg}")
 
         except Exception as e:
             print(f"Error generating QR code: {str(e)}")
