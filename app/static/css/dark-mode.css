@@ -337,7 +337,7 @@ body.dark-mode .dashboard-logo-container::after {
 
 /* Dark mode logo shadow */
 body.dark-mode .dashboard-logo-container img.dashboard-logo {
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6)) brightness(1.1) contrast(1.1);
 }
 
 /* MBP Logo container with dark mode support */

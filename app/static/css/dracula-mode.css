@@ -335,5 +335,5 @@ body.dracula-mode .dashboard-logo-container::after {
 
 /* Dracula mode logo glow effect */
 body.dracula-mode .dashboard-logo-container img.dashboard-logo {
-  filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.4));
+  filter: drop-shadow(0 0 8px rgba(189, 147, 249, 0.4)) brightness(1.2) contrast(1.2);
 }
