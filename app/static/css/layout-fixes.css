@@ -1,0 +1,214 @@
+/* layout-fixes.css - Resolves UI layout issues from UI_LAYOUT_TODO.md */
+
+/* Fix collision between UI elements in wider layouts */
+.row {
+  margin-left: -10px !important;
+  margin-right: -10px !important;
+}
+
+.col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, 
+.col-7, .col-8, .col-9, .col-10, .col-11, .col-12,
+.col-sm, .col-md, .col-lg, .col-xl {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+/* Fix for tables expanding beyond containers */
+.table-responsive {
+  overflow-x: auto !important;
+  width: 100% !important;
+  margin-bottom: 1rem !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Tables with horizontal scroll should have visual indicator */
+.table-responsive:after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.05));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.table-responsive.scrollable:after {
+  opacity: 1;
+}
+
+/* Fix modal dialog positioning and widths */
+.modal-dialog {
+  max-width: 90% !important;
+  margin: 1.75rem auto !important;
+}
+
+.modal-lg, .modal-xl {
+  max-width: min(95vw, 1200px) !important;
+}
+
+.modal-md {
+  max-width: min(90vw, 800px) !important;
+}
+
+.modal-sm {
+  max-width: min(85vw, 500px) !important;
+}
+
+/* Ensure all containers use width classes properly */
+.container {
+  width: 100% !important;
+  max-width: var(--default-screen-width, 1550px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+}
+
+/* Fix for button styling */
+.btn {
+  white-space: nowrap !important;
+  margin: 0.25rem !important;
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Standardize button spacing */
+.btn-group, .btn-toolbar {
+  gap: 0.25rem !important;
+  flex-wrap: wrap !important;
+}
+
+/* Fix action button alignment */
+.action-btn-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.25rem !important;
+  justify-content: center !important;
+}
+
+/* Improve mobile responsiveness */
+@media (max-width: 767.98px) {
+  /* More compact padding for mobile */
+  .container, .container-fluid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  
+  /* Stack buttons on mobile for better tap targets */
+  .action-btn-container {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  /* Improve button visibility and clickability on mobile */
+  .btn {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 1rem !important;
+    min-height: 44px !important; /* Better touch target */
+  }
+  
+  /* Simplified tables for small screens */
+  .table-mobile-optimize {
+    display: block !important;
+    width: 100% !important;
+  }
+  
+  .table-mobile-optimize thead, 
+  .table-mobile-optimize tbody, 
+  .table-mobile-optimize th, 
+  .table-mobile-optimize td, 
+  .table-mobile-optimize tr {
+    display: block !important;
+  }
+  
+  .table-mobile-optimize thead tr {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+  }
+  
+  .table-mobile-optimize tr {
+    border: 1px solid #ddd !important;
+    margin-bottom: 0.5rem !important;
+    padding: 0.5rem !important;
+    border-radius: 0.25rem !important;
+  }
+  
+  .table-mobile-optimize td {
+    border: none !important;
+    position: relative !important;
+    padding-left: 50% !important;
+    text-align: right !important;
+    min-height: 30px !important;
+  }
+  
+  .table-mobile-optimize td:before {
+    position: absolute !important;
+    top: 8px !important;
+    left: 8px !important;
+    width: 45% !important;
+    white-space: nowrap !important;
+    font-weight: bold !important;
+    text-align: left !important;
+  }
+}
+
+/* Fix dark theme for wider layouts */
+.dark-mode .container-width-wide,
+.dark-mode .container-width-full,
+.dracula-mode .container-width-wide,
+.dracula-mode .container-width-full,
+.sweet-dracula-mode .container-width-wide, 
+.sweet-dracula-mode .container-width-full {
+  background-color: inherit !important;
+}
+
+/* Add proper table scrolling for wide tables */
+.table-scrollable {
+  display: block !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+  -webkit-overflow-scrolling: touch !important;
+  max-width: 100% !important;
+}
+
+.table-scrollable thead {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1 !important;
+  background-color: inherit !important;
+}
+
+/* Fix for sticky header in dark theme */
+.dark-mode .table-scrollable thead,
+.dracula-mode .table-scrollable thead,
+.sweet-dracula-mode .table-scrollable thead {
+  background-color: inherit !important;
+}
+
+/* Avoid content overflow for all text elements */
+p, h1, h2, h3, h4, h5, h6, .card-title, .card-text, .text-truncate {
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  -ms-word-break: break-all !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Dynamic table columns for all screen sizes */
+@media (min-width: 1200px) {
+  .equipment-table .col-id { width: 8% !important; }
+  .equipment-table .col-category { width: 10% !important; }
+  .equipment-table .col-type { width: 10% !important; }
+  .equipment-table .col-manufacturer { width: 12% !important; }
+  .equipment-table .col-model { width: 12% !important; }
+  .equipment-table .col-serial { width: 12% !important; }
+  .equipment-table .col-location { width: 10% !important; }
+  .equipment-table .col-status { width: 8% !important; }
+  .equipment-table .col-actions { width: 18% !important; }
+}

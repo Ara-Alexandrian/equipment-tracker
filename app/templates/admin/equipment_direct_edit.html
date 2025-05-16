@@ -30,11 +30,11 @@
                 </button>
             </div>
             <div class="card-body">
-                <form action="{{ url_for('admin.update_equipment_direct', equipment_id=equipment.id) }}" method="POST">
+                <form action="{{ url_for('admin.update_equipment_direct', equipment_id=equipment.id|default(equipment_id)) }}" method="POST">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="equipment_id" class="form-label">Equipment ID</label>
-                            <input type="text" class="form-control" id="equipment_id" value="{{ equipment.id }}" readonly>
+                            <input type="text" class="form-control" id="equipment_id" value="{{ equipment.id|default('') }}" readonly>
                             <div class="form-text">Equipment ID cannot be changed</div>
                         </div>
                         <div class="col-md-6">
@@ -67,11 +67,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="model" class="form-label">Model*</label>
-                            <input type="text" class="form-control" id="model" name="model" value="{{ equipment.model }}" required>
+                            <input type="text" class="form-control" id="model" name="model" value="{{ equipment.model|default('') }}" required>
                         </div>
                         <div class="col-md-6">
                             <label for="serial_number" class="form-label">Serial Number*</label>
-                            <input type="text" class="form-control" id="serial_number" name="serial_number" value="{{ equipment.serial_number }}" required>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number" value="{{ equipment.serial_number|default('') }}" required>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -85,12 +85,12 @@
                         </div>
                         <div class="col-md-6">
                             <label for="calibration_due_date" class="form-label">Calibration Due Date*</label>
-                            <input type="text" class="form-control" id="calibration_due_date" name="calibration_due_date" value="{{ equipment.calibration_due_date }}" required>
+                            <input type="text" class="form-control" id="calibration_due_date" name="calibration_due_date" value="{{ equipment.calibration_due_date|default('') }}" required>
                         </div>
                     </div>
                     <div class="mb-4">
                         <label for="notes" class="form-label">Notes</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ equipment.notes }}</textarea>
+                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ equipment.notes|default('') }}</textarea>
                     </div>
                     <div class="d-flex justify-content-end">
                         <a href="{{ url_for('admin.equipment_management') }}" class="btn btn-secondary me-2">Cancel</a>
@@ -161,9 +161,9 @@
                 <p>Are you sure you want to delete this equipment?</p>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <p><strong>ID:</strong> {{ equipment.id }}</p>
-                        <p><strong>Equipment:</strong> {{ equipment.manufacturer }} {{ equipment.model }}</p>
-                        <p><strong>Serial Number:</strong> {{ equipment.serial_number }}</p>
+                        <p><strong>ID:</strong> {{ equipment.id|default(equipment_id) }}</p>
+                        <p><strong>Equipment:</strong> {{ equipment.manufacturer|default('') }} {{ equipment.model|default('') }}</p>
+                        <p><strong>Serial Number:</strong> {{ equipment.serial_number|default('') }}</p>
                     </div>
                 </div>
                 <div class="alert alert-warning" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
@@ -180,7 +180,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteEquipmentForm" action="/admin/equipment/delete/{{ equipment.id }}" method="POST">
+                <form id="deleteEquipmentForm" action="/admin/equipment/delete/{{ equipment.id|default(equipment_id) }}" method="POST">
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash"></i> Delete Equipment & Related Data
                     </button>
@@ -225,7 +225,7 @@
         // Initialize QR code display when page loads
         setTimeout(function() {
             console.log('Initializing QR code load');
-            loadQRCodeForDirectEdit('{{ equipment.id }}', '{{ equipment.manufacturer }}', '{{ equipment.model }}', '{{ equipment.serial_number }}');
+            loadQRCodeForDirectEdit('{{ equipment.id|default(equipment_id) }}', '{{ equipment.manufacturer|default('') }}', '{{ equipment.model|default('') }}', '{{ equipment.serial_number|default('') }}');
         }, 500); // Short delay to ensure DOM is ready
         
         // Initialize the regenerate button
@@ -233,7 +233,7 @@
         if (regenerateBtn) {
             regenerateBtn.addEventListener('click', function() {
                 console.log('Regenerate button clicked');
-                regenerateQRCodeForDirectEdit('{{ equipment.id }}', '{{ equipment.manufacturer }}', '{{ equipment.model }}', '{{ equipment.serial_number }}');
+                regenerateQRCodeForDirectEdit('{{ equipment.id|default(equipment_id) }}', '{{ equipment.manufacturer|default('') }}', '{{ equipment.model|default('') }}', '{{ equipment.serial_number|default('') }}');
             });
         }
     });

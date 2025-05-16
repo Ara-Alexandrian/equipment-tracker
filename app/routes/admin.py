@@ -369,18 +369,25 @@ def edit_equipment_direct(equipment_id):
     print(f"DEBUG: Editing equipment with ID: {equipment_id}")
     print(f"DEBUG: Equipment data: {equipment}")
 
+    # Ensure equipment contains the ID since it's used in the form
+    if equipment and 'id' not in equipment:
+        equipment['id'] = equipment_id
+
     # Get the equipment directly from JSON file as a fallback method
-    from app.models.json_utils import load_json
+    if not equipment or not all(key in equipment for key in ['category', 'equipment_type', 'manufacturer', 'model', 'serial_number', 'location']):
+        from app.models.json_utils import load_json
 
-    json_file = os.path.join(equipment_manager.data_dir, 'equipment.json')
-    all_equipment = load_json(json_file) or []
+        json_file = os.path.join(equipment_manager.data_dir, 'equipment.json')
+        all_equipment = load_json(json_file) or []
 
-    # Find the equipment item by ID
-    for item in all_equipment:
-        if item.get('id') == equipment_id:
-            equipment = item
-            print(f"DEBUG: Found equipment in direct JSON: {equipment}")
-            break
+        # Find the equipment item by ID
+        for item in all_equipment:
+            if item.get('id') == equipment_id:
+                equipment = item
+                print(f"DEBUG: Found equipment in direct JSON: {equipment}")
+                # Ensure id field is present
+                equipment['id'] = equipment_id
+                break
 
     # If we still don't have valid equipment data, show an error
     if not equipment:
